@@ -1,20 +1,42 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
+import "react-native-gesture-handler";
+import { NavigationContainer } from "@react-navigation/native";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebaseConfig";
+import UnauthStack from "./routes/UnauthStack";
+import AuthStack from "./routes/AuthStack";
+import { UserContext } from "./context/UserContext";
 
 export default function App() {
+  const [user, setUser] = useState("");
+
+  useEffect(() => {
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/firebase.User
+        const uid = user.uid;
+        // ...
+        setUser(user);
+        console.log(user);
+      } else {
+        // User is signed out
+        // ...
+        console.log("user signed out");
+        setUser("");
+      }
+    });
+
+    return unsubAuth;
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <UserContext.Provider value={{ user, setUser }}>
+      <NavigationContainer>
+        {!user ? <UnauthStack /> : <AuthStack />}
+        <StatusBar style="auto" />
+      </NavigationContainer>
+    </UserContext.Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
