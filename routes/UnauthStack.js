@@ -6,7 +6,7 @@ const Stack = createNativeStackNavigator();
 
 const UnauthStack = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="LogIn" component={LogInScreen} />
       <Stack.Screen name="SignUp" component={SignUpScreen} />
     </Stack.Navigator>
