@@ -185,8 +185,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   screenTitleText: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 32,
+    fontWeight: "800",
   },
   userInfoInputView: {
     flex: 1,

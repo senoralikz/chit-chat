@@ -9,11 +9,20 @@ import {
   Pressable,
   Image,
 } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
-import { collection, addDoc, setDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  setDoc,
+  doc,
+  query,
+  where,
+  getDocs,
+  onSnapshot,
+} from "firebase/firestore";
 import { auth, storage, db } from "../firebaseConfig";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -25,9 +34,30 @@ import {
 const SignUpScreen = ({ navigation: { goBack } }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [profilePic, setProfilePic] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [displayNameAvailable, setDisplayNameAvailable] = useState(true);
   const [pickedPhoto, setPickedPhoto] = useState("");
+
+  useEffect(() => {
+    const checkDisplayName = async () => {
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("displayName", "==", displayName));
+      const querySnapshot = await getDocs(q);
+
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        {
+          doc.data().displayName === displayName &&
+            setDisplayNameAvailable(false);
+        }
+      });
+    };
+
+    checkDisplayName();
+    setDisplayNameAvailable(true);
+  }, [displayName]);
 
   const selectProfilePic = async () => {
     try {
@@ -48,7 +78,21 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
     }
   };
 
-  const checkDisplayName = (text) => {};
+  // const checkDisplayName = async (text) => {
+  //   setDisplayName(text);
+  //   let userName = displayName;
+  //   console.log("this is the display name:", userName);
+  //   const usersRef = collection(db, "users");
+  //   const q = query(usersRef, where("displayName", "==", displayName));
+  //   const querySnapshot = await getDocs(q);
+  // querySnapshot.forEach((doc) => {
+  //   // doc.data() is never undefined for query doc snapshots
+  //   {
+  //     doc.data().displayName === displayName &&
+  //       setDisplayNameAvailable(false);
+  //   }
+  // });
+  // };
 
   const addUserToCollection = async (user) => {
     try {
@@ -244,6 +288,11 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               style={{ width: "100%" }}
             />
           </View>
+          {!displayNameAvailable && (
+            <Text style={{ color: "#e84118", fontSize: 14 }}>
+              Display Name Is Not Available
+            </Text>
+          )}
           <View style={styles.credentialInput}>
             <MaterialCommunityIcons
               name="onepassword"
@@ -259,11 +308,59 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               secureTextEntry
             />
           </View>
+          <View
+            style={
+              password !== confirmPassword
+                ? styles.pwNotConfirmed
+                : styles.credentialInput
+            }
+          >
+            {password !== confirmPassword ? (
+              <AntDesign
+                name="close"
+                size={24}
+                color="#e84118"
+                style={{ marginRight: 5 }}
+              />
+            ) : (
+              <AntDesign
+                name="check"
+                size={24}
+                color="green"
+                style={{ marginRight: 5 }}
+              />
+            )}
+            <TextInput
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChangeText={(text) => setConfirmPassword(text)}
+              style={{ width: "100%" }}
+              editable={true}
+              secureTextEntry
+            />
+          </View>
+          {password !== confirmPassword && (
+            <Text style={{ color: "#e84118", fontSize: 14 }}>
+              Passwords do not match
+            </Text>
+          )}
           {/* <Button title="Sign Up" onPress={() => alert("signing up")} /> */}
           {/* <Button title="Sign Up" onPress={handleSignUp} />
            */}
           <View style={{ alignItems: "center" }}>
-            <Pressable onPress={handleSignUp} style={styles.signUpBtn}>
+            <Pressable
+              onPress={handleSignUp}
+              style={
+                password !== confirmPassword || !displayNameAvailable
+                  ? styles.disabledSignUpBtn
+                  : styles.signUpBtn
+              }
+              disabled={
+                password !== confirmPassword || !displayNameAvailable
+                  ? true
+                  : false
+              }
+            >
               <Text style={{ margin: 10, fontSize: 24, color: "#34495e" }}>
                 Sign Up
               </Text>
@@ -318,8 +415,32 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     padding: 3,
   },
+  pwNotConfirmed: {
+    flexDirection: "row",
+    width: "80%",
+    borderColor: "#e84118",
+    borderBottomColor: "#000",
+    borderWidth: 1,
+    marginVertical: 10,
+    padding: 3,
+  },
   signUpBtn: {
     backgroundColor: "#fff",
+    borderRadius: 10,
+    borderColor: "#34495e",
+    borderWidth: 1,
+    width: 200,
+    marginVertical: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 3,
+    shadowOffset: { width: 2, height: 2 },
+    shadowColor: "#333",
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+  },
+  disabledSignUpBtn: {
+    backgroundColor: "#bdc3c7",
     borderRadius: 10,
     borderColor: "#34495e",
     borderWidth: 1,
