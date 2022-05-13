@@ -2,7 +2,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
   TextInput,
   KeyboardAvoidingView,
   Alert,
@@ -14,6 +13,7 @@ import { auth } from "../firebaseConfig";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SocialIcon } from "react-native-elements";
 import { SafeAreaView } from "react-native-safe-area-context";
+import GoogleSignInBtn from "../components/GoogleSignInBtn";
 
 const LogInScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -62,55 +62,24 @@ const LogInScreen = ({ navigation }) => {
         </Text>
       </View>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        // behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.userInfoInputView}
       >
-        <View>
-          <SocialIcon
-            type="google"
-            title="Sign In With Google"
-            fontStyle={{ fontSize: 20 }}
-            button={true}
-            // light={true}
-            onPress={() => alert("singing in with google")}
-            style={{ width: 200, borderRadius: 10 }}
-          />
-        </View>
-        <View style={{ marginBottom: 20 }}>
+        {/* <View style={{ marginBottom: 20 }}>
           <SocialIcon
             type="apple"
             title="Sign In With Apple"
             fontStyle={{ fontSize: 20 }}
             button={true}
-            onPress={() => alert("singing in with apple")}
+            onPress={() => alert("signing in with apple")}
             style={{
               width: 200,
               backgroundColor: "#000",
               borderRadius: 10,
             }}
           />
-        </View>
-        <View style={{ flexDirection: "row", marginVertical: 10 }}>
-          <View
-            style={{
-              backgroundColor: "lightgrey",
-              height: 2,
-              flex: 1,
-              alignSelf: "center",
-            }}
-          />
-          <Text style={{ alignSelf: "center", paddingHorizontal: 5 }}>
-            Or Sign In With Email
-          </Text>
-          <View
-            style={{
-              backgroundColor: "lightgrey",
-              height: 2,
-              flex: 1,
-              alignSelf: "center",
-            }}
-          />
-        </View>
+          
+        </View> */}
         <View style={styles.credentialInput}>
           <MaterialCommunityIcons
             name="email"
@@ -148,15 +117,8 @@ const LogInScreen = ({ navigation }) => {
             </Text>
           </Pressable>
         </View>
-        {/* <Button title="Log In" onPress={handleSignIn} /> */}
-        {/* <Button title="Log In" onPress={() => alert("logging in")} /> */}
         <Text style={{ fontSize: 16 }}>
           Don't have an account? You can
-          {/* <Button
-            title="sign up"
-            onPress={() => navigation.navigate("SignUp")}
-            style
-          /> */}
           <Text
             style={{ color: "#3498db", fontWeight: "bold" }}
             onPress={() => navigation.navigate("SignUp")}
@@ -166,6 +128,28 @@ const LogInScreen = ({ navigation }) => {
           </Text>
           here!
         </Text>
+        <View style={{ flexDirection: "row", marginVertical: 25 }}>
+          <View
+            style={{
+              backgroundColor: "lightgrey",
+              height: 2,
+              flex: 1,
+              alignSelf: "center",
+            }}
+          />
+          <Text style={{ alignSelf: "center", paddingHorizontal: 5 }}>Or</Text>
+          <View
+            style={{
+              backgroundColor: "lightgrey",
+              height: 2,
+              flex: 1,
+              alignSelf: "center",
+            }}
+          />
+        </View>
+        <View>
+          <GoogleSignInBtn />
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

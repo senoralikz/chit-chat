@@ -9,15 +9,15 @@ import {
 import { signOut } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 
-const HomeScreen = () => {
+const ChatsScreen = () => {
   const user = auth.currentUser;
   const handleSignOut = () => {
-    signOut(auth).then(() => console.log("user signed out from home screen "));
+    signOut(auth);
   };
 
   return (
     <SafeAreaView>
-      <Text>HomeScreen</Text>
+      <Text>ChatsScreen</Text>
       <Image source={{ uri: user.photoURL }} style={styles.profilePic} />
       <Text>{user.email}</Text>
       <Text>{user.displayName}</Text>
@@ -27,7 +27,7 @@ const HomeScreen = () => {
   );
 };
 
-export default HomeScreen;
+export default ChatsScreen;
 
 const styles = StyleSheet.create({
   profilePic: {
