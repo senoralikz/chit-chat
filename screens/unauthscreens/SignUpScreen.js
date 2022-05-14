@@ -2,7 +2,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
   TextInput,
   KeyboardAvoidingView,
   Alert,
@@ -15,7 +14,6 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import {
   collection,
-  addDoc,
   setDoc,
   doc,
   query,
@@ -23,7 +21,7 @@ import {
   getDocs,
   onSnapshot,
 } from "firebase/firestore";
-import { auth, storage, db } from "../firebaseConfig";
+import { auth, storage, db } from "../../firebaseConfig";
 import * as ImagePicker from "expo-image-picker";
 import {
   MaterialCommunityIcons,
@@ -35,7 +33,6 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [profilePic, setProfilePic] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [displayNameAvailable, setDisplayNameAvailable] = useState(true);
   const [pickedPhoto, setPickedPhoto] = useState("");
@@ -96,7 +93,8 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
 
   const addUserToCollection = async (user) => {
     try {
-      await setDoc(doc(db, `users/${user.uid}`), {
+      const userRef = doc(db, `users/${user.uid}`);
+      await setDoc(userRef, {
         email: user.email,
         photoURL: user.photoURL,
         displayName: user.displayName,
@@ -235,7 +233,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
           {!pickedPhoto ? (
             <View>
               <Image
-                source={require("../assets/default-user-icon.jpeg")}
+                source={require("../../assets/default-user-icon.jpeg")}
                 style={styles.profilePic}
               />
               <Ionicons
@@ -309,11 +307,12 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
             />
           </View>
           <View
-            style={
-              password !== confirmPassword
-                ? styles.pwNotConfirmed
-                : styles.credentialInput
-            }
+            style={styles.credentialInput}
+            // style={
+            //   password !== confirmPassword
+            //     ? styles.pwNotConfirmed
+            //     : styles.credentialInput
+            // }
           >
             {password !== confirmPassword ? (
               <AntDesign
