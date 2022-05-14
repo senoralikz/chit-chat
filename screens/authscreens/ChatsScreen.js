@@ -50,6 +50,7 @@ const ChatsScreen = () => {
               size={60}
               color="#bdc3c7"
             />
+            <Text style={{ fontSize: 18, color: "#bdc3c7" }}>No Chats</Text>
           </View>
         )}
       />
