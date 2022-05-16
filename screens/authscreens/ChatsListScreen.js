@@ -3,7 +3,7 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
+  Pressable,
   Image,
   SafeAreaView,
   FlatList,
@@ -11,10 +11,11 @@ import {
 import { auth, db } from "../../firebaseConfig";
 import { collection, doc, query, where, onSnapshot } from "firebase/firestore";
 import ChatListItem from "../../components/ChatListItem";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
+import { Avatar } from "react-native-elements";
 
-const ChatsScreen = () => {
-  const [chats, setChats] = useState("");
+const ChatsListScreen = ({ navigation }) => {
+  const [chats, setChats] = useState([]);
 
   const user = auth.currentUser;
   const userRef = doc(db, "users", user.uid);
@@ -25,7 +26,7 @@ const ChatsScreen = () => {
     const unsubChats = onSnapshot(q, (querySnapshot) => {
       setChats(
         querySnapshot.docs.map((doc) => {
-          return { ...doc.data() };
+          return { ...doc.data(), chatId: doc.id };
         })
       );
     });
@@ -36,12 +37,35 @@ const ChatsScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <Avatar
+          source={{ uri: user.photoURL }}
+          size="small"
+          rounded
+          onPress={() => navigation.navigate("Profile")}
+        />
         <Text style={{ fontSize: 36, fontWeight: "800" }}>Chats</Text>
-        <Image source={{ uri: user.photoURL }} style={styles.profilePic} />
+        <Pressable
+          onPress={() => alert("creating a new chat")}
+          style={{ alignSelf: "center" }}
+        >
+          <Ionicons name="create-outline" size={28} color="#22a6b3" />
+        </Pressable>
       </View>
       <FlatList
+        ItemSeparatorComponent={() => (
+          <View
+            style={{
+              width: "95%",
+              alignSelf: "center",
+              borderBottomColor: "#bdc3c7",
+              borderBottomWidth: 1,
+            }}
+          />
+        )}
         data={chats}
-        renderItem={({ item }) => <ChatListItem chat={item} />}
+        renderItem={({ item }) => (
+          <ChatListItem chat={item} navigation={navigation} />
+        )}
         keyExtractor={(item) => item.chatId}
         ListEmptyComponent={() => (
           <View style={{ marginTop: 80, alignItems: "center" }}>
@@ -58,7 +82,7 @@ const ChatsScreen = () => {
   );
 };
 
-export default ChatsScreen;
+export default ChatsListScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -71,11 +95,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 5,
-  },
-  profilePic: {
-    borderRadius: 15,
-    height: 30,
-    width: 30,
-    alignSelf: "center",
   },
 });

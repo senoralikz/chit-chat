@@ -6,13 +6,12 @@ import {
   KeyboardAvoidingView,
   Alert,
   Pressable,
+  SafeAreaView,
 } from "react-native";
 import { useState, useLayoutEffect } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebaseConfig";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { SocialIcon } from "react-native-elements";
-import { SafeAreaView } from "react-native-safe-area-context";
 import GoogleSignInBtn from "../../components/GoogleSignInBtn";
 
 const LogInScreen = ({ navigation }) => {

@@ -6,10 +6,9 @@ import {
   KeyboardAvoidingView,
   Alert,
   Pressable,
-  Image,
+  SafeAreaView,
 } from "react-native";
 import { useEffect, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import {
@@ -28,6 +27,7 @@ import {
   AntDesign,
   Ionicons,
 } from "@expo/vector-icons";
+import { Avatar } from "react-native-elements";
 
 const SignUpScreen = ({ navigation: { goBack } }) => {
   const [email, setEmail] = useState("");
@@ -232,9 +232,10 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
         <Pressable onPress={selectProfilePic}>
           {!pickedPhoto ? (
             <View>
-              <Image
+              <Avatar
                 source={require("../../assets/default-user-icon.jpeg")}
-                style={styles.profilePic}
+                size={150}
+                rounded
               />
               <Ionicons
                 name="add-circle"
@@ -245,7 +246,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
             </View>
           ) : (
             <View>
-              <Image source={{ uri: pickedPhoto }} style={styles.profilePic} />
+              <Avatar source={{ uri: pickedPhoto }} size={150} rounded />
               <Pressable onPress={() => setPickedPhoto("")}>
                 <Ionicons
                   name="remove-circle"
@@ -400,11 +401,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 5,
-  },
-  profilePic: {
-    borderRadius: 100,
-    height: 150,
-    width: 150,
   },
   credentialInput: {
     flexDirection: "row",

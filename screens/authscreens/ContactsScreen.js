@@ -10,7 +10,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import ContactListItem from "../../components/ContactListItem";
 
-const ContactsScreen = () => {
+const ContactsScreen = ({ navigation }) => {
   const [contacts, setContacts] = useState("");
 
   return (
@@ -18,10 +18,11 @@ const ContactsScreen = () => {
       <View style={styles.header}>
         <Text style={{ fontSize: 36, fontWeight: "800" }}>Contacts</Text>
         <Pressable
-          onPress={() => alert("adding a new contact")}
+          onPress={() => navigation.navigate("AddContactScreen")}
+          // onPress={() => alert("adding a new contact")}
           style={{ alignSelf: "center" }}
         >
-          <Ionicons name="ios-person-add" size={24} color="black" />
+          <Ionicons name="ios-person-add" size={28} color="black" />
         </Pressable>
       </View>
       <FlatList
