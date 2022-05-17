@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import ChatScreen from "../../screens/authscreens/ChatScreen";
-import ChatsListScreen from "../../screens/authscreens/ChatsListScreen";
+import ChatScreen from "../../screens/authScreens/ChatScreen";
+import ChatsListScreen from "../../screens/authScreens/ChatsListScreen";
+import AuthTabs from "./AuthTabs";
 
 const Stack = createNativeStackNavigator();
 
@@ -9,7 +10,7 @@ const ChatsStack = () => {
     <Stack.Navigator initialRouteName="ChatsListScreen">
       <Stack.Screen
         name="ChatsListScreen"
-        component={ChatsListScreen}
+        component={AuthTabs}
         options={{ headerShown: false }}
       />
       <Stack.Screen

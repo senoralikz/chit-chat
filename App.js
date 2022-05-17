@@ -4,9 +4,10 @@ import "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebaseConfig";
-import UnauthStack from "./routes/unAuthRoutes/UnauthStack";
+import UnauthStack from "./routes/unauthRoutes/UnauthStack";
 import AuthTabs from "./routes/authRoutes/AuthTabs";
 import { UserContext } from "./context/UserContext";
+import ChatsStack from "./routes/authRoutes/ChatsStack";
 
 export default function App() {
   const [user, setUser] = useState("");
@@ -34,7 +35,8 @@ export default function App() {
   return (
     <UserContext.Provider value={{ user, setUser }}>
       <NavigationContainer>
-        {!user ? <UnauthStack /> : <AuthTabs />}
+        {!user ? <UnauthStack /> : <ChatsStack />}
+        {/* {!user ? <UnauthStack /> : <AuthTabs />} */}
         <StatusBar style="auto" />
       </NavigationContainer>
     </UserContext.Provider>

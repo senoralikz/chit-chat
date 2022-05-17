@@ -1,8 +1,10 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import ChatsStack from "./ChatsStack";
 import ContactsStack from "./ContactsStack";
-import ProfileScreen from "../../screens/authscreens/ProfileScreen";
+import ProfileScreen from "../../screens/authScreens/ProfileScreen";
 import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import ChatsListScreen from "../../screens/authScreens/ChatsListScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -21,14 +23,14 @@ const AuthTabs = () => {
     >
       <Tab.Screen
         name="ChatsTab"
-        component={ChatsStack}
-        options={{
+        component={ChatsListScreen}
+        options={({ route }) => ({
           tabBarAccessibilityLabel: "Chats",
           tabBarBadge: 3,
           tabBarIcon: ({ color }) => (
             <Ionicons name="ios-chatbubbles" size={28} color={color} />
           ),
-        }}
+        })}
       />
       <Tab.Screen
         name="ContactsTab"

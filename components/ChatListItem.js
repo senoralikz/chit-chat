@@ -19,19 +19,29 @@ const ChatListItem = ({ chat, navigation }) => {
   };
 
   return (
-    <View style={{ marginVertical: 10, paddingHorizontal: 10 }}>
-      <Pressable
-        onPress={() =>
-          navigation.navigate("ChatScreen", { messages: chat.messages })
-        }
-      >
+    <Pressable
+      style={styles.container}
+      onPress={() => {
+        navigation.navigate("ChatScreen", {
+          chatId: chat.chatId,
+        });
+      }}
+    >
+      <View>
         <Text>{chatters}</Text>
         {/* <Text>{chat.chatId}</Text> */}
-      </Pressable>
-    </View>
+      </View>
+    </Pressable>
   );
 };
 
 export default ChatListItem;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginVertical: 10,
+    paddingHorizontal: 10,
+    height: 40,
+  },
+});

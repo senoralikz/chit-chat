@@ -51,33 +51,35 @@ const ChatsListScreen = ({ navigation }) => {
           <Ionicons name="create-outline" size={28} color="#22a6b3" />
         </Pressable>
       </View>
-      <FlatList
-        ItemSeparatorComponent={() => (
-          <View
-            style={{
-              width: "95%",
-              alignSelf: "center",
-              borderBottomColor: "#bdc3c7",
-              borderBottomWidth: 1,
-            }}
-          />
-        )}
-        data={chats}
-        renderItem={({ item }) => (
-          <ChatListItem chat={item} navigation={navigation} />
-        )}
-        keyExtractor={(item) => item.chatId}
-        ListEmptyComponent={() => (
-          <View style={{ marginTop: 80, alignItems: "center" }}>
-            <MaterialCommunityIcons
-              name="chat-remove"
-              size={60}
-              color="#bdc3c7"
+      <View style={{ paddingTop: 20 }}>
+        <FlatList
+          ItemSeparatorComponent={() => (
+            <View
+              style={{
+                width: "95%",
+                alignSelf: "center",
+                borderBottomColor: "#bdc3c7",
+                borderBottomWidth: 1,
+              }}
             />
-            <Text style={{ fontSize: 18, color: "#bdc3c7" }}>No Chats</Text>
-          </View>
-        )}
-      />
+          )}
+          data={chats}
+          renderItem={({ item }) => (
+            <ChatListItem chat={item} navigation={navigation} />
+          )}
+          keyExtractor={(item) => item.chatId}
+          ListEmptyComponent={() => (
+            <View style={{ marginTop: 80, alignItems: "center" }}>
+              <MaterialCommunityIcons
+                name="chat-remove"
+                size={60}
+                color="#bdc3c7"
+              />
+              <Text style={{ fontSize: 18, color: "#bdc3c7" }}>No Chats</Text>
+            </View>
+          )}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -87,8 +89,6 @@ export default ChatsListScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: "center",
-    // alignItems: "center",
     backgroundColor: "#fff",
   },
   header: {
