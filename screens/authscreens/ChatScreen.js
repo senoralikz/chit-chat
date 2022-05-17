@@ -1,5 +1,8 @@
 import {
+  Alert,
+  FlatList,
   KeyboardAvoidingView,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -15,12 +18,16 @@ import {
   query,
   onSnapshot,
   serverTimestamp,
+  orderBy,
 } from "firebase/firestore";
 import { GiftedChat } from "react-native-gifted-chat";
 import { auth, db } from "../../firebaseConfig";
+import { FontAwesome } from "@expo/vector-icons";
+import Message from "../../components/Message";
 
 const ChatScreen = ({ route, navigation }) => {
   const [messages, setMessages] = useState([]);
+  const [textInput, setTextInput] = useState("");
 
   const user = auth.currentUser;
   const userRef = doc(db, "users", user.uid);
@@ -33,29 +40,58 @@ const ChatScreen = ({ route, navigation }) => {
       setMessages(
         snapshot.docs.map((doc) => {
           return {
-            text: doc.data().message,
-            _id: doc.id,
+            message: doc.data().message,
+            messageId: doc.id,
             createdAt: doc.data().timestamp,
-            user: {
-              _id: doc.data().userId,
-              name: doc.data().displayName,
-              avatar: doc.data().photoURL,
-            },
+            userId: doc.data().userId,
+            userDisplayName: doc.data().displayName,
+            userAvatar: doc.data().photoURL,
           };
         })
       );
     });
+    // const unsubMessages = onSnapshot(q, (snapshot) => {
+    //   setMessages(
+    //     snapshot.docs.map((doc) => {
+    //       return {
+    //         text: doc.data().message,
+    //         _id: doc.id,
+    //         createdAt: doc.data().timestamp,
+    //         user: {
+    //           _id: doc.data().userId,
+    //           name: doc.data().displayName,
+    //           avatar: doc.data().photoURL,
+    //         },
+    //       };
+    //     })
+    //   );
+    // });
     return unsubMessages;
   }, []);
 
-  const onSend = useCallback((messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
-    );
-    const { _id, createdAt, text, user } = messages[0];
+  const handleSendMessage = async () => {
+    try {
+      await addDoc(messagesRef, {
+        message: textInput,
+        createdAt: serverTimestamp(),
+        userId: user.uid,
+        userDisplayName: user.displayName,
+        userAvatar: user.photoURL,
+      });
+      setTextInput("");
+    } catch (error) {
+      Alert.alert(error.code, error.message, { text: "Ok" });
+    }
+  };
 
-    addDoc(messagesRef, { _id, createdAt, text, user });
-  }, []);
+  // const onSend = useCallback((messages = []) => {
+  //   setMessages((previousMessages) =>
+  //     GiftedChat.append(previousMessages, messages)
+  //   );
+  //   const { _id, createdAt, text, user } = messages[0];
+
+  //   addDoc(messagesRef, { _id, createdAt, text, user });
+  // }, []);
 
   // const onSend = useCallback((messages = []) => {
   //   setMessages((previousMessages) =>
@@ -66,10 +102,10 @@ const ChatScreen = ({ route, navigation }) => {
   return (
     // <GiftedChat
     //   messages={messages}
-    //   showAvatarForEveryMessage={false}
+    //   showAvatarForEveryMessage={true}
     //   onSend={(messages) => onSend(messages)}
     //   user={{
-    //     _id: auth?.currentUser?.email,
+    //     _id: auth?.currentUser?.uid,
     //     name: auth?.currentUser?.displayName,
     //     avatar: auth?.currentUser?.photoURL,
     //   }}
@@ -82,15 +118,22 @@ const ChatScreen = ({ route, navigation }) => {
         style={styles.container}
         keyboardVerticalOffset={90}
       >
-        <ScrollView>
-          <Text>Hello</Text>
-        </ScrollView>
+        <FlatList
+          data={messages}
+          renderItem={({ item }) => <Message message={item} />}
+          keyExtractor={(item) => item.messageId}
+        />
         <>
           <View style={styles.footer}>
             <TextInput
-              placeholder="Type a Message"
+              placeholder="ChitChat"
+              value={textInput}
+              onChangeText={(text) => setTextInput(text)}
               style={styles.messageInput}
             />
+            <Pressable onPress={handleSendMessage}>
+              <FontAwesome name="send" size={24} color="#9b59b6" />
+            </Pressable>
           </View>
         </>
       </KeyboardAvoidingView>

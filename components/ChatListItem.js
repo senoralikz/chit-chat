@@ -22,8 +22,13 @@ const ChatListItem = ({ chat, navigation }) => {
     <Pressable
       style={styles.container}
       onPress={() => {
-        navigation.navigate("ChatScreen", {
-          chatId: chat.chatId,
+        chat.chatters.forEach((chatter) => {
+          navigation.navigate("ChatScreen", {
+            chatId: chat.chatId,
+            chatterId: chatter.userId,
+            chatterDisplayName: chatter.displayName,
+            chatterPhotoURL: chatter.photoURL,
+          });
         });
       }}
     >
