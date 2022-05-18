@@ -33,7 +33,7 @@ const ChatScreen = ({ route, navigation }) => {
   const userRef = doc(db, "users", user.uid);
   const chatsRef = doc(userRef, "chats", route.params.chatId);
   const messagesRef = collection(chatsRef, "messages");
-  const q = query(messagesRef);
+  const q = query(messagesRef, orderBy("createdAt"));
 
   useEffect(() => {
     const unsubMessages = onSnapshot(q, (snapshot) => {
@@ -42,30 +42,32 @@ const ChatScreen = ({ route, navigation }) => {
           return {
             message: doc.data().message,
             messageId: doc.id,
-            createdAt: doc.data().timestamp,
+            createdAt: doc.data().createdAt,
             userId: doc.data().userId,
-            userDisplayName: doc.data().displayName,
-            userAvatar: doc.data().photoURL,
+            userDisplayName: doc.data().userDisplayName,
+            userPhotoURL: doc.data().userPhotoURL,
           };
         })
       );
     });
+
     // const unsubMessages = onSnapshot(q, (snapshot) => {
     //   setMessages(
     //     snapshot.docs.map((doc) => {
     //       return {
-    //         text: doc.data().message,
-    //         _id: doc.id,
-    //         createdAt: doc.data().timestamp,
+    //         text: doc.data().text,
+    //         _id: doc.data()._id,
+    //         createdAt: doc.data().createdAt,
     //         user: {
-    //           _id: doc.data().userId,
-    //           name: doc.data().displayName,
-    //           avatar: doc.data().photoURL,
+    //           _id: doc.data()._id,
+    //           name: doc.data().name,
+    //           avatar: doc.data().avatar,
     //         },
     //       };
     //     })
     //   );
     // });
+
     return unsubMessages;
   }, []);
 
@@ -76,28 +78,24 @@ const ChatScreen = ({ route, navigation }) => {
         createdAt: serverTimestamp(),
         userId: user.uid,
         userDisplayName: user.displayName,
-        userAvatar: user.photoURL,
+        userPhotoURL: user.photoURL,
       });
+      // route.params.chatters.forEach
+      console.log("the chatters are", route.params.chatters);
       setTextInput("");
     } catch (error) {
       Alert.alert(error.code, error.message, { text: "Ok" });
     }
   };
 
-  // const onSend = useCallback((messages = []) => {
-  //   setMessages((previousMessages) =>
-  //     GiftedChat.append(previousMessages, messages)
-  //   );
-  //   const { _id, createdAt, text, user } = messages[0];
+  const onSend = useCallback((messages = []) => {
+    setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages, messages)
+    );
+    const { _id, createdAt, text, user } = messages[0];
 
-  //   addDoc(messagesRef, { _id, createdAt, text, user });
-  // }, []);
-
-  // const onSend = useCallback((messages = []) => {
-  //   setMessages((previousMessages) =>
-  //     GiftedChat.append(previousMessages, messages)
-  //   );
-  // }, []);
+    addDoc(messagesRef, { _id, createdAt, text, user });
+  }, []);
 
   return (
     // <GiftedChat
@@ -109,33 +107,40 @@ const ChatScreen = ({ route, navigation }) => {
     //     name: auth?.currentUser?.displayName,
     //     avatar: auth?.currentUser?.photoURL,
     //   }}
-    //   // isTyping={true}
     //   alwaysShowSend={true}
     // />
+
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
         keyboardVerticalOffset={90}
       >
-        <FlatList
+        {/* <FlatList
           data={messages}
           renderItem={({ item }) => <Message message={item} />}
           keyExtractor={(item) => item.messageId}
-        />
-        <>
-          <View style={styles.footer}>
-            <TextInput
-              placeholder="ChitChat"
-              value={textInput}
-              onChangeText={(text) => setTextInput(text)}
-              style={styles.messageInput}
-            />
-            <Pressable onPress={handleSendMessage}>
-              <FontAwesome name="send" size={24} color="#9b59b6" />
-            </Pressable>
-          </View>
-        </>
+        /> */}
+        <ScrollView>
+          {messages.map((message) => (
+            <View key={message.messageId}>
+              <Message message={message} />
+            </View>
+          ))}
+        </ScrollView>
+        <View style={styles.footer}>
+          <TextInput
+            placeholder="ChitChat"
+            value={textInput}
+            onChangeText={(text) => setTextInput(text)}
+            style={styles.messageInput}
+            multiline={true}
+            textAlignVertical="center"
+          />
+          <Pressable onPress={handleSendMessage}>
+            <FontAwesome name="send" size={24} color="#9b59b6" />
+          </Pressable>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

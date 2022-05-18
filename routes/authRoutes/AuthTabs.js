@@ -9,6 +9,17 @@ import ChatsListScreen from "../../screens/authScreens/ChatsListScreen";
 const Tab = createBottomTabNavigator();
 
 const AuthTabs = () => {
+  const getTabBarVisibility = (route) => {
+    const routeName = route.state
+      ? route.state.routes[route.state.index].name
+      : "";
+
+    if (routeName === "ChatScreen") {
+      return false;
+    }
+    return true;
+  };
+
   return (
     <Tab.Navigator
       initialRouteName="Chats"
