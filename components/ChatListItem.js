@@ -2,6 +2,8 @@ import { StyleSheet, Text, View, Pressable } from "react-native";
 import { useEffect, useState } from "react";
 import { auth, db } from "../firebaseConfig";
 import { doc, collection, query, onSnapshot } from "firebase/firestore";
+import { Avatar, ListItem } from "react-native-elements";
+import { checkActionCode } from "firebase/auth";
 
 const ChatListItem = ({ chat, navigation }) => {
   const [chatters, setChatters] = useState("");
@@ -38,7 +40,6 @@ const ChatListItem = ({ chat, navigation }) => {
 
   return (
     <Pressable
-      style={styles.container}
       onPress={() => {
         // chat.chatters.forEach((chatter) => {
         navigation.navigate("ChatScreen", {
@@ -51,21 +52,20 @@ const ChatListItem = ({ chat, navigation }) => {
         // });
       }}
     >
-      <View>
-        <Text>{chatters}</Text>
-        {/* <Text>{chat.chatId}</Text> */}
-      </View>
+      <ListItem bottomDivider>
+        <Avatar source={{ uri: chat.chatters[0].photoURL }} />
+        <ListItem.Content>
+          <ListItem.Title style={{ fontWeight: "bold" }}>
+            {chat.chatters[0].displayName}
+          </ListItem.Title>
+          <ListItem.Subtitle>This is a test</ListItem.Subtitle>
+        </ListItem.Content>
+        <ListItem.Chevron />
+      </ListItem>
     </Pressable>
   );
 };
 
 export default ChatListItem;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginVertical: 10,
-    paddingHorizontal: 10,
-    height: 40,
-  },
-});
+const styles = StyleSheet.create({});

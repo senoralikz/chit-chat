@@ -57,7 +57,7 @@ const ProfileScreen = () => {
             {user.emailVerified ? (
               <Text style={styles.credentialPropertyText}>Yes</Text>
             ) : (
-              <Text style={styles.credentialPropertyText}>Not No</Text>
+              <Text style={styles.credentialPropertyText}>No</Text>
             )}
           </View>
           <View style={{ alignItems: "center" }}>

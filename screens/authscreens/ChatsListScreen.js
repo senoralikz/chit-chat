@@ -7,6 +7,7 @@ import {
   Image,
   SafeAreaView,
   FlatList,
+  ScrollView,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig";
 import { collection, doc, query, where, onSnapshot } from "firebase/firestore";
@@ -45,41 +46,30 @@ const ChatsListScreen = ({ navigation }) => {
         />
         <Text style={{ fontSize: 36, fontWeight: "800" }}>Chats</Text>
         <Pressable
-          onPress={() => alert("creating a new chat")}
+          onPress={() => navigation.navigate("AddChatScreen")}
           style={{ alignSelf: "center" }}
         >
           <Ionicons name="create-outline" size={28} color="#22a6b3" />
         </Pressable>
       </View>
-      <View style={{ paddingTop: 20 }}>
-        <FlatList
-          ItemSeparatorComponent={() => (
-            <View
-              style={{
-                width: "95%",
-                alignSelf: "center",
-                borderBottomColor: "#bdc3c7",
-                borderBottomWidth: 1,
-              }}
+      <FlatList
+        data={chats}
+        renderItem={({ item }) => (
+          <ChatListItem chat={item} navigation={navigation} />
+        )}
+        keyExtractor={(item) => item.chatId}
+        ListEmptyComponent={() => (
+          <View style={{ marginTop: 80, alignItems: "center" }}>
+            <MaterialCommunityIcons
+              name="chat-remove"
+              size={60}
+              color="#bdc3c7"
             />
-          )}
-          data={chats}
-          renderItem={({ item }) => (
-            <ChatListItem chat={item} navigation={navigation} />
-          )}
-          keyExtractor={(item) => item.chatId}
-          ListEmptyComponent={() => (
-            <View style={{ marginTop: 80, alignItems: "center" }}>
-              <MaterialCommunityIcons
-                name="chat-remove"
-                size={60}
-                color="#bdc3c7"
-              />
-              <Text style={{ fontSize: 18, color: "#bdc3c7" }}>No Chats</Text>
-            </View>
-          )}
-        />
-      </View>
+            <Text style={{ fontSize: 18, color: "#bdc3c7" }}>No Chats</Text>
+          </View>
+        )}
+        style={{ paddingTop: 10 }}
+      />
     </SafeAreaView>
   );
 };

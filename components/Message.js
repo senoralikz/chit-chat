@@ -39,11 +39,11 @@ const Message = ({ message }) => {
                 <Text style={{ color: "#fff", fontSize: 16 }}>
                   {message.message}
                 </Text>
-                <Text
+                {/* <Text
                   style={{ fontSize: 12, color: "#fff", textAlign: "right" }}
                 >
                   {formattedTime}
-                </Text>
+                </Text> */}
               </View>
             </View>
             <View
@@ -82,7 +82,7 @@ const Message = ({ message }) => {
               <View style={styles.messagesReceived}>
                 <View>
                   <Text style={{ fontSize: 16 }}>{message.message}</Text>
-                  <Text style={{ fontSize: 12 }}>{formattedTime}</Text>
+                  {/* <Text style={{ fontSize: 12 }}>{formattedTime}</Text> */}
                 </View>
               </View>
             </View>
@@ -97,13 +97,15 @@ export default Message;
 
 const styles = StyleSheet.create({
   messagesSent: {
+    maxWidth: 250,
     borderRadius: 20,
-    backgroundColor: "#22a6b3",
     padding: 10,
+    backgroundColor: "#22a6b3",
   },
   messagesReceived: {
+    maxWidth: 250,
     borderRadius: 20,
-    backgroundColor: "#ecf0f1",
     padding: 10,
+    backgroundColor: "#ecf0f1",
   },
 });

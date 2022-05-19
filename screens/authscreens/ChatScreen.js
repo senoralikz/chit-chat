@@ -40,12 +40,8 @@ const ChatScreen = ({ route, navigation }) => {
       setMessages(
         snapshot.docs.map((doc) => {
           return {
-            message: doc.data().message,
+            ...doc.data(),
             messageId: doc.id,
-            createdAt: doc.data().createdAt,
-            userId: doc.data().userId,
-            userDisplayName: doc.data().userDisplayName,
-            userPhotoURL: doc.data().userPhotoURL,
           };
         })
       );
@@ -116,18 +112,18 @@ const ChatScreen = ({ route, navigation }) => {
         style={styles.container}
         keyboardVerticalOffset={90}
       >
-        {/* <FlatList
+        <FlatList
           data={messages}
           renderItem={({ item }) => <Message message={item} />}
           keyExtractor={(item) => item.messageId}
-        /> */}
-        <ScrollView>
+        />
+        {/* <ScrollView>
           {messages.map((message) => (
             <View key={message.messageId}>
               <Message message={message} />
             </View>
           ))}
-        </ScrollView>
+        </ScrollView> */}
         <View style={styles.footer}>
           <TextInput
             placeholder="ChitChat"
@@ -137,8 +133,15 @@ const ChatScreen = ({ route, navigation }) => {
             multiline={true}
             textAlignVertical="center"
           />
-          <Pressable onPress={handleSendMessage}>
-            <FontAwesome name="send" size={24} color="#9b59b6" />
+          <Pressable
+            onPress={handleSendMessage}
+            disabled={!textInput ? true : false}
+          >
+            <FontAwesome
+              name="send"
+              size={24}
+              color={!textInput ? "#ececec" : "#9b59b6"}
+            />
           </Pressable>
         </View>
       </KeyboardAvoidingView>
