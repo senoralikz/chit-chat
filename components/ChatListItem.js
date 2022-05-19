@@ -53,7 +53,11 @@ const ChatListItem = ({ chat, navigation }) => {
       }}
     >
       <ListItem bottomDivider>
-        <Avatar source={{ uri: chat.chatters[0].photoURL }} />
+        <Avatar
+          size="medium"
+          source={{ uri: chat.chatters[0].photoURL }}
+          rounded
+        />
         <ListItem.Content>
           <ListItem.Title style={{ fontWeight: "bold" }}>
             {chat.chatters[0].displayName}
