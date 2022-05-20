@@ -31,30 +31,13 @@ const ChatListItem = ({ chat, navigation }) => {
     return unsubMessages;
   }, []);
 
-  // useEffect(() => {
-  //   getChatters();
-  //   // const unsubChat = onSnapshot(q, (querySnapshot) => {
-  //   //   setChatters(
-  //   //     querySnapshot.docs.map((doc) => {
-  //   //       doc.data().chatters.map((chatter) => {
-  //   //         return chatter.displayName;
-  //   //       });
-  //   //     })
-  //   //   );
-  //   // });
-
-  //   // return unsubChat;
-  // }, []);
-
-  // const getChatters = () => {
-  //   setChatters(
-  //     chat.chatters
-  //       .map((chatter) => {
-  //         return chatter.displayName;
-  //       })
-  //       .join(", ")
-  //   );
-  // };
+  // const formattedTime = new Date(
+  //   lastMessage[0].createdAt * 1000
+  // ).toLocaleTimeString("en-US", {
+  //   hour: "numeric",
+  //   minute: "numeric",
+  //   hour12: true,
+  // });
 
   const deleteMessagesColl = async () => {
     try {
@@ -127,11 +110,25 @@ const ChatListItem = ({ chat, navigation }) => {
       >
         <Avatar size="medium" source={{ uri: chat.friendPhotoURL }} rounded />
         <ListItem.Content>
-          <ListItem.Title style={{ fontWeight: "bold" }}>
+          <ListItem.Title
+            style={{
+              fontWeight: "bold",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
             {chat.friendDisplayName}
+            {/* {formattedTime} */}
           </ListItem.Title>
           <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
-            {lastMessage[0].message}
+            {/* {lastMessage ? lastMessage[0].message : ""} */}
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+            aliquip ex ea commodo consequat. Duis aute irure dolor in
+            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+            culpa qui officia deserunt mollit anim id est laborum.
           </ListItem.Subtitle>
         </ListItem.Content>
         <ListItem.Chevron />

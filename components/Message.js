@@ -6,7 +6,12 @@ import { Avatar } from "react-native-elements";
 const Message = ({ message }) => {
   const user = auth.currentUser;
   const formattedTime = new Date(message.createdAt * 1000).toLocaleTimeString(
-    "en-US"
+    "en-US",
+    {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    }
   );
 
   // const formattedTime = message.createdAt.toLocaleString("en-US", {
@@ -39,11 +44,11 @@ const Message = ({ message }) => {
                 <Text style={{ color: "#fff", fontSize: 16 }}>
                   {message.message}
                 </Text>
-                {/* <Text
+                <Text
                   style={{ fontSize: 12, color: "#fff", textAlign: "right" }}
                 >
                   {formattedTime}
-                </Text> */}
+                </Text>
               </View>
             </View>
             {/* <View
@@ -82,7 +87,7 @@ const Message = ({ message }) => {
               <View style={styles.messagesReceived}>
                 <View>
                   <Text style={{ fontSize: 16 }}>{message.message}</Text>
-                  {/* <Text style={{ fontSize: 12 }}>{formattedTime}</Text> */}
+                  <Text style={{ fontSize: 12 }}>{formattedTime}</Text>
                 </View>
               </View>
             </View>
