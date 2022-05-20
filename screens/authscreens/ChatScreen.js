@@ -10,7 +10,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   addDoc,
   doc,
@@ -20,12 +20,11 @@ import {
   serverTimestamp,
   orderBy,
 } from "firebase/firestore";
-import { GiftedChat } from "react-native-gifted-chat";
 import { auth, db } from "../../firebaseConfig";
 import { FontAwesome } from "@expo/vector-icons";
 import Message from "../../components/Message";
 
-const ChatScreen = ({ route, navigation }) => {
+const ChatScreen = ({ route }) => {
   const [messages, setMessages] = useState([]);
   const [textInput, setTextInput] = useState("");
 
@@ -47,23 +46,6 @@ const ChatScreen = ({ route, navigation }) => {
       );
     });
 
-    // const unsubMessages = onSnapshot(q, (snapshot) => {
-    //   setMessages(
-    //     snapshot.docs.map((doc) => {
-    //       return {
-    //         text: doc.data().text,
-    //         _id: doc.data()._id,
-    //         createdAt: doc.data().createdAt,
-    //         user: {
-    //           _id: doc.data()._id,
-    //           name: doc.data().name,
-    //           avatar: doc.data().avatar,
-    //         },
-    //       };
-    //     })
-    //   );
-    // });
-
     return unsubMessages;
   }, []);
 
@@ -84,28 +66,7 @@ const ChatScreen = ({ route, navigation }) => {
     }
   };
 
-  const onSend = useCallback((messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
-    );
-    const { _id, createdAt, text, user } = messages[0];
-
-    addDoc(messagesRef, { _id, createdAt, text, user });
-  }, []);
-
   return (
-    // <GiftedChat
-    //   messages={messages}
-    //   showAvatarForEveryMessage={true}
-    //   onSend={(messages) => onSend(messages)}
-    //   user={{
-    //     _id: auth?.currentUser?.uid,
-    //     name: auth?.currentUser?.displayName,
-    //     avatar: auth?.currentUser?.photoURL,
-    //   }}
-    //   alwaysShowSend={true}
-    // />
-
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -117,13 +78,6 @@ const ChatScreen = ({ route, navigation }) => {
           renderItem={({ item }) => <Message message={item} />}
           keyExtractor={(item) => item.messageId}
         />
-        {/* <ScrollView>
-          {messages.map((message) => (
-            <View key={message.messageId}>
-              <Message message={message} />
-            </View>
-          ))}
-        </ScrollView> */}
         <View style={styles.footer}>
           <TextInput
             placeholder="ChitChat"

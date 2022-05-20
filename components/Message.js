@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     maxWidth: 250,
     borderRadius: 20,
     padding: 10,
-    backgroundColor: "#22a6b3",
+    backgroundColor: "#9b59b6",
   },
   messagesReceived: {
     maxWidth: 250,

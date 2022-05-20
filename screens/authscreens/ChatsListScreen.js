@@ -46,17 +46,25 @@ const ChatsListScreen = ({ navigation }) => {
         />
         <Text style={{ fontSize: 36, fontWeight: "800" }}>Chats</Text>
         <Pressable
-          onPress={() => navigation.navigate("AddChatScreen")}
+          onPress={() => navigation.navigate("CreateChatScreen")}
           style={{ alignSelf: "center" }}
         >
           <Ionicons name="create-outline" size={28} color="#22a6b3" />
         </Pressable>
       </View>
       <FlatList
-        data={chats}
-        renderItem={({ item }) => (
-          <ChatListItem chat={item} navigation={navigation} />
+        ItemSeparatorComponent={() => (
+          <View
+            style={{
+              width: "100%",
+              alignSelf: "center",
+              borderBottomColor: "#dfe6e9",
+              borderBottomWidth: 1,
+            }}
+          />
         )}
+        data={chats}
+        renderItem={({ item }) => <ChatListItem chat={item} />}
         keyExtractor={(item) => item.chatId}
         ListEmptyComponent={() => (
           <View style={{ marginTop: 80, alignItems: "center" }}>

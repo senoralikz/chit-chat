@@ -11,15 +11,9 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import ContactListItem from "../../components/ContactListItem";
 import { auth, db } from "../../firebaseConfig";
-import {
-  collection,
-  doc,
-  getDocs,
-  onSnapshot,
-  query,
-} from "firebase/firestore";
+import { collection, doc, onSnapshot, query } from "firebase/firestore";
 
-const ContactsScreen = ({ navigation }) => {
+const ContactsListScreen = ({ navigation }) => {
   const [friends, setFriends] = useState([]);
 
   const user = auth.currentUser;
@@ -31,27 +25,13 @@ const ContactsScreen = ({ navigation }) => {
     const unsubFriends = onSnapshot(q, (querySnapshot) => {
       setFriends(
         querySnapshot.docs.map((doc) => {
-          return { ...doc.data() };
+          return { ...doc.data(), friendDocId: doc.id };
         })
       );
     });
 
     return unsubFriends;
   }, []);
-
-  // const getFriends = async () => {
-  //   try {
-  //     const gettingFriends = await getDocs(friendsRef);
-  //     setFriends(
-  //       gettingFriends.map((friend) => {
-  //         return { ...friend.data() };
-  //       })
-  //     );
-  //   } catch (error) {
-  //     Alert.alert(error.code, error.message, { text: "Ok" });
-  //     console.error(error.code, "-- error getting friends --", error.message);
-  //   }
-  // };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -66,8 +46,20 @@ const ContactsScreen = ({ navigation }) => {
         </Pressable>
       </View>
       <FlatList
+        ItemSeparatorComponent={() => (
+          <View
+            style={{
+              width: "100%",
+              alignSelf: "center",
+              borderBottomColor: "#dfe6e9",
+              borderBottomWidth: 1,
+            }}
+          />
+        )}
         data={friends}
-        renderItem={({ item }) => <ContactListItem contact={item} />}
+        renderItem={({ item }) => (
+          <ContactListItem friend={item} navigation={navigation} />
+        )}
         keyExtractor={(item) => item.friendUserId}
         ListEmptyComponent={() => (
           <View style={{ marginTop: 80, alignItems: "center" }}>
@@ -85,7 +77,7 @@ const ContactsScreen = ({ navigation }) => {
   );
 };
 
-export default ContactsScreen;
+export default ContactsListScreen;
 
 const styles = StyleSheet.create({
   container: {
