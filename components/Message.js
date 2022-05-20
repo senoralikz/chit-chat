@@ -46,7 +46,7 @@ const Message = ({ message }) => {
                 </Text> */}
               </View>
             </View>
-            <View
+            {/* <View
               style={{
                 justifyContent: "flex-end",
                 marginLeft: 3,
@@ -57,7 +57,7 @@ const Message = ({ message }) => {
                 rounded
                 source={{ uri: message.userPhotoURL }}
               />
-            </View>
+            </View> */}
           </View>
         </>
       ) : (
@@ -99,12 +99,14 @@ const styles = StyleSheet.create({
   messagesSent: {
     maxWidth: 250,
     borderRadius: 20,
+    borderBottomRightRadius: 5,
     padding: 10,
     backgroundColor: "#9b59b6",
   },
   messagesReceived: {
     maxWidth: 250,
     borderRadius: 20,
+    borderBottomLeftRadius: 5,
     padding: 10,
     backgroundColor: "#ecf0f1",
   },

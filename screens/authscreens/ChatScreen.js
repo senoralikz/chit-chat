@@ -21,7 +21,7 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { auth, db } from "../../firebaseConfig";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import Message from "../../components/Message";
 
 const ChatScreen = ({ route }) => {
@@ -63,6 +63,7 @@ const ChatScreen = ({ route }) => {
       setTextInput("");
     } catch (error) {
       Alert.alert(error.code, error.message, { text: "Ok" });
+      console.error(error.code, "-- error sending message --", error.message);
     }
   };
 
@@ -77,6 +78,15 @@ const ChatScreen = ({ route }) => {
           data={messages}
           renderItem={({ item }) => <Message message={item} />}
           keyExtractor={(item) => item.messageId}
+          ListEmptyComponent={() => (
+            <View style={{ marginTop: 80, alignItems: "center" }}>
+              <MaterialCommunityIcons
+                name="message-off"
+                size={60}
+                color="#bdc3c7"
+              />
+            </View>
+          )}
         />
         <View style={styles.footer}>
           <TextInput

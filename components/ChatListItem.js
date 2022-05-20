@@ -8,38 +8,53 @@ import {
   onSnapshot,
   deleteDoc,
   getDocs,
+  orderBy,
 } from "firebase/firestore";
 import { Avatar, ListItem, Button, Icon } from "react-native-elements";
 import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 
 const ChatListItem = ({ chat, navigation }) => {
-  const [chatters, setChatters] = useState("");
+  const [lastMessage, setLastMessage] = useState([]);
+
+  const user = auth.currentUser;
+  const userRef = doc(db, "users", user.uid);
+  const chatsRef = doc(userRef, "chats", chat.chatId);
+  const messagesRef = collection(chatsRef, "messages");
+  const q = query(messagesRef, orderBy("createdAt", "desc"));
 
   useEffect(() => {
-    getChatters();
-    // const unsubChat = onSnapshot(q, (querySnapshot) => {
-    //   setChatters(
-    //     querySnapshot.docs.map((doc) => {
-    //       doc.data().chatters.map((chatter) => {
-    //         return chatter.displayName;
-    //       });
-    //     })
-    //   );
-    // });
+    const unsubMessages = onSnapshot(q, (snapshot) => {
+      setLastMessage(snapshot.docs.map((doc) => doc.data()));
+    });
 
-    // return unsubChat;
+    return unsubMessages;
   }, []);
 
-  const getChatters = () => {
-    setChatters(
-      chat.chatters
-        .map((chatter) => {
-          return chatter.displayName;
-        })
-        .join(", ")
-    );
-  };
+  // useEffect(() => {
+  //   getChatters();
+  //   // const unsubChat = onSnapshot(q, (querySnapshot) => {
+  //   //   setChatters(
+  //   //     querySnapshot.docs.map((doc) => {
+  //   //       doc.data().chatters.map((chatter) => {
+  //   //         return chatter.displayName;
+  //   //       });
+  //   //     })
+  //   //   );
+  //   // });
+
+  //   // return unsubChat;
+  // }, []);
+
+  // const getChatters = () => {
+  //   setChatters(
+  //     chat.chatters
+  //       .map((chatter) => {
+  //         return chatter.displayName;
+  //       })
+  //       .join(", ")
+  //   );
+  // };
 
   const deleteMessagesColl = async () => {
     try {
@@ -104,23 +119,19 @@ const ChatListItem = ({ chat, navigation }) => {
             // chatterId: chatter.userId,
             // chatterDisplayName: chatter.displayName,
             // chatterPhotoURL: chatter.photoURL,
-            chatters: chat.chatters,
+            // chatters: chat.chatters,
           });
           // });
         }}
         // bottomDivider
       >
-        <Avatar
-          size="medium"
-          source={{ uri: chat.chatters[0].photoURL }}
-          rounded
-        />
+        <Avatar size="medium" source={{ uri: chat.friendPhotoURL }} rounded />
         <ListItem.Content>
           <ListItem.Title style={{ fontWeight: "bold" }}>
-            {chat.chatters[0].displayName}
+            {chat.friendDisplayName}
           </ListItem.Title>
           <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
-            This is a test
+            {lastMessage[0].message}
           </ListItem.Subtitle>
         </ListItem.Content>
         <ListItem.Chevron />

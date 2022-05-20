@@ -3,6 +3,7 @@ import ChatScreen from "../../screens/authScreens/ChatScreen";
 import ChatsListScreen from "../../screens/authScreens/ChatsListScreen";
 import AuthTabs from "./AuthTabs";
 import CreateChatScreen from "../../screens/authScreens/CreateChatScreen";
+import SelectChattersScreen from "../../screens/authScreens/SelectChattersScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -15,10 +16,10 @@ const ChatsStack = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="CreateChatScreen"
-        component={CreateChatScreen}
+        name="SelectChattersScreen"
+        component={SelectChattersScreen}
         options={{
-          title: "New ChitChat",
+          title: "Select Chatters",
           // headerTintColor: "#22a6b3",
         }}
       />
@@ -27,6 +28,15 @@ const ChatsStack = () => {
         component={ChatScreen}
         options={{
           title: "ChitterChat",
+          headerBackTitleVisible: false,
+          // headerTintColor: "#22a6b3",
+        }}
+      />
+      <Stack.Screen
+        name="CreateChatScreen"
+        component={CreateChatScreen}
+        options={{
+          title: "New ChitterChat",
           headerBackTitleVisible: false,
           // headerTintColor: "#22a6b3",
         }}

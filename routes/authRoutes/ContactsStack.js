@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ContactsListScreen from "../../screens/authScreens/ContactsListScreen";
 import AddContactScreen from "../../screens/authScreens/AddContactScreen";
-import CreateChatScreen from "../../screens/authScreens/CreateChatScreen";
+import CreateChatScreen from "../../screens/authScreens/SelectChattersScreen";
 
 const Stack = createNativeStackNavigator();
 

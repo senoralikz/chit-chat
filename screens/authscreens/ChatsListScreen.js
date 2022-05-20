@@ -46,7 +46,7 @@ const ChatsListScreen = ({ navigation }) => {
         />
         <Text style={{ fontSize: 36, fontWeight: "800" }}>Chats</Text>
         <Pressable
-          onPress={() => navigation.navigate("CreateChatScreen")}
+          onPress={() => navigation.navigate("SelectChattersScreen")}
           style={{ alignSelf: "center" }}
         >
           <Ionicons name="create-outline" size={28} color="#22a6b3" />
@@ -64,7 +64,9 @@ const ChatsListScreen = ({ navigation }) => {
           />
         )}
         data={chats}
-        renderItem={({ item }) => <ChatListItem chat={item} />}
+        renderItem={({ item }) => (
+          <ChatListItem chat={item} navigation={navigation} />
+        )}
         keyExtractor={(item) => item.chatId}
         ListEmptyComponent={() => (
           <View style={{ marginTop: 80, alignItems: "center" }}>
