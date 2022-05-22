@@ -5,30 +5,35 @@ import { doc, collection, addDoc } from "firebase/firestore";
 
 const ChatFriendListItem = ({ friend, navigation }) => {
   const handleCreateChat = async () => {
-    // alert(`chatting with ${friend.friendDisplayName}`);
-    try {
-      const user = auth.currentUser;
-      const userRef = doc(db, "users", user.uid);
-      const chatRef = collection(userRef, "chats");
-      const chatId = await addDoc(chatRef, {
-        friendPhotoURL: friend.friendPhotoURL,
-        friendDisplayName: friend.friendDisplayName,
-        friendUserId: friend.friendUserId,
-      });
-      navigation.navigate("CreateChatScreen", {
-        friendPhotoURL: friend.friendPhotoURL,
-        friendDisplayName: friend.friendDisplayName,
-        friendUserId: friend.friendUserId,
-        chatId: chatId.id,
-      });
-    } catch (error) {
-      Alert.alert(error.code, error.message, { text: "Ok" });
-      console.error(
-        error.code,
-        "-- error creating chat room --",
-        error.message
-      );
-    }
+    alert(`chatting with ${friend.friendDisplayName}`);
+    // try {
+    //   const user = auth.currentUser;
+    //   const userRef = doc(db, "users", user.uid);
+    //   const chatRef = collection(userRef, "chats");
+    //   // const chatRef = await addDoc(collection(userRef, "chats"), {
+    //   //   friendPhotoURL: friend.friendPhotoURL,
+    //   //   friendDisplayName: friend.friendDisplayName,
+    //   //   friendUserId: friend.friendUserId,
+    //   // });
+    //   const chatId = await addDoc(chatRef, {
+    //     friendPhotoURL: friend.friendPhotoURL,
+    //     friendDisplayName: friend.friendDisplayName,
+    //     friendUserId: friend.friendUserId,
+    //   });
+    //   navigation.navigate("ChatScreen", {
+    //     friendPhotoURL: friend.friendPhotoURL,
+    //     friendDisplayName: friend.friendDisplayName,
+    //     friendUserId: friend.friendUserId,
+    //     chatId: chatId.id,
+    //   });
+    // } catch (error) {
+    //   Alert.alert(error.code, error.message, { text: "Ok" });
+    //   console.error(
+    //     error.code,
+    //     "-- error creating chat room --",
+    //     error.message
+    //   );
+    // }
   };
 
   // const createChat = async () => {

@@ -15,7 +15,7 @@ import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 
 const ChatListItem = ({ chat, navigation }) => {
-  const [lastMessage, setLastMessage] = useState([]);
+  const [lastMessage, setLastMessage] = useState("");
 
   const user = auth.currentUser;
   const userRef = doc(db, "users", user.uid);
@@ -31,13 +31,13 @@ const ChatListItem = ({ chat, navigation }) => {
     return unsubMessages;
   }, []);
 
-  // const formattedTime = new Date(
-  //   lastMessage[0].createdAt * 1000
-  // ).toLocaleTimeString("en-US", {
-  //   hour: "numeric",
-  //   minute: "numeric",
-  //   hour12: true,
-  // });
+  const lastMessageTime =
+    lastMessage &&
+    new Date(lastMessage[0]?.createdAt * 1000).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    });
 
   const deleteMessagesColl = async () => {
     try {
@@ -96,39 +96,33 @@ const ChatListItem = ({ chat, navigation }) => {
     <Swipeable renderRightActions={rightSwipeActions}>
       <ListItem
         onPress={() => {
-          // chat.chatters.forEach((chatter) => {
           navigation.navigate("ChatScreen", {
             chatId: chat.chatId,
-            // chatterId: chatter.userId,
-            // chatterDisplayName: chatter.displayName,
-            // chatterPhotoURL: chatter.photoURL,
-            // chatters: chat.chatters,
+            friendUserId: chat.friendUserId,
+            friendDisplayName: chat.friendDisplayName,
+            friendPhotoURL: chat.friendPhotoURL,
+            // friends: chat.friends,
           });
-          // });
         }}
-        // bottomDivider
       >
         <Avatar size="medium" source={{ uri: chat.friendPhotoURL }} rounded />
         <ListItem.Content>
-          <ListItem.Title
+          <View
             style={{
-              fontWeight: "bold",
+              width: "100%",
               flexDirection: "row",
               justifyContent: "space-between",
             }}
           >
-            {chat.friendDisplayName}
-            {/* {formattedTime} */}
-          </ListItem.Title>
+            <ListItem.Title style={{ fontWeight: "bold" }}>
+              {chat.friendDisplayName}
+            </ListItem.Title>
+            <ListItem.Title right={true} style={{ fontSize: 14 }}>
+              {lastMessageTime}
+            </ListItem.Title>
+          </View>
           <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
-            {/* {lastMessage ? lastMessage[0].message : ""} */}
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
+            {lastMessage && lastMessage[0]?.message}
           </ListItem.Subtitle>
         </ListItem.Content>
         <ListItem.Chevron />

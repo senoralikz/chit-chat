@@ -49,7 +49,42 @@ const CreateChatScreen = ({ route }) => {
     return unsubMessages;
   }, []);
 
-  const addChatters = async () => {};
+  const createChat = async () => {
+    // alert(`chatting with ${friend.friendDisplayName}`);
+    try {
+      const user = auth.currentUser;
+      const userRef = doc(db, "users", user.uid);
+      const chatRef = collection(userRef, "chats");
+      // const chatRef = await addDoc(collection(userRef, "chats"), {
+      //   friendPhotoURL: friend.friendPhotoURL,
+      //   friendDisplayName: friend.friendDisplayName,
+      //   friendUserId: friend.friendUserId,
+      // });
+      const chatId = await addDoc(chatRef, {
+        friendPhotoURL: route.params.friendPhotoURL,
+        friendDisplayName: route.params.friendDisplayName,
+        friendUserId: route.params.friendUserId,
+      })
+        .then(() => {
+          navigation.navigate("ChatScreen", {
+            friendPhotoURL: friend.friendPhotoURL,
+            friendDisplayName: friend.friendDisplayName,
+            friendUserId: friend.friendUserId,
+            chatId: chatId.id,
+          });
+        })
+        .then(() => {
+          handleSendMessage();
+        });
+    } catch (error) {
+      Alert.alert(error.code, error.message, { text: "Ok" });
+      console.error(
+        error.code,
+        "-- error creating chat room --",
+        error.message
+      );
+    }
+  };
 
   const handleSendMessage = async () => {
     // alert("sending message from create chat screen");
@@ -61,8 +96,6 @@ const CreateChatScreen = ({ route }) => {
         userDisplayName: user.displayName,
         userPhotoURL: user.photoURL,
       });
-      // route.params.chatters.forEach
-      console.log("the chatters are", route.params.chatters);
       setTextInput("");
     } catch (error) {
       Alert.alert(error.code, error.message, { text: "Ok" });
@@ -100,10 +133,7 @@ const CreateChatScreen = ({ route }) => {
             multiline={true}
             textAlignVertical="center"
           />
-          <Pressable
-            onPress={handleSendMessage}
-            disabled={!textInput ? true : false}
-          >
+          <Pressable onPress={createChat} disabled={!textInput ? true : false}>
             <FontAwesome
               name="send"
               size={24}

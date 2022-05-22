@@ -3,8 +3,9 @@ import React from "react";
 import { auth } from "../firebaseConfig";
 import { Avatar } from "react-native-elements";
 
-const Message = ({ message }) => {
+const Message = ({ message, index, messages }) => {
   const user = auth.currentUser;
+
   const formattedTime = new Date(message.createdAt * 1000).toLocaleTimeString(
     "en-US",
     {
@@ -14,42 +15,87 @@ const Message = ({ message }) => {
     }
   );
 
-  // const formattedTime = message.createdAt.toLocaleString("en-US", {
+  const newMsgDate = new Date(
+    message.createdAt?.seconds * 1000 + message.createdAt?.nanoseconds / 1000000
+  ).toLocaleDateString("en-US", {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  const prevMsgDate = new Date(
+    messages[index - 1]?.createdAt.seconds * 1000 +
+      messages[index - 1]?.createdAt.nanoseconds / 1000000
+  ).toLocaleDateString("en-US", {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  // const formattedTime = message.createdAt.toDate().toLocaleTimeString("en-US", {
   //   hour: "numeric",
   //   minute: "numeric",
   //   hour12: true,
   // });
 
+  // const newMsgDate = message.createdAt.toDate().toLocaleDateString("en-US", {
+  //   weekday: "short",
+  //   year: "numeric",
+  //   month: "short",
+  //   day: "numeric",
+  // });
+
+  // const prevMsgDate = messages[index - 1]?.createdAt
+  //   .toDate()
+  //   .toLocaleDateString("en-US", {
+  //     weekday: "short",
+  //     year: "numeric",
+  //     month: "short",
+  //     day: "numeric",
+  //   });
+
   return (
-    <View
-      style={
-        user.uid === message.userId
-          ? {
-              alignSelf: "flex-end",
-              paddingHorizontal: 5,
-              paddingVertical: 3,
-            }
-          : {
-              alignSelf: "flex-start",
-              paddingHorizontal: 5,
-              paddingVertical: 3,
-            }
-      }
-    >
-      {user.uid === message.userId ? (
-        <>
+    <>
+      {newMsgDate !== prevMsgDate && (
+        <Text
+          style={{ textAlign: "center", color: "#7f8c8d", paddingVertical: 10 }}
+        >
+          {newMsgDate}
+        </Text>
+      )}
+      <View
+        style={
+          user.uid === message.userId
+            ? {
+                alignSelf: "flex-end",
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+              }
+            : {
+                alignSelf: "flex-start",
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+              }
+        }
+      >
+        {user.uid === message.userId ? (
           <View style={{ flexDirection: "row" }}>
             <View style={styles.messagesSent}>
-              <View>
-                <Text style={{ color: "#fff", fontSize: 16 }}>
-                  {message.message}
-                </Text>
-                <Text
-                  style={{ fontSize: 12, color: "#fff", textAlign: "right" }}
-                >
-                  {formattedTime}
-                </Text>
-              </View>
+              <Text style={{ color: "#fff", fontSize: 16 }}>
+                {message.message}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: "#fff",
+                  textAlign: "right",
+                  paddingTop: 5,
+                }}
+              >
+                {formattedTime}
+              </Text>
             </View>
             {/* <View
               style={{
@@ -64,9 +110,7 @@ const Message = ({ message }) => {
               />
             </View> */}
           </View>
-        </>
-      ) : (
-        <>
+        ) : (
           <View style={{ flexDirection: "row" }}>
             <View
               style={{
@@ -85,16 +129,16 @@ const Message = ({ message }) => {
                 {message.userDisplayName}
               </Text>
               <View style={styles.messagesReceived}>
-                <View>
-                  <Text style={{ fontSize: 16 }}>{message.message}</Text>
-                  <Text style={{ fontSize: 12 }}>{formattedTime}</Text>
-                </View>
+                <Text style={{ fontSize: 16 }}>{message.message}</Text>
+                <Text style={{ fontSize: 12, paddingTop: 5 }}>
+                  {formattedTime}
+                </Text>
               </View>
             </View>
           </View>
-        </>
-      )}
-    </View>
+        )}
+      </View>
+    </>
   );
 };
 

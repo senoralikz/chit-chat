@@ -19,12 +19,11 @@ const ChatsListScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
 
   const user = auth.currentUser;
-  const userRef = doc(db, "users", user.uid);
-  const chatsRef = collection(userRef, "chats");
-  const q = query(chatsRef);
+  const chatDetailsRef = collection(db, "chatDetails");
+  const q = query(chatDetailsRef);
 
   useEffect(() => {
-    const unsubChats = onSnapshot(q, (querySnapshot) => {
+    const unsubChatDetails = onSnapshot(q, (querySnapshot) => {
       setChats(
         querySnapshot.docs.map((doc) => {
           return { ...doc.data(), chatId: doc.id };
@@ -32,7 +31,7 @@ const ChatsListScreen = ({ navigation }) => {
       );
     });
 
-    return unsubChats;
+    return unsubChatDetails;
   }, []);
 
   return (
@@ -46,7 +45,8 @@ const ChatsListScreen = ({ navigation }) => {
         />
         <Text style={{ fontSize: 36, fontWeight: "800" }}>Chats</Text>
         <Pressable
-          onPress={() => navigation.navigate("SelectChattersScreen")}
+          onPress={() => alert("creating a new chat")}
+          // onPress={() => navigation.navigate("SelectChattersScreen")}
           style={{ alignSelf: "center" }}
         >
           <Ionicons name="create-outline" size={28} color="#22a6b3" />
