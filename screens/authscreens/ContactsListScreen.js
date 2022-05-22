@@ -60,7 +60,7 @@ const ContactsListScreen = ({ navigation }) => {
         renderItem={({ item }) => (
           <ContactListItem friend={item} navigation={navigation} />
         )}
-        keyExtractor={(item) => item.friendUserId}
+        keyExtractor={(item) => item.userId}
         ListEmptyComponent={() => (
           <View style={{ marginTop: 80, alignItems: "center" }}>
             <MaterialCommunityIcons

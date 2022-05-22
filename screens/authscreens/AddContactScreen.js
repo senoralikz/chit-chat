@@ -1,24 +1,9 @@
 import { useState, useEffect } from "react";
-import {
-  FlatList,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
 import { db, auth } from "../../firebaseConfig";
 import { SearchBar } from "react-native-elements";
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-  query,
-  collection,
-  where,
-  onSnapshot,
-  doc,
-  getDocs,
-  orderBy,
-} from "firebase/firestore";
+import { query, collection, where, getDocs, orderBy } from "firebase/firestore";
 import AddFriendListItem from "../../components/AddFriendListItem";
 
 const AddContactScreen = () => {
@@ -53,18 +38,6 @@ const AddContactScreen = () => {
         error.message
       );
     }
-  };
-
-  const filteringUserResults = (text) => {
-    setSearch(text);
-    usersSearchResult.forEach((user) => {
-      user.includes(text) && console.log(user);
-    });
-    // setUsersFiltered(
-    //   usersSearchResult
-    //     .filter((user) => user.includes(search))
-    //     .map((filteredUser) => filteredUser)
-    // );
   };
 
   const searchFilterFunction = (text) => {
