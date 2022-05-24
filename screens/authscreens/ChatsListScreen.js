@@ -19,14 +19,14 @@ const ChatsListScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
 
   const user = auth.currentUser;
-  const chatDetailsRef = collection(db, "chatDetails");
-  const q = query(chatDetailsRef);
+  const groupsRef = collection(db, "groups");
+  const q = query(groupsRef, where("members", "array-contains", user.uid));
 
   useEffect(() => {
     const unsubChatDetails = onSnapshot(q, (querySnapshot) => {
       setChats(
         querySnapshot.docs.map((doc) => {
-          return { ...doc.data(), chatId: doc.id };
+          return { ...doc.data(), groupId: doc.id };
         })
       );
     });
@@ -67,7 +67,7 @@ const ChatsListScreen = ({ navigation }) => {
         renderItem={({ item }) => (
           <ChatListItem chat={item} navigation={navigation} />
         )}
-        keyExtractor={(item) => item.chatId}
+        keyExtractor={(item) => item.groupId}
         ListEmptyComponent={() => (
           <View style={{ marginTop: 80, alignItems: "center" }}>
             <MaterialCommunityIcons

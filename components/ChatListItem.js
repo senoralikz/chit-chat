@@ -19,33 +19,29 @@ const ChatListItem = ({ chat, navigation }) => {
 
   const user = auth.currentUser;
   const userRef = doc(db, "users", user.uid);
-  const chatsRef = doc(userRef, "chats", chat.chatId);
-  const messagesRef = collection(chatsRef, "messages");
-  const q = query(messagesRef, orderBy("createdAt", "desc"));
+  const groupRef = doc(db, "groups", chat.groupId);
+  const chatRef = doc(db, "chats", chat.groupId);
+  const q = query(chatRef);
 
-  useEffect(() => {
-    const unsubMessages = onSnapshot(q, (snapshot) => {
-      setLastMessage(snapshot.docs.map((doc) => doc.data()));
-    });
+  // useEffect(() => {
+  //   const unsubMessages = onSnapshot(q, (snapshot) => {
+  //     setLastMessage(snapshot.docs.map((doc) => doc.data()));
+  //   });
 
-    return unsubMessages;
-  }, []);
+  //   return unsubMessages;
+  // }, []);
 
-  const lastMessageTime =
-    lastMessage &&
-    new Date(lastMessage[0]?.createdAt * 1000).toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    });
+  // const lastMessageTime =
+  //   lastMessage &&
+  //   new Date(lastMessage[0]?.createdAt * 1000).toLocaleTimeString("en-US", {
+  //     hour: "numeric",
+  //     minute: "numeric",
+  //     hour12: true,
+  //   });
 
   const deleteMessagesColl = async () => {
     try {
-      const user = auth.currentUser;
-      const userRef = doc(db, "users", user.uid);
-      const chatRef = doc(userRef, "chats", chat.chatId);
-      const messagesRef = collection(chatRef, "messages");
-      const q = query(messagesRef);
+      const q = query(chatRef, "messages");
       const snapshot = await getDocs(q);
       const results = snapshot.docs.map((doc) => ({
         ...doc.data(),
@@ -63,9 +59,6 @@ const ChatListItem = ({ chat, navigation }) => {
 
   const deleteChatDoc = async () => {
     try {
-      const user = auth.currentUser;
-      const userRef = doc(db, "users", user.uid);
-      const chatRef = doc(userRef, "chats", chat.chatId);
       await deleteDoc(chatRef);
       deleteMessagesColl();
     } catch (error) {
@@ -96,13 +89,14 @@ const ChatListItem = ({ chat, navigation }) => {
     <Swipeable renderRightActions={rightSwipeActions}>
       <ListItem
         onPress={() => {
-          navigation.navigate("ChatScreen", {
-            chatId: chat.chatId,
-            friendUserId: chat.friendUserId,
-            friendDisplayName: chat.friendDisplayName,
-            friendPhotoURL: chat.friendPhotoURL,
-            // friends: chat.friends,
-          });
+          // navigation.navigate("ChatScreen", {
+          //   chatId: chat.chatId,
+          //   friendUserId: chat.friendUserId,
+          //   friendDisplayName: chat.friendDisplayName,
+          //   friendPhotoURL: chat.friendPhotoURL,
+          //   // friends: chat.friends,
+          // });
+          alert("going to chat screen");
         }}
       >
         <Avatar size="medium" source={{ uri: chat.friendPhotoURL }} rounded />
@@ -115,15 +109,15 @@ const ChatListItem = ({ chat, navigation }) => {
             }}
           >
             <ListItem.Title style={{ fontWeight: "bold" }}>
-              {chat.friendDisplayName}
+              {chat.members.join(", ")}
             </ListItem.Title>
-            <ListItem.Title right={true} style={{ fontSize: 14 }}>
+            {/* <ListItem.Title right={true} style={{ fontSize: 14 }}>
               {lastMessageTime}
-            </ListItem.Title>
+            </ListItem.Title> */}
           </View>
-          <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
+          {/* <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
             {lastMessage && lastMessage[0]?.message}
-          </ListItem.Subtitle>
+          </ListItem.Subtitle> */}
         </ListItem.Content>
         <ListItem.Chevron />
       </ListItem>

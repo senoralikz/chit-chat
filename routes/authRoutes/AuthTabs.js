@@ -22,7 +22,7 @@ const AuthTabs = () => {
 
   return (
     <Tab.Navigator
-      initialRouteName="Chats"
+      initialRouteName="ChatsTab"
       shifting={true}
       labeled={false}
       screenOptions={{
@@ -32,7 +32,7 @@ const AuthTabs = () => {
         tabBarInactiveTintColor: "#bdc3c7",
       }}
     >
-      <Tab.Screen
+      {/* <Tab.Screen
         name="ChatsTab"
         component={ChatsListScreen}
         options={({ route }) => ({
@@ -42,7 +42,7 @@ const AuthTabs = () => {
             <Ionicons name="ios-chatbubbles" size={28} color={color} />
           ),
         })}
-      />
+      /> */}
       <Tab.Screen
         name="ContactsTab"
         component={ContactsStack}

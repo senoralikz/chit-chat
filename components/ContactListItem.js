@@ -1,16 +1,120 @@
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Button, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState, useEffect } from "react";
 import { ListItem, Avatar } from "react-native-elements";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { auth, db } from "../firebaseConfig";
-import { doc, deleteDoc } from "firebase/firestore";
+import {
+  doc,
+  deleteDoc,
+  collection,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+} from "firebase/firestore";
 
 const ContactListItem = ({ friend, navigation }) => {
+  const [groups, setGroups] = useState("");
+
+  const user = auth.currentUser;
+
+  const groupsRef = collection(db, "groups");
+  const qGroups = query(
+    groupsRef,
+    where("members", "in", [
+      [user.uid, friend.userId],
+      [friend.userId, user.uid],
+    ])
+  );
+
+  useEffect(() => {
+    console.log("user id is", user.uid);
+    console.log("friend id is", friend.userId);
+
+    const unsubGroups = onSnapshot(qGroups, (snapshot) => {
+      //   const gettingGroups = snapshot.docs.map((doc) => {
+      //     console.log(
+      //       "checking doc data from contact list item",
+      //       doc.data(),
+      //       "and doc id is:",
+      //       doc.id
+      //     );
+      //     return {
+      //       ...doc.data(),
+      //       groupId: doc.id,
+      //     };
+      //   });
+
+      //   console.log("got these groups:", gettingGroups);
+
+      //   const filteredGroups = gettingGroups.find((group) => {
+      //     group.members === groupMembers;
+      //   });
+
+      //   console.log("filtered groups:", filteredGroups);
+      // });
+
+      setGroups(
+        snapshot.docs.map((doc) => {
+          console.log(
+            "checking doc data from contact list item",
+            doc.data(),
+            "and doc id is:",
+            doc.id
+          );
+          return {
+            ...doc.data(),
+            groupId: doc.id,
+          };
+        })
+      );
+    });
+
+    return unsubGroups;
+  }, []);
+
+  const goToChatScreen = async () => {
+    try {
+      if (groups.length === 0) {
+        const groupDoc = await addDoc(groupsRef, {
+          members: [user.uid, friend.userId],
+        })
+          .then((groupDoc) => {
+            navigation.navigate("ChatScreen", {
+              friendUserId: friend.userId,
+              // groups,
+              groupId: groupDoc.id,
+            });
+          })
+          .catch((error) =>
+            console.error(
+              error.code,
+              "-- error adding new group --",
+              error.message
+            )
+          );
+      } else {
+        navigation.navigate("ChatScreen", {
+          friendUserId: friend.userId,
+          // groups,
+          groupId: groups[0].groupId,
+        });
+      }
+    } catch (error) {
+      console.error(
+        error.code,
+        "-- error going to chat screen --",
+        error.message
+      );
+    }
+  };
+
   const deleteFriend = async () => {
     try {
       const user = auth.currentUser;
       const userRef = doc(db, "users", user.uid);
-      const friendRef = doc(userRef, "friends", friend.friendDocId);
+      const friendRef = doc(userRef, "friends", friend.userId);
       await deleteDoc(friendRef);
     } catch (error) {
       Alert.alert(error.code, error.message, { text: "Ok" });
@@ -58,21 +162,15 @@ const ContactListItem = ({ friend, navigation }) => {
               {friend.displayName}
             </ListItem.Title>
             <ListItem.Title>
-              <Pressable
-                onPress={
-                  () =>
-                    Alert.alert(
-                      "El Bochinche",
-                      `You are gossiping with ${friend.displayName}`,
-                      { text: "Ok" }
-                    )
-                  // navigation.navigate("ChatScreen")
-                }
-              >
+              <Pressable onPress={goToChatScreen}>
                 <Ionicons name="chatbubble" size={24} color="#9b59b6" />
               </Pressable>
             </ListItem.Title>
           </View>
+          {/* <Button
+            title="Read Groups"
+            onPress={() => console.log("these are the groups:", groups)}
+          /> */}
         </ListItem.Content>
       </ListItem>
     </Swipeable>

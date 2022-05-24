@@ -11,25 +11,33 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import ContactListItem from "../../components/ContactListItem";
 import { auth, db } from "../../firebaseConfig";
-import { collection, doc, onSnapshot, query } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  getDocs,
+} from "firebase/firestore";
 
 const ContactsListScreen = ({ navigation }) => {
   const [friends, setFriends] = useState([]);
 
   const user = auth.currentUser;
+
   const userRef = doc(db, "users", user.uid);
+
   const friendsRef = collection(userRef, "friends");
-  const q = query(friendsRef);
+  const q = query(friendsRef, orderBy("displayName"));
 
   useEffect(() => {
     const unsubFriends = onSnapshot(q, (querySnapshot) => {
       setFriends(
         querySnapshot.docs.map((doc) => {
-          return { ...doc.data(), friendDocId: doc.id };
+          return { ...doc.data() };
         })
       );
     });
-
     return unsubFriends;
   }, []);
 
@@ -42,9 +50,18 @@ const ContactsListScreen = ({ navigation }) => {
           // onPress={() => alert("adding a new contact")}
           style={{ alignSelf: "center" }}
         >
-          <Ionicons name="ios-person-add" size={28} color="black" />
+          <Ionicons name="ios-person-add" size={28} color="#22a6b3" />
         </Pressable>
       </View>
+      {friends.length !== 0 && friends.length > 1 ? (
+        <Text style={{ paddingLeft: 5, fontSize: 22 }}>
+          {friends.length} friends
+        </Text>
+      ) : (
+        <Text style={{ paddingLeft: 5, fontSize: 22 }}>
+          {friends.length} friend
+        </Text>
+      )}
       <FlatList
         ItemSeparatorComponent={() => (
           <View

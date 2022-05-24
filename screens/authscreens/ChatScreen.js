@@ -33,20 +33,34 @@ import {
 import Message from "../../components/Message";
 
 const ChatScreen = ({ route }) => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState("");
   const [textInput, setTextInput] = useState("");
   const scrollViewRef = useRef();
 
   const user = auth.currentUser;
-  const userRef = doc(db, "users", user.uid);
-  const chatsRef = doc(userRef, "chats", route.params.chatId);
-  const messagesRef = collection(chatsRef, "messages");
-
-  // const friendRef = doc(db, "users", route.params.friendUserId);
+  const groupsRef = collection(db, "groups");
+  const chatsRef = collection(db, "chats");
+  const messagesRef = collection(chatsRef, route.params.groupId, "messages");
 
   const q = query(messagesRef, orderBy("createdAt"));
 
+  // useEffect(() => {
+  //   const unsubGroups = onSnapshot(qGroups, (snapshot) => {
+  //     setGroups(
+  //       snapshot.docs.map((doc) => {
+  //         return {
+  //           ...doc.data(),
+  //           groupId: doc.id,
+  //         };
+  //       })
+  //     );
+  //   });
+
+  //   return unsubGroups;
+  // }, []);
+
   useEffect(() => {
+    console.log("checking groupId from chat screen", route.params.groupId);
     const unsubMessages = onSnapshot(q, (snapshot) => {
       setMessages(
         snapshot.docs.map((doc) => {
@@ -65,67 +79,14 @@ const ChatScreen = ({ route }) => {
     scrollViewRef.current.scrollToEnd({ animating: true });
   };
 
-  // const sendMessagetoFriend = async () => {
-  //   try {
-  //     const friendRef = doc(db, "users", route.params.friendUserId);
-  //     const friendChatRef = doc(friendRef, "chats");
-  //     // const friendMessagesRef = collection(friendChatRef, "messages");
-  //     const friendChatCollRef = await addDoc(friendChatRef, {
-  //       friendDisplayName: user.displayName,
-  //       friendPhotoURL: user.photoURL,
-  //       friendUserId: user.uid,
-  //     }).then(async (friendChatCollRef) => {
-  //       const friendMessagesRef = collection(
-  //         doc(friendRef, "chats", friendChatCollRef.id),
-  //         "messages"
-  //       );
-  //       await addDoc(friendMessagesRef, {
-  //         message: textInput,
-  //         createdAt: serverTimestamp(),
-  //         userId: user.uid,
-  //         userDisplayName: user.displayName,
-  //         userPhotoURL: user.photoURL,
-  //       });
-  //     });
-  //   } catch (error) {
-  //     Alert.alert(error.code, error.message, { text: "Ok" });
-  //     console.error(
-  //       error.code,
-  //       "-- error adding message to friend ref --",
-  //       error.message
-  //     );
-  //   }
-  // };
-
   const handleSendMessage = async () => {
     try {
-      const friendRef = doc(db, "users", route.params.friendUserId);
-      const friendChatRef = collection(friendRef, "chats");
       await addDoc(messagesRef, {
         message: textInput,
+        senderDisplayName: user.displayName,
+        senderPhotoURL: user.photoURL,
+        senderUserId: user.uid,
         createdAt: serverTimestamp(),
-        userId: user.uid,
-        userDisplayName: user.displayName,
-        userPhotoURL: user.photoURL,
-      }).then(async () => {
-        const friendChatCollRef = await addDoc(friendChatRef, {
-          friendDisplayName: user.displayName,
-          friendPhotoURL: user.photoURL,
-          friendUserId: user.uid,
-        }).then(async (friendChatCollRef) => {
-          const friendMsgRef = collection(
-            friendChatRef,
-            "chats",
-            friendChatCollRef.id
-          );
-          await addDoc(friendMsgRef, {
-            message: textInput,
-            createdAt: serverTimestamp(),
-            userId: user.uid,
-            userDisplayName: user.displayName,
-            userPhotoURL: user.photoURL,
-          });
-        });
       });
       setTextInput("");
     } catch (error) {
@@ -133,24 +94,6 @@ const ChatScreen = ({ route }) => {
       console.error(error.code, "-- error sending message --", error.message);
     }
   };
-
-  // const handleSendMessage = async () => {
-  //   try {
-  //     await addDoc(messagesRef, {
-  //       message: textInput,
-  //       createdAt: serverTimestamp(),
-  //       userId: user.uid,
-  //       userDisplayName: user.displayName,
-  //       userPhotoURL: user.photoURL,
-  //     }).then(() => {
-  //       sendMessagetoFriend();
-  //     });
-  //     setTextInput("");
-  //   } catch (error) {
-  //     Alert.alert(error.code, error.message, { text: "Ok" });
-  //     console.error(error.code, "-- error sending message --", error.message);
-  //   }
-  // };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -165,12 +108,26 @@ const ChatScreen = ({ route }) => {
             scrollViewRef.current.scrollToEnd({ animated: true })
           }
         >
-          {messages.map((message, index) => (
-            <View key={message.messageId}>
-              <Message message={message} index={index} messages={messages} />
+          {messages.length !== 0 ? (
+            messages.map((message, index) => (
+              <View key={message.messageId}>
+                <Message message={message} index={index} messages={messages} />
+              </View>
+            ))
+          ) : (
+            <View style={{ marginTop: 80, alignItems: "center" }}>
+              <MaterialCommunityIcons
+                name="message-off"
+                size={60}
+                color="#bdc3c7"
+              />
+              <Text style={{ fontSize: 18, color: "#bdc3c7" }}>
+                No Messages
+              </Text>
             </View>
-          ))}
+          )}
         </ScrollView>
+
         <View style={styles.footer}>
           <TextInput
             placeholder="ChitChat"

@@ -67,7 +67,7 @@ const Message = ({ message, index, messages }) => {
       )}
       <View
         style={
-          user.uid === message.userId
+          user.uid === message.senderUserId
             ? {
                 alignSelf: "flex-end",
                 paddingHorizontal: 8,
@@ -80,7 +80,7 @@ const Message = ({ message, index, messages }) => {
               }
         }
       >
-        {user.uid === message.userId ? (
+        {user.uid === message.senderUserId ? (
           <View style={{ flexDirection: "row" }}>
             <View style={styles.messagesSent}>
               <Text style={{ color: "#fff", fontSize: 16 }}>
@@ -121,12 +121,12 @@ const Message = ({ message, index, messages }) => {
               <Avatar
                 size="small"
                 rounded
-                source={{ uri: message.userPhotoURL }}
+                source={{ uri: message.senderPhotoURL }}
               />
             </View>
             <View style={{ flexDirection: "column" }}>
               <Text style={{ paddingLeft: 10, color: "#95a5a6" }}>
-                {message.userDisplayName}
+                {message.senderDisplayName}
               </Text>
               <View style={styles.messagesReceived}>
                 <Text style={{ fontSize: 16 }}>{message.message}</Text>

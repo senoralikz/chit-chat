@@ -10,6 +10,7 @@ const AddContactScreen = () => {
   const [search, setSearch] = useState("");
   const [usersSearchResult, setUsersSearchResult] = useState([]);
   const [usersFiltered, setUsersFiltered] = useState([]);
+  const [friends, setFriends] = useState([]);
 
   const user = auth.currentUser;
   const usersCollRef = collection(db, "users");
@@ -21,6 +22,7 @@ const AddContactScreen = () => {
 
   useEffect(() => {
     gettingUsers();
+    gettingFriends();
   }, []);
 
   const gettingUsers = async () => {
@@ -31,6 +33,24 @@ const AddContactScreen = () => {
         usersSnapshot.push(doc.data());
       });
       setUsersSearchResult(usersSnapshot);
+    } catch (error) {
+      console.error(
+        error.code,
+        "-- error getting friends for add contact screen --",
+        error.message
+      );
+    }
+  };
+
+  const gettingFriends = async () => {
+    try {
+      const friendsCollRef = collection(db, "users", user.uid, "friends");
+      let friendsSnapshot = [];
+      const querySnapshot = await getDocs(friendsCollRef);
+      querySnapshot.forEach((doc) => {
+        friendsSnapshot.push(doc.data());
+      });
+      setFriends(friendsSnapshot);
     } catch (error) {
       console.error(
         error.code,
@@ -90,7 +110,9 @@ const AddContactScreen = () => {
           />
         )}
         data={usersFiltered}
-        renderItem={({ item }) => <AddFriendListItem user={item} />}
+        renderItem={({ item }) => (
+          <AddFriendListItem user={item} friends={friends} />
+        )}
         keyExtractor={(item) => item.userId}
         ListEmptyComponent={() => (
           <View style={{ marginTop: 80, alignItems: "center" }}>

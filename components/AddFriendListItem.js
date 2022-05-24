@@ -1,19 +1,38 @@
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Text, View, Pressable, Alert } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
 import { Ionicons } from "@expo/vector-icons";
 import { db, auth } from "../firebaseConfig";
-import { doc, collection, addDoc } from "firebase/firestore";
+import { doc, collection, setDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
-const AddFriendListItem = ({ user }) => {
+const AddFriendListItem = ({ user, friends }) => {
+  const [alreadyFriends, setAlreadyFriends] = useState(false);
+
   const userRef = doc(db, "users", auth.currentUser.uid);
   const friendsCollRef = collection(userRef, "friends");
 
+  useEffect(() => {
+    checkIfFriends();
+  }, [alreadyFriends]);
+
   const addFriend = async () => {
-    await addDoc(friendsCollRef, {
-      photoURL: user.photoURL,
-      displayName: user.displayName,
-      userId: user.userId,
-    });
+    try {
+      await setDoc(doc(friendsCollRef, user.userId), {
+        photoURL: user.photoURL,
+        displayName: user.displayName,
+        userId: user.userId,
+      });
+    } catch (error) {
+      console.error(error.code, "-- error adding friend --", error.message);
+    }
+  };
+
+  const checkIfFriends = () => {
+    {
+      friends &&
+        friends.some((friend) => friend.userId === user.userId) &&
+        setAlreadyFriends(true);
+    }
   };
 
   return (
@@ -37,11 +56,30 @@ const AddFriendListItem = ({ user }) => {
             {user.displayName}
           </ListItem.Title>
           <ListItem.Title>
-            <Pressable onPress={addFriend}>
-              <Ionicons name="add-circle" size={24} color="#22a6b3" />
+            <Pressable
+              onPress={
+                () =>
+                  Alert.alert(
+                    "El Bochinche",
+                    `You are gossiping with ${user.displayName}`,
+                    { text: "Ok" }
+                  )
+                // navigation.navigate("ChatScreen")
+              }
+              style={{ paddingRight: 20, paddingTop: 1 }}
+            >
+              <Ionicons name="chatbubble" size={28} color="#9b59b6" />
+            </Pressable>
+            <Pressable onPress={addFriend} disabled={alreadyFriends}>
+              <Ionicons
+                name="add-circle"
+                size={30}
+                color={alreadyFriends ? "#bdc3c7" : "#22a6b3"}
+              />
             </Pressable>
           </ListItem.Title>
         </View>
+        {alreadyFriends && <ListItem.Subtitle>Friend</ListItem.Subtitle>}
       </ListItem.Content>
     </ListItem>
   );
