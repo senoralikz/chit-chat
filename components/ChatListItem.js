@@ -9,13 +9,15 @@ import {
   deleteDoc,
   getDocs,
   orderBy,
+  updateDoc,
+  arrayRemove,
 } from "firebase/firestore";
 import { Avatar, ListItem, Button, Icon } from "react-native-elements";
 import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 
 const ChatListItem = ({ chat, navigation }) => {
-  const [lastMessage, setLastMessage] = useState("");
+  const [members, setMembers] = useState("");
 
   const user = auth.currentUser;
   const userRef = doc(db, "users", user.uid);
@@ -23,21 +25,15 @@ const ChatListItem = ({ chat, navigation }) => {
   const chatRef = doc(db, "chats", chat.groupId);
   const q = query(chatRef);
 
-  // useEffect(() => {
-  //   const unsubMessages = onSnapshot(q, (snapshot) => {
-  //     setLastMessage(snapshot.docs.map((doc) => doc.data()));
-  //   });
-
-  //   return unsubMessages;
-  // }, []);
-
-  // const lastMessageTime =
-  //   lastMessage &&
-  //   new Date(lastMessage[0]?.createdAt * 1000).toLocaleTimeString("en-US", {
-  //     hour: "numeric",
-  //     minute: "numeric",
-  //     hour12: true,
-  //   });
+  useEffect(() => {
+    setMembers(
+      chat.members.filter((member) => {
+        if (member.userId !== user.uid) {
+          return member;
+        }
+      })
+    );
+  }, []);
 
   const deleteMessagesColl = async () => {
     try {
@@ -59,7 +55,7 @@ const ChatListItem = ({ chat, navigation }) => {
 
   const deleteChatDoc = async () => {
     try {
-      await deleteDoc(chatRef);
+      await deleteDoc(groupRef);
       deleteMessagesColl();
     } catch (error) {
       Alert.alert(error.code, error.message, { text: "Ok" });
@@ -89,17 +85,16 @@ const ChatListItem = ({ chat, navigation }) => {
     <Swipeable renderRightActions={rightSwipeActions}>
       <ListItem
         onPress={() => {
-          // navigation.navigate("ChatScreen", {
-          //   chatId: chat.chatId,
-          //   friendUserId: chat.friendUserId,
-          //   friendDisplayName: chat.friendDisplayName,
-          //   friendPhotoURL: chat.friendPhotoURL,
-          //   // friends: chat.friends,
-          // });
-          alert("going to chat screen");
+          navigation.navigate("ChatScreen", {
+            groupId: chat.groupId,
+            friendUserId: members[0]?.userId,
+            friendDisplayName: members[0]?.displayName,
+            friendPhotoURL: members[0]?.photoURL,
+          });
+          // alert("going to chat screen");
         }}
       >
-        <Avatar size="medium" source={{ uri: chat.friendPhotoURL }} rounded />
+        <Avatar size="medium" source={{ uri: members[0]?.photoURL }} rounded />
         <ListItem.Content>
           <View
             style={{
@@ -109,15 +104,22 @@ const ChatListItem = ({ chat, navigation }) => {
             }}
           >
             <ListItem.Title style={{ fontWeight: "bold" }}>
-              {chat.members.join(", ")}
+              {members[0]?.displayName}
             </ListItem.Title>
-            {/* <ListItem.Title right={true} style={{ fontSize: 14 }}>
-              {lastMessageTime}
-            </ListItem.Title> */}
+            <ListItem.Title right={true} style={{ fontSize: 14 }}>
+              {new Date(chat.lastMessage?.createdAt * 1000).toLocaleTimeString(
+                "en-US",
+                {
+                  hour: "numeric",
+                  minute: "numeric",
+                  hour12: true,
+                }
+              )}
+            </ListItem.Title>
           </View>
-          {/* <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
-            {lastMessage && lastMessage[0]?.message}
-          </ListItem.Subtitle> */}
+          <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
+            {chat.lastMessage?.message}
+          </ListItem.Subtitle>
         </ListItem.Content>
         <ListItem.Chevron />
       </ListItem>

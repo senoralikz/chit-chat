@@ -11,11 +11,12 @@ import {
   View,
   Platform,
 } from "react-native";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import {
   addDoc,
   setDoc,
   doc,
+  deleteDoc,
   collection,
   query,
   onSnapshot,
@@ -23,16 +24,18 @@ import {
   orderBy,
   where,
   getDocs,
+  updateDoc,
 } from "firebase/firestore";
 import { auth, db } from "../../firebaseConfig";
 import {
   FontAwesome,
   MaterialCommunityIcons,
   AntDesign,
+  Ionicons,
 } from "@expo/vector-icons";
 import Message from "../../components/Message";
 
-const ChatScreen = ({ route }) => {
+const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
   const [messages, setMessages] = useState("");
   const [textInput, setTextInput] = useState("");
   const scrollViewRef = useRef();
@@ -43,21 +46,6 @@ const ChatScreen = ({ route }) => {
   const messagesRef = collection(chatsRef, route.params.groupId, "messages");
 
   const q = query(messagesRef, orderBy("createdAt"));
-
-  // useEffect(() => {
-  //   const unsubGroups = onSnapshot(qGroups, (snapshot) => {
-  //     setGroups(
-  //       snapshot.docs.map((doc) => {
-  //         return {
-  //           ...doc.data(),
-  //           groupId: doc.id,
-  //         };
-  //       })
-  //     );
-  //   });
-
-  //   return unsubGroups;
-  // }, []);
 
   useEffect(() => {
     console.log("checking groupId from chat screen", route.params.groupId);
@@ -75,6 +63,29 @@ const ChatScreen = ({ route }) => {
     return unsubMessages;
   }, []);
 
+  useEffect(
+    () =>
+      navigation.addListener("beforeRemove", async () => {
+        if (messages.length > 0) {
+          // If we don't have unsaved changes, then we don't need to do anything
+          return;
+        }
+        await deleteDoc(doc(groupsRef, route.params.groupId));
+        console.log("leaving chat screen");
+      }),
+    [navigation, messages]
+  );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <Pressable onPress={() => goBack()}>
+          <Ionicons name="chevron-back" size={32} color="#9b59b6" />
+        </Pressable>
+      ),
+    });
+  }, [navigation]);
+
   const onPressFunction = () => {
     scrollViewRef.current.scrollToEnd({ animating: true });
   };
@@ -87,6 +98,11 @@ const ChatScreen = ({ route }) => {
         senderPhotoURL: user.photoURL,
         senderUserId: user.uid,
         createdAt: serverTimestamp(),
+      }).then(async () => {
+        await updateDoc(doc(groupsRef, route.params.groupId), {
+          lastModified: serverTimestamp(),
+          lastMessage: { message: textInput, createdAt: serverTimestamp() },
+        });
       });
       setTextInput("");
     } catch (error) {
@@ -176,15 +192,4 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 30,
   },
-  // button: {
-  //   position: "absolute",
-  //   width: 50,
-  //   height: 50,
-  //   borderRadius: 50 / 2,
-  //   backgroundColor: "pink",
-  //   alignItems: "center",
-  //   justifyContent: "center",
-  //   right: 30,
-  //   bottom: 30,
-  // },
 });

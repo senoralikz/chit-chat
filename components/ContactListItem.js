@@ -12,6 +12,7 @@ import {
   where,
   onSnapshot,
   addDoc,
+  updateDoc,
 } from "firebase/firestore";
 
 const ContactListItem = ({ friend, navigation }) => {
@@ -78,9 +79,23 @@ const ContactListItem = ({ friend, navigation }) => {
     try {
       if (groups.length === 0) {
         const groupDoc = await addDoc(groupsRef, {
-          members: [user.uid, friend.userId],
+          members: [
+            {
+              userId: user.uid,
+              displayName: user.displayName,
+              photoURL: user.photoURL,
+            },
+            {
+              userId: friend.userId,
+              displayName: friend.displayName,
+              photoURL: friend.photoURL,
+            },
+          ],
         })
-          .then((groupDoc) => {
+          .then(async (groupDoc) => {
+            await updateDoc(doc(groupsRef, groupDoc.id), {
+              groupId: groupDoc.id,
+            });
             navigation.navigate("ChatScreen", {
               friendUserId: friend.userId,
               // groups,

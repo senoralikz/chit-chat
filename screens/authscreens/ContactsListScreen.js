@@ -53,7 +53,17 @@ const ContactsListScreen = ({ navigation }) => {
           <Ionicons name="ios-person-add" size={28} color="#22a6b3" />
         </Pressable>
       </View>
-      {friends.length !== 0 && friends.length > 1 ? (
+      {friends.length === 1 && (
+        <Text style={{ paddingLeft: 5, fontSize: 22 }}>
+          {friends.length} friend
+        </Text>
+      )}
+      {friends.length > 1 && (
+        <Text style={{ paddingLeft: 5, fontSize: 22 }}>
+          {friends.length} friends
+        </Text>
+      )}
+      {/* {friends.length !== 0 && friends.length > 1 ? (
         <Text style={{ paddingLeft: 5, fontSize: 22 }}>
           {friends.length} friends
         </Text>
@@ -61,7 +71,7 @@ const ContactsListScreen = ({ navigation }) => {
         <Text style={{ paddingLeft: 5, fontSize: 22 }}>
           {friends.length} friend
         </Text>
-      )}
+      )} */}
       <FlatList
         ItemSeparatorComponent={() => (
           <View

@@ -10,7 +10,14 @@ import {
   ScrollView,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig";
-import { collection, doc, query, where, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  query,
+  where,
+  onSnapshot,
+  orderBy,
+} from "firebase/firestore";
 import ChatListItem from "../../components/ChatListItem";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { Avatar } from "react-native-elements";
@@ -20,7 +27,15 @@ const ChatsListScreen = ({ navigation }) => {
 
   const user = auth.currentUser;
   const groupsRef = collection(db, "groups");
-  const q = query(groupsRef, where("members", "array-contains", user.uid));
+  const q = query(
+    groupsRef,
+    where("members", "array-contains", {
+      userId: user.uid,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+    }),
+    orderBy("lastModified", "desc")
+  );
 
   useEffect(() => {
     const unsubChatDetails = onSnapshot(q, (querySnapshot) => {
@@ -56,7 +71,7 @@ const ChatsListScreen = ({ navigation }) => {
         ItemSeparatorComponent={() => (
           <View
             style={{
-              width: "100%",
+              width: "90%",
               alignSelf: "center",
               borderBottomColor: "#dfe6e9",
               borderBottomWidth: 1,
