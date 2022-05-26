@@ -23,39 +23,43 @@ const ContactListItem = ({ friend, navigation }) => {
   const groupsRef = collection(db, "groups");
   const qGroups = query(
     groupsRef,
+    // where("members", "in", [
+    //   [user.uid, friend.userId],
+    //   [friend.userId, user.uid],
+    // ])
     where("members", "in", [
-      [user.uid, friend.userId],
-      [friend.userId, user.uid],
+      [
+        {
+          userId: user.uid,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        },
+        {
+          userId: friend.userId,
+          displayName: friend.displayName,
+          photoURL: friend.photoURL,
+        },
+      ],
+      [
+        {
+          userId: friend.userId,
+          displayName: friend.displayName,
+          photoURL: friend.photoURL,
+        },
+        {
+          userId: user.uid,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        },
+      ],
     ])
   );
 
   useEffect(() => {
-    console.log("user id is", user.uid);
-    console.log("friend id is", friend.userId);
+    // console.log("user id is", user.uid);
+    // console.log("friend id is", friend.userId);
 
     const unsubGroups = onSnapshot(qGroups, (snapshot) => {
-      //   const gettingGroups = snapshot.docs.map((doc) => {
-      //     console.log(
-      //       "checking doc data from contact list item",
-      //       doc.data(),
-      //       "and doc id is:",
-      //       doc.id
-      //     );
-      //     return {
-      //       ...doc.data(),
-      //       groupId: doc.id,
-      //     };
-      //   });
-
-      //   console.log("got these groups:", gettingGroups);
-
-      //   const filteredGroups = gettingGroups.find((group) => {
-      //     group.members === groupMembers;
-      //   });
-
-      //   console.log("filtered groups:", filteredGroups);
-      // });
-
       setGroups(
         snapshot.docs.map((doc) => {
           console.log(
@@ -79,6 +83,7 @@ const ContactListItem = ({ friend, navigation }) => {
     try {
       if (groups.length === 0) {
         const groupDoc = await addDoc(groupsRef, {
+          groupName: [],
           members: [
             {
               userId: user.uid,
@@ -93,6 +98,7 @@ const ContactListItem = ({ friend, navigation }) => {
           ],
         })
           .then(async (groupDoc) => {
+            console.log("new group id:", groupDoc.id);
             await updateDoc(doc(groupsRef, groupDoc.id), {
               groupId: groupDoc.id,
             });
