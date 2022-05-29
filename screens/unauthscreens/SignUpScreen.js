@@ -37,23 +37,25 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
   const [displayNameAvailable, setDisplayNameAvailable] = useState(true);
   const [pickedPhoto, setPickedPhoto] = useState("");
 
+  const usersRef = collection(db, "users");
+  const qEmail = query(usersRef, where("email", "==", email));
+  const qDisplayName = query(usersRef, where("displayName", "==", displayName));
+
   useEffect(() => {
-    const checkDisplayName = async () => {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("displayName", "==", displayName));
-      const querySnapshot = await getDocs(q);
-
-      querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        {
-          doc.data().displayName === displayName &&
-            setDisplayNameAvailable(false);
-        }
+    const unsubDisplayNames = onSnapshot(qDisplayName, (querySnapshot) => {
+      let userDisplayNames = [];
+      querySnapshot.docs.forEach((doc) => {
+        userDisplayNames.push(doc.data().displayName);
       });
-    };
 
-    checkDisplayName();
-    setDisplayNameAvailable(true);
+      if (userDisplayNames.length > 0) {
+        setDisplayNameAvailable(false);
+      } else {
+        setDisplayNameAvailable(true);
+      }
+    });
+
+    return unsubDisplayNames;
   }, [displayName]);
 
   const selectProfilePic = async () => {
@@ -74,22 +76,6 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
       console.error(error.code, "--- line 109 ----", error.message);
     }
   };
-
-  // const checkDisplayName = async (text) => {
-  //   setDisplayName(text);
-  //   let userName = displayName;
-  //   console.log("this is the display name:", userName);
-  //   const usersRef = collection(db, "users");
-  //   const q = query(usersRef, where("displayName", "==", displayName));
-  //   const querySnapshot = await getDocs(q);
-  // querySnapshot.forEach((doc) => {
-  //   // doc.data() is never undefined for query doc snapshots
-  //   {
-  //     doc.data().displayName === displayName &&
-  //       setDisplayNameAvailable(false);
-  //   }
-  // });
-  // };
 
   const addUserToCollection = async (user) => {
     try {
@@ -119,7 +105,6 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
     const img = await fetch(pickedPhoto);
     const bytes = await img.blob();
     await uploadBytes(imageRef, bytes).then(() => {
-      console.log("successfully uploaded picture");
       getDownloadURL(imageRef)
         .then((url) => {
           console.log(url);
@@ -160,10 +145,8 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               storage,
               "defaultUserImage/default-user-icon.jpeg"
             );
-            console.log(user.email, "has no default photo");
             getDownloadURL(defaultImageRef)
               .then((url) => {
-                // console.log("got default pic url", url);
                 updateProfile(user, {
                   photoURL: url,
                   displayName: displayName,
@@ -186,7 +169,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
           });
         })
         .catch((error) => {
-          console.log(
+          console.error(
             error.code,
             "--- trouble creating user ---",
             error.message

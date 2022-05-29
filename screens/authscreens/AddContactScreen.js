@@ -3,7 +3,14 @@ import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
 import { db, auth } from "../../firebaseConfig";
 import { SearchBar } from "react-native-elements";
 import { MaterialIcons } from "@expo/vector-icons";
-import { query, collection, where, getDocs, orderBy } from "firebase/firestore";
+import {
+  query,
+  collection,
+  where,
+  getDocs,
+  orderBy,
+  onSnapshot,
+} from "firebase/firestore";
 import AddFriendListItem from "../../components/AddFriendListItem";
 
 const AddContactScreen = () => {
@@ -21,44 +28,29 @@ const AddContactScreen = () => {
   );
 
   useEffect(() => {
-    gettingUsers();
-    gettingFriends();
+    const unsubUsers = onSnapshot(q, (querySnapshot) => {
+      setUsersSearchResult(
+        querySnapshot.docs.map((doc) => {
+          return { ...doc.data() };
+        })
+      );
+    });
+
+    return unsubUsers;
   }, []);
 
-  const gettingUsers = async () => {
-    try {
-      const querySnapshot = await getDocs(q);
-      let usersSnapshot = [];
-      querySnapshot.forEach((doc) => {
-        usersSnapshot.push(doc.data());
-      });
-      setUsersSearchResult(usersSnapshot);
-    } catch (error) {
-      console.error(
-        error.code,
-        "-- error getting friends for add contact screen --",
-        error.message
+  useEffect(() => {
+    const friendsRef = collection(db, "users", user.uid, "friends");
+    const unsubFriends = onSnapshot(friendsRef, (querySnapshot) => {
+      setFriends(
+        querySnapshot.docs.map((doc) => {
+          return { ...doc.data() };
+        })
       );
-    }
-  };
+    });
 
-  const gettingFriends = async () => {
-    try {
-      const friendsCollRef = collection(db, "users", user.uid, "friends");
-      let friendsSnapshot = [];
-      const querySnapshot = await getDocs(friendsCollRef);
-      querySnapshot.forEach((doc) => {
-        friendsSnapshot.push(doc.data());
-      });
-      setFriends(friendsSnapshot);
-    } catch (error) {
-      console.error(
-        error.code,
-        "-- error getting friends for add contact screen --",
-        error.message
-      );
-    }
-  };
+    return unsubFriends;
+  }, []);
 
   const searchFilterFunction = (text) => {
     // Check if searched text is not blank
@@ -111,7 +103,7 @@ const AddContactScreen = () => {
         )}
         data={usersFiltered}
         renderItem={({ item }) => (
-          <AddFriendListItem user={item} friends={friends} />
+          <AddFriendListItem user={item} currentFriends={friends} />
         )}
         keyExtractor={(item) => item.userId}
         ListEmptyComponent={() => (

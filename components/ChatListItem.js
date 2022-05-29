@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, Alert } from "react-native";
+import { StyleSheet, Text, View, Pressable, Alert, Button } from "react-native";
 import { useEffect, useState } from "react";
 import { auth, db } from "../firebaseConfig";
 import {
@@ -12,12 +12,13 @@ import {
   updateDoc,
   arrayRemove,
 } from "firebase/firestore";
-import { Avatar, ListItem, Button, Icon } from "react-native-elements";
+import { Avatar, ListItem, Icon } from "react-native-elements";
 import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 
 const ChatListItem = ({ chat, navigation }) => {
-  const [members, setMembers] = useState("");
+  const [members, setMembers] = useState([]);
+  const [membersInfo, setMembersInfo] = useState("");
 
   const user = auth.currentUser;
   const userRef = doc(db, "users", user.uid);
@@ -25,15 +26,61 @@ const ChatListItem = ({ chat, navigation }) => {
   const chatRef = doc(db, "chats", chat.groupId);
   const q = query(chatRef);
 
+  // const memberRef = doc(db, "users", members[0]);
+  // const qMembersInfo = query(memberRef);
+
+  // console.log("these are the members array:", members);
+  // console.log("these are the member id's:", members[0]);
+
   useEffect(() => {
-    setMembers(
-      chat.members.filter((member) => {
-        if (member.userId !== user.uid) {
-          return member;
-        }
-      })
-    );
+    let chatMember = [];
+
+    chat.members.forEach((member) => {
+      if (member !== user.uid) {
+        chatMember.push(member);
+      }
+    });
+
+    const memberID = chatMember[0];
+
+    console.log("this is it:", chatMember);
+    console.log("this is it:", chatMember[0]);
+
+    const memberRef = doc(db, "users", memberID);
+
+    const unsubMembersInfo = onSnapshot(memberRef, (doc) => {
+      console.log("Current data: ", doc.data());
+      setMembersInfo(() => {
+        return { ...doc.data() };
+      });
+    });
+
+    return unsubMembersInfo;
   }, []);
+
+  // useEffect(() => {
+  //   setMembers(
+  //     chat.members.filter((member) => {
+  //       if (member !== user.uid) {
+  //         return member;
+  //       }
+  //     })
+  //   );
+  // }, []);
+
+  // useEffect(() => {
+  //   if (members.length > 0) {
+  //     const unsubMembersInfo = onSnapshot(qMembersInfo, (querySnapshot) => {
+  //       setMembersInfo(
+  //         querySnapshot.docs.map((doc) => {
+  //           return { ...doc.data() };
+  //         })
+  //       );
+  //     });
+
+  //     return unsubMembersInfo;
+  //   }
+  // }, [members]);
 
   const deleteMessagesColl = async () => {
     try {
@@ -55,8 +102,8 @@ const ChatListItem = ({ chat, navigation }) => {
 
   const deleteChatDoc = async () => {
     try {
-      await deleteDoc(groupRef);
       deleteMessagesColl();
+      await deleteDoc(groupRef);
     } catch (error) {
       Alert.alert(error.code, error.message, { text: "Ok" });
       console.error(error.code, "-- error deleting chat --", error.message);
@@ -87,14 +134,14 @@ const ChatListItem = ({ chat, navigation }) => {
         onPress={() => {
           navigation.navigate("ChatScreen", {
             groupId: chat.groupId,
-            friendUserId: members[0]?.userId,
-            friendDisplayName: members[0]?.displayName,
-            friendPhotoURL: members[0]?.photoURL,
+            friendUserId: membersInfo?.userId,
+            friendDisplayName: membersInfo?.displayName,
+            friendPhotoURL: membersInfo?.photoURL,
           });
           // alert("going to chat screen");
         }}
       >
-        <Avatar size="medium" source={{ uri: members[0]?.photoURL }} rounded />
+        <Avatar size="medium" source={{ uri: membersInfo?.photoURL }} rounded />
         <ListItem.Content>
           <View
             style={{
@@ -104,7 +151,7 @@ const ChatListItem = ({ chat, navigation }) => {
             }}
           >
             <ListItem.Title style={{ fontWeight: "bold" }}>
-              {members[0]?.displayName}
+              {membersInfo?.displayName}
             </ListItem.Title>
             <ListItem.Title right={true} style={{ fontSize: 14 }}>
               {new Date(chat.lastMessage?.createdAt * 1000).toLocaleTimeString(
@@ -116,6 +163,14 @@ const ChatListItem = ({ chat, navigation }) => {
                 }
               )}
             </ListItem.Title>
+            {/* <Button
+              title="check members"
+              onPress={() => console.log("members in here", members)}
+            />
+            <Button
+              title="check members info"
+              onPress={() => console.log("members info", membersInfo)}
+            /> */}
           </View>
           <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
             {chat.lastMessage?.message}

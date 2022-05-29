@@ -3,7 +3,7 @@ import React from "react";
 import { auth } from "../firebaseConfig";
 import { Avatar } from "react-native-elements";
 
-const Message = ({ message, index, messages }) => {
+const Message = ({ message, index, messages, route }) => {
   const user = auth.currentUser;
 
   const formattedTime = new Date(message.createdAt * 1000).toLocaleTimeString(
@@ -33,28 +33,6 @@ const Message = ({ message, index, messages }) => {
     month: "short",
     day: "numeric",
   });
-
-  // const formattedTime = message.createdAt.toDate().toLocaleTimeString("en-US", {
-  //   hour: "numeric",
-  //   minute: "numeric",
-  //   hour12: true,
-  // });
-
-  // const newMsgDate = message.createdAt.toDate().toLocaleDateString("en-US", {
-  //   weekday: "short",
-  //   year: "numeric",
-  //   month: "short",
-  //   day: "numeric",
-  // });
-
-  // const prevMsgDate = messages[index - 1]?.createdAt
-  //   .toDate()
-  //   .toLocaleDateString("en-US", {
-  //     weekday: "short",
-  //     year: "numeric",
-  //     month: "short",
-  //     day: "numeric",
-  //   });
 
   return (
     <>
@@ -103,11 +81,7 @@ const Message = ({ message, index, messages }) => {
                 marginLeft: 3,
               }}
             >
-              <Avatar
-                size="small"
-                rounded
-                source={{ uri: message.userPhotoURL }}
-              />
+              <Avatar size="small" rounded source={{ uri: user.photoURL }} />
             </View> */}
           </View>
         ) : (
@@ -121,12 +95,12 @@ const Message = ({ message, index, messages }) => {
               <Avatar
                 size="small"
                 rounded
-                source={{ uri: message.senderPhotoURL }}
+                source={{ uri: route.params.friendPhotoURL }}
               />
             </View>
             <View style={{ flexDirection: "column" }}>
               <Text style={{ paddingLeft: 10, color: "#95a5a6" }}>
-                {message.senderDisplayName}
+                {route.params.friendDisplayName}
               </Text>
               <View style={styles.messagesReceived}>
                 <Text style={{ fontSize: 16 }}>{message.message}</Text>

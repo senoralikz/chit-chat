@@ -25,9 +25,7 @@ const ContactsListScreen = ({ navigation }) => {
 
   const user = auth.currentUser;
 
-  const userRef = doc(db, "users", user.uid);
-
-  const friendsRef = collection(userRef, "friends");
+  const friendsRef = collection(db, "users", user.uid, "friends");
   const q = query(friendsRef, orderBy("displayName"));
 
   useEffect(() => {
@@ -63,15 +61,6 @@ const ContactsListScreen = ({ navigation }) => {
           {friends.length} friends
         </Text>
       )}
-      {/* {friends.length !== 0 && friends.length > 1 ? (
-        <Text style={{ paddingLeft: 5, fontSize: 22 }}>
-          {friends.length} friends
-        </Text>
-      ) : (
-        <Text style={{ paddingLeft: 5, fontSize: 22 }}>
-          {friends.length} friend
-        </Text>
-      )} */}
       <FlatList
         ItemSeparatorComponent={() => (
           <View

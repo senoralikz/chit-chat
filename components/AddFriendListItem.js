@@ -5,15 +5,19 @@ import { db, auth } from "../firebaseConfig";
 import { doc, collection, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
-const AddFriendListItem = ({ user, friends }) => {
+const AddFriendListItem = ({ user, currentFriends }) => {
   const [alreadyFriends, setAlreadyFriends] = useState(false);
 
-  const userRef = doc(db, "users", auth.currentUser.uid);
-  const friendsCollRef = collection(userRef, "friends");
+  const friendsCollRef = collection(
+    db,
+    "users",
+    auth.currentUser.uid,
+    "friends"
+  );
 
   useEffect(() => {
     checkIfFriends();
-  }, [alreadyFriends]);
+  }, [currentFriends]);
 
   const addFriend = async () => {
     try {
@@ -29,8 +33,8 @@ const AddFriendListItem = ({ user, friends }) => {
 
   const checkIfFriends = () => {
     {
-      friends &&
-        friends.some((friend) => friend.userId === user.userId) &&
+      currentFriends &&
+        currentFriends.some((friend) => friend.userId === user.userId) &&
         setAlreadyFriends(true);
     }
   };
@@ -79,7 +83,9 @@ const AddFriendListItem = ({ user, friends }) => {
             </Pressable>
           </ListItem.Title>
         </View>
-        {alreadyFriends && <ListItem.Subtitle>Friend</ListItem.Subtitle>}
+        <ListItem.Subtitle>
+          {alreadyFriends && <Text>Friend</Text>}
+        </ListItem.Subtitle>
       </ListItem.Content>
     </ListItem>
   );

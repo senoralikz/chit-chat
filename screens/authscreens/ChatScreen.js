@@ -48,7 +48,7 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
   const q = query(messagesRef, orderBy("createdAt"));
 
   useEffect(() => {
-    console.log("checking groupId from chat screen", route.params.groupId);
+    // console.log("checking groupId from chat screen", route.params.groupId);
     const unsubMessages = onSnapshot(q, (snapshot) => {
       setMessages(
         snapshot.docs.map((doc) => {
@@ -92,18 +92,22 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
 
   const handleSendMessage = async () => {
     try {
-      await addDoc(messagesRef, {
+      const newMessage = await addDoc(messagesRef, {
         message: textInput,
-        senderDisplayName: user.displayName,
-        senderPhotoURL: user.photoURL,
         senderUserId: user.uid,
         createdAt: serverTimestamp(),
-      }).then(async () => {
-        await updateDoc(doc(groupsRef, route.params.groupId), {
-          lastModified: serverTimestamp(),
-          lastMessage: { message: textInput, createdAt: serverTimestamp() },
+      })
+        .then(async (newMessage) => {
+          await updateDoc(doc(messagesRef, newMessage.id), {
+            messageId: newMessage.id,
+          });
+        })
+        .then(async () => {
+          await updateDoc(doc(groupsRef, route.params.groupId), {
+            lastModified: serverTimestamp(),
+            lastMessage: { message: textInput, createdAt: serverTimestamp() },
+          });
         });
-      });
       setTextInput("");
     } catch (error) {
       Alert.alert(error.code, error.message, { text: "Ok" });
@@ -127,7 +131,12 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
           {messages.length !== 0 ? (
             messages.map((message, index) => (
               <View key={message.messageId}>
-                <Message message={message} index={index} messages={messages} />
+                <Message
+                  message={message}
+                  index={index}
+                  messages={messages}
+                  route={route}
+                />
               </View>
             ))
           ) : (
@@ -143,7 +152,6 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
             </View>
           )}
         </ScrollView>
-
         <View style={styles.footer}>
           <TextInput
             placeholder="ChitChat"

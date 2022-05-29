@@ -29,11 +29,7 @@ const ChatsListScreen = ({ navigation }) => {
   const groupsRef = collection(db, "groups");
   const q = query(
     groupsRef,
-    where("members", "array-contains", {
-      userId: user.uid,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-    }),
+    where("members", "array-contains", user.uid),
     orderBy("lastModified", "desc")
   );
 
@@ -41,7 +37,7 @@ const ChatsListScreen = ({ navigation }) => {
     const unsubChatDetails = onSnapshot(q, (querySnapshot) => {
       setChats(
         querySnapshot.docs.map((doc) => {
-          return { ...doc.data(), groupId: doc.id };
+          return { ...doc.data() };
         })
       );
     });
