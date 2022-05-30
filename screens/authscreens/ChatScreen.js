@@ -78,6 +78,9 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      title: route.params.groupName
+        ? route.params.groupName
+        : route.params.friendDisplayName,
       headerLeft: () => (
         <Pressable onPress={() => goBack()}>
           <Ionicons name="chevron-back" size={32} color="#9b59b6" />

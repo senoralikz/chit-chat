@@ -3,7 +3,7 @@ import ChatScreen from "../../screens/authScreens/ChatScreen";
 import ChatsListScreen from "../../screens/authScreens/ChatsListScreen";
 import AuthTabs from "./AuthTabs";
 import CreateChatScreen from "../../screens/authScreens/CreateChatScreen";
-import SelectChattersScreen from "../../screens/authScreens/SelectChattersScreen";
+import SelectChattersListScreen from "../../screens/authScreens/SelectChattersListScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -17,7 +17,7 @@ const ChatsStack = () => {
       />
       <Stack.Screen
         name="SelectChattersScreen"
-        component={SelectChattersScreen}
+        component={SelectChattersListScreen}
         options={{
           title: "Select Chatters",
           // headerTintColor: "#22a6b3",

@@ -56,8 +56,8 @@ const ChatsListScreen = ({ navigation }) => {
         />
         <Text style={{ fontSize: 36, fontWeight: "800" }}>Chats</Text>
         <Pressable
-          onPress={() => alert("creating a new chat")}
-          // onPress={() => navigation.navigate("SelectChattersScreen")}
+          // onPress={() => alert("creating a new chat")}
+          onPress={() => navigation.navigate("SelectChattersScreen")}
           style={{ alignSelf: "center" }}
         >
           <Ionicons name="create-outline" size={28} color="#22a6b3" />

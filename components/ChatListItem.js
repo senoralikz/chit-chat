@@ -8,6 +8,7 @@ import {
   onSnapshot,
   deleteDoc,
   getDocs,
+  where,
   orderBy,
   updateDoc,
   arrayRemove,
@@ -17,7 +18,7 @@ import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 
 const ChatListItem = ({ chat, navigation }) => {
-  const [members, setMembers] = useState([]);
+  const [memberNames, setMemberNames] = useState([]);
   const [membersInfo, setMembersInfo] = useState("");
 
   const user = auth.currentUser;
@@ -33,29 +34,37 @@ const ChatListItem = ({ chat, navigation }) => {
   // console.log("these are the member id's:", members[0]);
 
   useEffect(() => {
-    let chatMember = [];
+    // console.log("this is it:", chatMember);
+    // console.log("this is it:", chatMember[0]);
 
-    chat.members.forEach((member) => {
-      if (member !== user.uid) {
-        chatMember.push(member);
-      }
-    });
+    const membersRef = collection(db, "users");
+    const q = query(membersRef, where("userId", "in", chat.members));
+    // const memberRef = doc(db, "users", memberID);
 
-    const memberID = chatMember[0];
+    const unsubMessages = onSnapshot(q, (snapshot) => {
+      let gettingMemberInfo = [];
+      let gettingDisplayNames = [];
 
-    console.log("this is it:", chatMember);
-    console.log("this is it:", chatMember[0]);
-
-    const memberRef = doc(db, "users", memberID);
-
-    const unsubMembersInfo = onSnapshot(memberRef, (doc) => {
-      console.log("Current data: ", doc.data());
-      setMembersInfo(() => {
-        return { ...doc.data() };
+      snapshot.docs.forEach((doc) => {
+        if (doc.data().userId !== user.uid) {
+          gettingMemberInfo.push(doc.data());
+          gettingDisplayNames.push(doc.data().displayName);
+        }
       });
+      setMembersInfo(gettingMemberInfo);
+      setMemberNames(gettingDisplayNames);
     });
 
-    return unsubMembersInfo;
+    return unsubMessages;
+
+    // const unsubMembersInfo = onSnapshot(q, (doc) => {
+    //   // console.log("Current data: ", doc.data());
+    //   setMembersInfo(() => {
+    //     return { ...doc.data() };
+    //   });
+    // });
+
+    // return unsubMembersInfo;
   }, []);
 
   // useEffect(() => {
@@ -70,12 +79,12 @@ const ChatListItem = ({ chat, navigation }) => {
 
   // useEffect(() => {
   //   if (members.length > 0) {
-  //     const unsubMembersInfo = onSnapshot(qMembersInfo, (querySnapshot) => {
-  //       setMembersInfo(
-  //         querySnapshot.docs.map((doc) => {
-  //           return { ...doc.data() };
-  //         })
-  //       );
+  //     const memberRef = doc(db, "users", members[0]);
+  //     const unsubMembersInfo = onSnapshot(memberRef, (doc) => {
+  //       // console.log("Current data: ", doc.data());
+  //       setMembersInfo(() => {
+  //         return { ...doc.data() };
+  //       });
   //     });
 
   //     return unsubMembersInfo;
@@ -110,6 +119,26 @@ const ChatListItem = ({ chat, navigation }) => {
     }
   };
 
+  const goToChatScreen = () => {
+    if (membersInfo.length === 1) {
+      navigation.navigate("ChatScreen", {
+        groupId: chat.groupId,
+        groupName: chat.groupName,
+        friendUserId: membersInfo[0]?.userId,
+        friendDisplayName: membersInfo[0]?.displayName,
+        friendPhotoURL: membersInfo[0]?.photoURL,
+      });
+    } else {
+      navigation.navigate("ChatScreen", {
+        groupId: chat.groupId,
+        groupName: chat.groupName,
+        // friendUserId: membersInfo[0]?.userId,
+        friendDisplayName: membersInfo.length,
+        // friendPhotoURL: membersInfo[0]?.photoURL,
+      });
+    }
+  };
+
   const rightSwipeActions = () => {
     return (
       <Pressable onPress={deleteChatDoc}>
@@ -130,18 +159,34 @@ const ChatListItem = ({ chat, navigation }) => {
 
   return (
     <Swipeable renderRightActions={rightSwipeActions}>
-      <ListItem
-        onPress={() => {
-          navigation.navigate("ChatScreen", {
-            groupId: chat.groupId,
-            friendUserId: membersInfo?.userId,
-            friendDisplayName: membersInfo?.displayName,
-            friendPhotoURL: membersInfo?.photoURL,
-          });
-          // alert("going to chat screen");
-        }}
-      >
-        <Avatar size="medium" source={{ uri: membersInfo?.photoURL }} rounded />
+      <ListItem onPress={goToChatScreen}>
+        {membersInfo.length === 1 ? (
+          <Avatar
+            size="medium"
+            source={{ uri: membersInfo[0]?.photoURL }}
+            rounded
+          />
+        ) : (
+          <View
+            style={{
+              backgroundColor: "#bdc3c7",
+              height: 50,
+              width: 50,
+              borderRadius: 25,
+            }}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                textAlign: "center",
+                fontSize: 42,
+                paddingVertical: 3,
+              }}
+            >
+              {membersInfo.length}
+            </Text>
+          </View>
+        )}
         <ListItem.Content>
           <View
             style={{
@@ -151,7 +196,7 @@ const ChatListItem = ({ chat, navigation }) => {
             }}
           >
             <ListItem.Title style={{ fontWeight: "bold" }}>
-              {membersInfo?.displayName}
+              {memberNames.join(", ")}
             </ListItem.Title>
             <ListItem.Title right={true} style={{ fontSize: 14 }}>
               {new Date(chat.lastMessage?.createdAt * 1000).toLocaleTimeString(
@@ -165,7 +210,7 @@ const ChatListItem = ({ chat, navigation }) => {
             </ListItem.Title>
             {/* <Button
               title="check members"
-              onPress={() => console.log("members in here", members)}
+              onPress={() => console.log("members in here", memberNames)}
             />
             <Button
               title="check members info"

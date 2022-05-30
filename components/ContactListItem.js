@@ -29,32 +29,6 @@ const ContactListItem = ({ friend, navigation }) => {
       [user.uid, friend.userId],
       [friend.userId, user.uid],
     ])
-    // where("members", "in", [
-    //   [
-    //     {
-    //       userId: user.uid,
-    //       displayName: user.displayName,
-    //       photoURL: user.photoURL,
-    //     },
-    //     {
-    //       userId: friend.userId,
-    //       displayName: friend.displayName,
-    //       photoURL: friend.photoURL,
-    //     },
-    //   ],
-    //   [
-    //     {
-    //       userId: friend.userId,
-    //       displayName: friend.displayName,
-    //       photoURL: friend.photoURL,
-    //     },
-    //     {
-    //       userId: user.uid,
-    //       displayName: user.displayName,
-    //       photoURL: user.photoURL,
-    //     },
-    //   ],
-    // ])
   );
 
   useEffect(() => {
@@ -91,10 +65,41 @@ const ContactListItem = ({ friend, navigation }) => {
     return unsubFriendInfo;
   }, []);
 
+  useEffect(() => {
+    updateFriendInfo();
+  }, [friendInfo]);
+
+  const updateFriendInfo = async () => {
+    if (friendInfo) {
+      try {
+        const friendDocRef = doc(
+          db,
+          "users",
+          user.uid,
+          "friends",
+          friend.userId
+        );
+
+        // Set the "capital" field of the city 'DC'
+        await updateDoc(friendDocRef, {
+          displayName: friendInfo.displayName,
+          photoURL: friendInfo.photoURL,
+        });
+      } catch (error) {
+        console.error(
+          error.code,
+          "-- error updating friend info --",
+          error.message
+        );
+      }
+    }
+  };
+
   const goToChatScreen = async () => {
     try {
       if (groups.length === 0) {
         const groupDoc = await addDoc(groupsRef, {
+          groupName: "",
           members: [user.uid, friend.userId],
         })
           .then(async (groupDoc) => {
@@ -104,6 +109,8 @@ const ContactListItem = ({ friend, navigation }) => {
             });
             navigation.navigate("ChatScreen", {
               friendUserId: friend.userId,
+              friendPhotoURL: friend.photoURL,
+              friendDisplayName: friend.displayName,
               groupId: groupDoc.id,
             });
           })
@@ -117,7 +124,8 @@ const ContactListItem = ({ friend, navigation }) => {
       } else {
         navigation.navigate("ChatScreen", {
           friendUserId: friend.userId,
-          // groups,
+          friendPhotoURL: friend.photoURL,
+          friendDisplayName: friend.displayName,
           groupId: groups[0].groupId,
         });
       }

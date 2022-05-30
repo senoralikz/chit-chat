@@ -1,64 +1,52 @@
-import { StyleSheet, Text, View, Alert } from "react-native";
+import { Alert, Button, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState, useEffect } from "react";
 import { ListItem, Avatar } from "react-native-elements";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import Swipeable from "react-native-gesture-handler/Swipeable";
 import { auth, db } from "../firebaseConfig";
-import { doc, collection, addDoc } from "firebase/firestore";
+import {
+  doc,
+  deleteDoc,
+  collection,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+} from "firebase/firestore";
 
-const ChatFriendListItem = ({ friend, navigation }) => {
-  const handleCreateChat = async () => {
-    alert(`chatting with ${friend.friendDisplayName}`);
-    // try {
-    //   const user = auth.currentUser;
-    //   const userRef = doc(db, "users", user.uid);
-    //   const chatRef = collection(userRef, "chats");
-    //   // const chatRef = await addDoc(collection(userRef, "chats"), {
-    //   //   friendPhotoURL: friend.friendPhotoURL,
-    //   //   friendDisplayName: friend.friendDisplayName,
-    //   //   friendUserId: friend.friendUserId,
-    //   // });
-    //   const chatId = await addDoc(chatRef, {
-    //     friendPhotoURL: friend.friendPhotoURL,
-    //     friendDisplayName: friend.friendDisplayName,
-    //     friendUserId: friend.friendUserId,
-    //   });
-    //   navigation.navigate("ChatScreen", {
-    //     friendPhotoURL: friend.friendPhotoURL,
-    //     friendDisplayName: friend.friendDisplayName,
-    //     friendUserId: friend.friendUserId,
-    //     chatId: chatId.id,
-    //   });
-    // } catch (error) {
-    //   Alert.alert(error.code, error.message, { text: "Ok" });
-    //   console.error(
-    //     error.code,
-    //     "-- error creating chat room --",
-    //     error.message
-    //   );
-    // }
-  };
-
-  // const createChat = async () => {
-  //   try {
-  //     const user = auth.currentUser;
-  //     const userRef = doc(db, "users", user.uid);
-  //     const chatRef = collection(userRef, 'chats')
-  //     await addDoc(chatRef, {
-  //       friendPhotoURL: friend.friendPhotoURL,
-  //       friendDisplayName: friend.friendDisplayName,
-  //       friendUserId: friend.friendUserId,
-  //     })
-  //   }
-  // }
-
+const ContactListItem = ({ friend }) => {
   return (
-    <ListItem onPress={handleCreateChat}>
-      <Avatar size="medium" source={{ uri: friend.friendPhotoURL }} rounded />
+    <ListItem>
+      <Avatar size="medium" source={{ uri: friend.photoURL }} rounded />
       <ListItem.Content>
-        <ListItem.Title>{friend.friendDisplayName}</ListItem.Title>
+        <View
+          style={{
+            width: "100%",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <ListItem.Title
+            style={{
+              fontWeight: "bold",
+              fontSize: 18,
+            }}
+          >
+            {friend.displayName}
+          </ListItem.Title>
+          <ListItem.Title>
+            {/* <Pressable onPress={goToChatScreen}>
+                <Ionicons name="chatbubble" size={24} color="#9b59b6" />
+              </Pressable> */}
+          </ListItem.Title>
+        </View>
       </ListItem.Content>
     </ListItem>
   );
 };
 
-export default ChatFriendListItem;
+export default ContactListItem;
 
 const styles = StyleSheet.create({});
