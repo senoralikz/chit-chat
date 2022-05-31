@@ -53,8 +53,16 @@ const ChatsListScreen = ({ navigation }) => {
           size="small"
           rounded
           onPress={() => navigation.navigate("Profile")}
+          containerStyle={{ alignSelf: "center" }}
         />
-        <Text style={{ fontSize: 36, fontWeight: "800" }}>Chats</Text>
+        <Text
+          style={{
+            fontSize: 36,
+            fontWeight: "800",
+          }}
+        >
+          Chats
+        </Text>
         <Pressable
           // onPress={() => alert("creating a new chat")}
           onPress={() => navigation.navigate("SelectChattersScreen")}

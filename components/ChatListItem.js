@@ -13,13 +13,14 @@ import {
   updateDoc,
   arrayRemove,
 } from "firebase/firestore";
-import { Avatar, ListItem, Icon } from "react-native-elements";
+import { Avatar, ListItem, Icon, Badge } from "react-native-elements";
 import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 
 const ChatListItem = ({ chat, navigation }) => {
   const [memberNames, setMemberNames] = useState([]);
   const [membersInfo, setMembersInfo] = useState("");
+  const [numUnreadMsgs, setNumUnreadMsgs] = useState(0);
 
   const user = auth.currentUser;
   const userRef = doc(db, "users", user.uid);
@@ -27,16 +28,7 @@ const ChatListItem = ({ chat, navigation }) => {
   const chatRef = doc(db, "chats", chat.groupId);
   const q = query(chatRef);
 
-  // const memberRef = doc(db, "users", members[0]);
-  // const qMembersInfo = query(memberRef);
-
-  // console.log("these are the members array:", members);
-  // console.log("these are the member id's:", members[0]);
-
   useEffect(() => {
-    // console.log("this is it:", chatMember);
-    // console.log("this is it:", chatMember[0]);
-
     const membersRef = collection(db, "users");
     const q = query(membersRef, where("userId", "in", chat.members));
     // const memberRef = doc(db, "users", memberID);
@@ -56,40 +48,15 @@ const ChatListItem = ({ chat, navigation }) => {
     });
 
     return unsubMessages;
-
-    // const unsubMembersInfo = onSnapshot(q, (doc) => {
-    //   // console.log("Current data: ", doc.data());
-    //   setMembersInfo(() => {
-    //     return { ...doc.data() };
-    //   });
-    // });
-
-    // return unsubMembersInfo;
   }, []);
 
-  // useEffect(() => {
-  //   setMembers(
-  //     chat.members.filter((member) => {
-  //       if (member !== user.uid) {
-  //         return member;
-  //       }
-  //     })
-  //   );
-  // }, []);
-
-  // useEffect(() => {
-  //   if (members.length > 0) {
-  //     const memberRef = doc(db, "users", members[0]);
-  //     const unsubMembersInfo = onSnapshot(memberRef, (doc) => {
-  //       // console.log("Current data: ", doc.data());
-  //       setMembersInfo(() => {
-  //         return { ...doc.data() };
-  //       });
-  //     });
-
-  //     return unsubMembersInfo;
-  //   }
-  // }, [members]);
+  useEffect(() => {
+    if (!chat.lastMessage.isRead) {
+      setNumUnreadMsgs((prevState) => prevState + 1);
+    } else {
+      setNumUnreadMsgs(0);
+    }
+  }, [chat]);
 
   const deleteMessagesColl = async () => {
     try {
@@ -124,6 +91,8 @@ const ChatListItem = ({ chat, navigation }) => {
       navigation.navigate("ChatScreen", {
         groupId: chat.groupId,
         groupName: chat.groupName,
+        isRead: chat.lastMessage.isRead,
+        sentBy: chat.lastMessage.sentBy,
         friendUserId: membersInfo[0]?.userId,
         friendDisplayName: membersInfo[0]?.displayName,
         friendPhotoURL: membersInfo[0]?.photoURL,
@@ -132,6 +101,7 @@ const ChatListItem = ({ chat, navigation }) => {
       navigation.navigate("ChatScreen", {
         groupId: chat.groupId,
         groupName: chat.groupName,
+        isRead: chat.lastMessage.isRead,
         // friendUserId: membersInfo[0]?.userId,
         friendDisplayName: membersInfo.length,
         // friendPhotoURL: membersInfo[0]?.photoURL,
@@ -187,6 +157,23 @@ const ChatListItem = ({ chat, navigation }) => {
             </Text>
           </View>
         )}
+        <View style={{ position: "absolute", top: 13, left: 52 }}>
+          {chat.lastMessage.sentBy !== user.uid &&
+            !chat.lastMessage.isRead &&
+            numUnreadMsgs > 0 && (
+              <Badge
+                value={numUnreadMsgs > 9 ? "9+" : numUnreadMsgs}
+                textStyle={{ fontSize: 14 }}
+                badgeStyle={{
+                  width: 23,
+                  height: 23,
+                  borderRadius: 15,
+                  borderColor: "#fff",
+                  borderWidth: 2,
+                }}
+              />
+            )}
+        </View>
         <ListItem.Content>
           <View
             style={{

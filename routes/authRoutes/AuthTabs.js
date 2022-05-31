@@ -37,7 +37,7 @@ const AuthTabs = () => {
         component={ChatsListScreen}
         options={({ route }) => ({
           tabBarAccessibilityLabel: "Chats",
-          tabBarBadge: 3,
+          tabBarBadge: 9,
           tabBarIcon: ({ color }) => (
             <Ionicons name="ios-chatbubbles" size={28} color={color} />
           ),

@@ -65,7 +65,7 @@ const ContactsListScreen = ({ navigation }) => {
         ItemSeparatorComponent={() => (
           <View
             style={{
-              width: "100%",
+              width: "90%",
               alignSelf: "center",
               borderBottomColor: "#dfe6e9",
               borderBottomWidth: 1,

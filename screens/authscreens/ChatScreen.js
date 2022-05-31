@@ -76,6 +76,10 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
     [navigation, messages]
   );
 
+  useEffect(() => {
+    updateReadMessage();
+  }, []);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: route.params.groupName
@@ -93,6 +97,22 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
     scrollViewRef.current.scrollToEnd({ animating: true });
   };
 
+  const updateReadMessage = async () => {
+    if (route.params.sentBy !== user.uid) {
+      try {
+        await updateDoc(doc(groupsRef, route.params.groupId), {
+          "lastMessage.isRead": true,
+        });
+      } catch (error) {
+        console.error(
+          error.code,
+          "-- error updating last message to read --",
+          error.message
+        );
+      }
+    }
+  };
+
   const handleSendMessage = async () => {
     try {
       const newMessage = await addDoc(messagesRef, {
@@ -108,7 +128,12 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
         .then(async () => {
           await updateDoc(doc(groupsRef, route.params.groupId), {
             lastModified: serverTimestamp(),
-            lastMessage: { message: textInput, createdAt: serverTimestamp() },
+            lastMessage: {
+              message: textInput,
+              createdAt: serverTimestamp(),
+              isRead: false,
+              sentBy: user.uid,
+            },
           });
         });
       setTextInput("");
