@@ -5,7 +5,6 @@ import {
   View,
   Pressable,
   Image,
-  SafeAreaView,
   Button,
   FlatList,
   ScrollView,
@@ -23,6 +22,7 @@ import ChatListItem from "../../components/ChatListItem";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { Avatar } from "react-native-elements";
 import Toast from "react-native-toast-message";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const ChatsListScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
@@ -46,16 +46,6 @@ const ChatsListScreen = ({ navigation }) => {
 
     return unsubChatDetails;
   }, []);
-
-  const showToast = () => {
-    Toast.show({
-      type: "success",
-      text1: "Hello",
-      text2: "This is some something 👋",
-      // position: "bottom",
-      // bottomOffset: 90,
-    });
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -83,7 +73,6 @@ const ChatsListScreen = ({ navigation }) => {
           <Ionicons name="create-outline" size={28} color="#22a6b3" />
         </Pressable>
       </View>
-      <Button title="Show toast" onPress={showToast} />
       <FlatList
         ItemSeparatorComponent={() => (
           <View

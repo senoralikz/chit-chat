@@ -170,6 +170,7 @@ const ChatListItem = ({ chat, navigation }) => {
                   borderRadius: 15,
                   borderColor: "#fff",
                   borderWidth: 2,
+                  backgroundColor: "#9b59b6",
                 }}
               />
             )}

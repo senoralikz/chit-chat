@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, View, SafeAreaView } from "react-native";
 import { db, auth } from "../../firebaseConfig";
 import { SearchBar } from "react-native-elements";
 import { MaterialIcons } from "@expo/vector-icons";

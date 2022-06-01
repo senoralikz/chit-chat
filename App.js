@@ -13,6 +13,7 @@ import Toast, {
   ErrorToast,
   InfoToast,
 } from "react-native-toast-message";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function App() {
   const [user, setUser] = useState("");
@@ -80,12 +81,14 @@ export default function App() {
 
   return (
     <>
-      <NavigationContainer>
-        {!user ? <UnauthStack /> : <ChatsStack />}
-        {/* {!user ? <UnauthStack /> : <AuthTabs />} */}
-        <StatusBar style="auto" />
-      </NavigationContainer>
-      <Toast config={toastConfig} />
+      <SafeAreaProvider>
+        <NavigationContainer>
+          {!user ? <UnauthStack /> : <ChatsStack />}
+          {/* {!user ? <UnauthStack /> : <AuthTabs />} */}
+          <StatusBar style="auto" />
+        </NavigationContainer>
+        <Toast config={toastConfig} />
+      </SafeAreaProvider>
     </>
   );
 }

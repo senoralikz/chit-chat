@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -18,6 +17,7 @@ import {
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import { signOut, updateProfile } from "firebase/auth";
 import { auth, db, storage } from "../../firebaseConfig";
