@@ -24,6 +24,7 @@ import { auth, db, storage } from "../../firebaseConfig";
 import { Avatar } from "react-native-elements";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import Toast from "react-native-toast-message";
 
 const ProfileScreen = () => {
   const user = auth.currentUser;
@@ -31,9 +32,10 @@ const ProfileScreen = () => {
   const [pickedPhoto, setPickedPhoto] = useState("");
   const [email, setEmail] = useState(user.email);
   const [displayName, setDisplayName] = useState(user.displayName);
-  const [emailVerified, setEmailVerified] = useState("");
+  const [emailVerified, setEmailVerified] = useState(user.emailVerified);
   const [emailAvailable, setEmailAvailable] = useState(true);
   const [displayNameAvailable, setDisplayNameAvailable] = useState(true);
+  const [canSave, setCanSave] = useState(true);
 
   const usersRef = collection(db, "users");
   const qEmail = query(usersRef, where("email", "==", email));
@@ -77,6 +79,14 @@ const ProfileScreen = () => {
     return unsubDisplayNames;
   }, [displayName]);
 
+  // useEffect(() => {
+  //   if (email === user.email || displayName === user.displayName) {
+  //     setCanSave(true);
+  //   } else {
+  //     setCanSave(false);
+  //   }
+  // }, [email, displayName]);
+
   const selectProfilePic = async () => {
     try {
       // No permissions request is necessary for launching the image library
@@ -91,7 +101,10 @@ const ProfileScreen = () => {
         setPickedPhoto(result.uri);
       }
     } catch (error) {
-      Alert.alert(error.code, error.message, { text: "Ok" });
+      Toast.show({
+        type: "error",
+        text1: "Trouble selecting profile pic",
+      });
       console.error(
         error.code,
         "-- error selecting new profile pic --",
@@ -125,8 +138,13 @@ const ProfileScreen = () => {
               });
             })
             .then(() => {
-              Alert.alert("Success", "Profile was updated succesfully");
-              console.log("Profile was updated succesfully");
+              setPickedPhoto("");
+              Toast.show({
+                type: "success",
+                text1: "Success!",
+                text2: "Successfully updated profile",
+              });
+              // console.log("Profile was updated succesfully");
             });
         });
       });
@@ -136,20 +154,28 @@ const ProfileScreen = () => {
         "--- trouble signing up with profile pic ---",
         error.message
       );
-      Alert.alert("Sorry", "Error updating profile");
+      Toast.show({
+        type: "error",
+        text1: "Sorry!",
+        text1: "Trouble updating profile",
+      });
     }
   };
 
   const handleUpdateProfile = async () => {
     try {
       if (!email || !displayName) {
-        Alert.alert(
-          "Missing Info",
-          "Please make sure there is an email and display name.",
-          {
-            text: "Ok",
-          }
-        );
+        Toast.show({
+          type: "error",
+          text1: "Missing Info",
+          text2: "Please make sure there is an email and display name",
+        });
+      } else if (email !== user.email || displayName !== user.displayName) {
+        Toast.show({
+          type: "error",
+          text1: "Sorry!",
+          text1: "Trouble updating profile",
+        });
       } else {
         if (pickedPhoto) {
           updateWithProfilePic();
@@ -166,13 +192,21 @@ const ProfileScreen = () => {
               });
             })
             .then(() => {
-              Alert.alert("Success", "Profile was updated succesfully");
-              console.log("Profile was updated succesfully");
+              Toast.show({
+                type: "info",
+                text1: "Sorry",
+                text2: "No changes to be saved",
+              });
+              // console.log("Profile was updated succesfully");
             });
         }
       }
     } catch (error) {
-      Alert.alert("Sorry", "Was not able to update profile");
+      Toast.show({
+        type: "error",
+        text1: "Sorry!",
+        text1: "Trouble updating profile",
+      });
       console.error(error.code, "-- error updating profile --", error.message);
     }
   };
@@ -249,7 +283,7 @@ const ProfileScreen = () => {
           )}
           <View style={styles.credentialInputView}>
             <Text style={styles.credentialPropertyText}>Email Verified: </Text>
-            {user.emailVerified ? (
+            {emailVerified ? (
               <Text style={styles.credentialPropertyText}>Yes</Text>
             ) : (
               <Text style={styles.credentialPropertyText}>No</Text>
@@ -259,8 +293,18 @@ const ProfileScreen = () => {
         <View style={{ alignItems: "center" }}>
           <Pressable
             onPress={handleUpdateProfile}
+            // style={
+            //   email === user.email || displayName === user.displayName
+            //     ? styles.disabledSignUpBtn
+            //     : styles.signUpBtn
+            // }
+            // disabled={
+            //   email === user.email || displayName === user.displayName
+            //     ? true
+            //     : false
+            // }
             style={
-              !emailAvailable || !displayNameAvailable
+              !displayNameAvailable || !emailAvailable
                 ? styles.disabledSignUpBtn
                 : styles.signUpBtn
             }
