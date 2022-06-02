@@ -34,10 +34,13 @@ import {
   Ionicons,
 } from "@expo/vector-icons";
 import Message from "../../components/Message";
+import { Button } from "react-native-elements";
+import Toast from "react-native-toast-message";
 
 const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
-  const [messages, setMessages] = useState("");
+  const [messages, setMessages] = useState(route.params.messages || []);
   const [textInput, setTextInput] = useState("");
+  const [unreadMsgs, setUnreadMsgs] = useState(0);
   const scrollViewRef = useRef();
 
   const user = auth.currentUser;
@@ -63,6 +66,49 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
     return unsubMessages;
   }, []);
 
+  // useEffect(() => {
+  //   readMsgs();
+  // }, []);
+
+  const readMsgs = async () => {
+    // const qMsgs = query(messagesRef, where('readBy', 'array-contains', {'readMsg': false,'user': user.uid }))
+    let readMsg = [];
+    messages.forEach((message) => {
+      message.readBy.filter((reading) => {
+        if (reading.readMsg === false && reading.userId === user.uid) {
+          readMsg.push(message);
+        }
+      });
+    });
+
+    console.log("unread msgs:", readMsg);
+
+    readMsg.forEach((unreadMsg) => {
+      console.log("reading msg:", unreadMsg.messageId);
+      unreadMsg.readBy.forEach(async (reading) => {
+        try {
+          console.log("reading user ID:", reading.userId);
+          if (reading.userId === user.uid) {
+            console.log("reading msg id again:", unreadMsg.messageId);
+            await updateDoc(messagesRef, unreadMsg.messageId, {
+              "reading.readMsg": true,
+            });
+          }
+        } catch (error) {
+          console.error(
+            error.code,
+            "-- trouble setting message to read --",
+            code.message
+          );
+          Toast.show({
+            type: "error",
+            text1: "Trouble setting message to read",
+          });
+        }
+      });
+    });
+  };
+
   useEffect(
     () =>
       navigation.addListener("beforeRemove", async () => {
@@ -75,10 +121,6 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
       }),
     [navigation, messages]
   );
-
-  useEffect(() => {
-    updateReadMessage();
-  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -97,27 +139,28 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
     scrollViewRef.current.scrollToEnd({ animating: true });
   };
 
-  const updateReadMessage = async () => {
-    if (route.params.sentBy !== user.uid) {
-      try {
-        await updateDoc(doc(groupsRef, route.params.groupId), {
-          "lastMessage.isRead": true,
-        });
-      } catch (error) {
-        console.error(
-          error.code,
-          "-- error updating last message to read --",
-          error.message
-        );
-      }
-    }
-  };
+  // const membersRead = () => {
+  //   const msgRead = [];
+  //   route.params.groupMembers.forEach((member) => {
+  //     if (member !== user.uid) {
+  //       msgRead.push({ member, readMsg: false });
+  //     }
+  //   });
+  //   console.log("they read the message", msgRead);
+  // };
 
   const handleSendMessage = async () => {
     try {
+      let isMsgRead = [];
+      route.params.groupMembers.forEach((member) => {
+        if (member !== user.uid) {
+          isMsgRead.push({ userId: member, readMsg: false });
+        }
+      });
       const newMessage = await addDoc(messagesRef, {
         message: textInput,
         senderUserId: user.uid,
+        readBy: isMsgRead,
         createdAt: serverTimestamp(),
       })
         .then(async (newMessage) => {
@@ -131,14 +174,17 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
             lastMessage: {
               message: textInput,
               createdAt: serverTimestamp(),
-              isRead: false,
               sentBy: user.uid,
             },
           });
         });
       setTextInput("");
     } catch (error) {
-      Alert.alert(error.code, error.message, { text: "Ok" });
+      Toast.show({
+        type: "error",
+        text1: "Sorry!",
+        text2: "Trouble sending the message",
+      });
       console.error(error.code, "-- error sending message --", error.message);
     }
   };
@@ -180,6 +226,10 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
             </View>
           )}
         </ScrollView>
+        {/* <Button
+          title="read msgs"
+          onPress={() => console.log(route.params.groupMembers)}
+        /> */}
         <View style={styles.footer}>
           <TextInput
             placeholder="ChitChat"

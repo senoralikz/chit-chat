@@ -18,22 +18,23 @@ import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 
 const ChatListItem = ({ chat, navigation }) => {
+  const [messages, setMessages] = useState("");
+  const [unreadMsgs, setUnreadMsgs] = useState(0);
   const [memberNames, setMemberNames] = useState([]);
   const [membersInfo, setMembersInfo] = useState("");
-  const [numUnreadMsgs, setNumUnreadMsgs] = useState(0);
 
   const user = auth.currentUser;
-  const userRef = doc(db, "users", user.uid);
+  // const userRef = doc(db, "users", user.uid);
   const groupRef = doc(db, "groups", chat.groupId);
   const chatRef = doc(db, "chats", chat.groupId);
-  const q = query(chatRef);
+  // const q = query(chatRef);
 
   useEffect(() => {
     const membersRef = collection(db, "users");
     const q = query(membersRef, where("userId", "in", chat.members));
     // const memberRef = doc(db, "users", memberID);
 
-    const unsubMessages = onSnapshot(q, (snapshot) => {
+    const unsubMembers = onSnapshot(q, (snapshot) => {
       let gettingMemberInfo = [];
       let gettingDisplayNames = [];
 
@@ -47,16 +48,28 @@ const ChatListItem = ({ chat, navigation }) => {
       setMemberNames(gettingDisplayNames);
     });
 
-    return unsubMessages;
+    return unsubMembers;
   }, []);
 
   useEffect(() => {
-    if (!chat.lastMessage.isRead) {
-      setNumUnreadMsgs((prevState) => prevState + 1);
-    } else {
-      setNumUnreadMsgs(0);
-    }
-  }, [chat]);
+    const chatsRef = collection(db, "chats");
+    const messagesRef = collection(chatsRef, chat.groupId, "messages");
+
+    const q = query(messagesRef, orderBy("createdAt"));
+    // console.log("checking groupId from chat screen", route.params.groupId);
+    const unsubMessages = onSnapshot(q, (snapshot) => {
+      setMessages(
+        snapshot.docs.map((doc) => {
+          return {
+            ...doc.data(),
+            messageId: doc.id,
+          };
+        })
+      );
+    });
+
+    return unsubMessages;
+  }, []);
 
   const deleteMessagesColl = async () => {
     try {
@@ -89,9 +102,10 @@ const ChatListItem = ({ chat, navigation }) => {
   const goToChatScreen = () => {
     if (membersInfo.length === 1) {
       navigation.navigate("ChatScreen", {
+        messages: messages,
         groupId: chat.groupId,
         groupName: chat.groupName,
-        isRead: chat.lastMessage.isRead,
+        groupMembers: chat.members,
         sentBy: chat.lastMessage.sentBy,
         friendUserId: membersInfo[0]?.userId,
         friendDisplayName: membersInfo[0]?.displayName,
@@ -101,7 +115,7 @@ const ChatListItem = ({ chat, navigation }) => {
       navigation.navigate("ChatScreen", {
         groupId: chat.groupId,
         groupName: chat.groupName,
-        isRead: chat.lastMessage.isRead,
+        groupMembers: chat.members,
         // friendUserId: membersInfo[0]?.userId,
         friendDisplayName: membersInfo.length,
         // friendPhotoURL: membersInfo[0]?.photoURL,
@@ -157,7 +171,7 @@ const ChatListItem = ({ chat, navigation }) => {
             </Text>
           </View>
         )}
-        <View style={{ position: "absolute", top: 13, left: 52 }}>
+        {/* <View style={{ position: "absolute", top: 13, left: 52 }}>
           {chat.lastMessage.sentBy !== user.uid &&
             !chat.lastMessage.isRead &&
             numUnreadMsgs > 0 && (
@@ -174,7 +188,7 @@ const ChatListItem = ({ chat, navigation }) => {
                 }}
               />
             )}
-        </View>
+        </View> */}
         <ListItem.Content>
           <View
             style={{

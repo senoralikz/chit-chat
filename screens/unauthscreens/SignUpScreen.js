@@ -6,8 +6,8 @@ import {
   KeyboardAvoidingView,
   Alert,
   Pressable,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
@@ -214,31 +214,25 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
       >
         <Pressable onPress={selectProfilePic}>
           {!pickedPhoto ? (
-            <View>
+            <>
               <Avatar
                 source={require("../../assets/default-user-icon.jpeg")}
                 size={150}
                 rounded
               />
-              <Ionicons
-                name="add-circle"
-                size={30}
-                color="green"
-                style={styles.removeAddPhotoBtn}
-              />
-            </View>
+              <View style={styles.removeAddPhotoBtn}>
+                <Ionicons name="add-circle" size={34} color="green" />
+              </View>
+            </>
           ) : (
-            <View>
+            <>
               <Avatar source={{ uri: pickedPhoto }} size={150} rounded />
-              <Pressable onPress={() => setPickedPhoto("")}>
-                <Ionicons
-                  name="remove-circle"
-                  size={30}
-                  color="tomato"
-                  style={styles.removeAddPhotoBtn}
-                />
-              </Pressable>
-            </View>
+              <View style={styles.removeAddPhotoBtn}>
+                <Pressable onPress={() => setPickedPhoto("")}>
+                  <Ionicons name="remove-circle" size={34} color="tomato" />
+                </Pressable>
+              </View>
+            </>
           )}
         </Pressable>
         <View>
@@ -384,6 +378,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 5,
+    width: 34,
+    height: 34,
+    borderRadius: 20,
+    backgroundColor: "#fff",
   },
   credentialInput: {
     flexDirection: "row",

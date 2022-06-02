@@ -157,7 +157,7 @@ const ProfileScreen = () => {
       Toast.show({
         type: "error",
         text1: "Sorry!",
-        text1: "Trouble updating profile",
+        text2: "Trouble updating profile",
       });
     }
   };
@@ -170,11 +170,11 @@ const ProfileScreen = () => {
           text1: "Missing Info",
           text2: "Please make sure there is an email and display name",
         });
-      } else if (email !== user.email || displayName !== user.displayName) {
+      } else if (email === user.email && displayName === user.displayName) {
         Toast.show({
-          type: "error",
-          text1: "Sorry!",
-          text1: "Trouble updating profile",
+          type: "info",
+          text1: "Sorry",
+          text2: "No changes to be saved",
         });
       } else {
         if (pickedPhoto) {
@@ -193,9 +193,9 @@ const ProfileScreen = () => {
             })
             .then(() => {
               Toast.show({
-                type: "info",
-                text1: "Sorry",
-                text2: "No changes to be saved",
+                type: "success",
+                text1: "Success!",
+                text2: "Successfully updated profile",
               });
               // console.log("Profile was updated succesfully");
             });
@@ -222,24 +222,18 @@ const ProfileScreen = () => {
             <>
               <Avatar source={{ uri: user.photoURL }} size={150} rounded />
               <Pressable onPress={selectProfilePic}>
-                <Ionicons
-                  name="add-circle"
-                  size={34}
-                  color="green"
-                  style={styles.removeAddPhotoBtn}
-                />
+                <View style={styles.removeAddPhotoBtn}>
+                  <Ionicons name="add-circle" size={34} color="green" />
+                </View>
               </Pressable>
             </>
           ) : (
             <>
               <Avatar source={{ uri: pickedPhoto }} size={150} rounded />
               <Pressable onPress={() => setPickedPhoto("")}>
-                <Ionicons
-                  name="remove-circle"
-                  size={34}
-                  color="tomato"
-                  style={styles.removeAddPhotoBtn}
-                />
+                <View style={styles.removeAddPhotoBtn}>
+                  <Ionicons name="remove-circle" size={34} color="tomato" />
+                </View>
               </Pressable>
             </>
           )}
@@ -353,6 +347,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: -75,
+    width: 34,
+    height: 34,
+    borderRadius: 20,
+    backgroundColor: "#fff",
   },
   settingsBodyView: {
     // justifyContent: "center",

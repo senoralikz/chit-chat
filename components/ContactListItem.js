@@ -111,6 +111,7 @@ const ContactListItem = ({ friend, navigation }) => {
               friendUserId: friend.userId,
               friendPhotoURL: friend.photoURL,
               friendDisplayName: friend.displayName,
+              groupMembers: [user.uid, friend.userId],
               groupId: groupDoc.id,
             });
           })
@@ -126,6 +127,7 @@ const ContactListItem = ({ friend, navigation }) => {
           friendUserId: friend.userId,
           friendPhotoURL: friend.photoURL,
           friendDisplayName: friend.displayName,
+          groupMembers: [user.uid, friend.userId],
           groupId: groups[0].groupId,
         });
       }

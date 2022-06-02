@@ -22,38 +22,55 @@ export default function App() {
     success: (props) => (
       <BaseToast
         {...props}
-        style={{ borderLeftColor: "green", width: "95%" }}
+        style={{
+          borderLeftColor: "#6ab04c",
+          width: "95%",
+          backgroundColor: "#6ab04c",
+        }}
         contentContainerStyle={{ paddingHorizontal: 15 }}
         text1Style={{
           fontSize: 20,
-          fontWeight: "400",
+          color: "#fff",
         }}
         text2Style={{
           fontSize: 15,
+          color: "#fff",
         }}
       />
     ),
     error: (props) => (
       <ErrorToast
         {...props}
-        style={{ borderLeftColor: "red", width: "95%" }}
+        style={{
+          borderLeftColor: "#eb4d4b",
+          width: "95%",
+          backgroundColor: "#eb4d4b",
+        }}
         text1Style={{
           fontSize: 20,
+          color: "#fff",
         }}
         text2Style={{
           fontSize: 15,
+          color: "#fff",
         }}
       />
     ),
     info: (props) => (
       <InfoToast
         {...props}
-        style={{ borderLeftColor: "gold", width: "95%" }}
+        style={{
+          borderLeftColor: "#feca57",
+          width: "95%",
+          backgroundColor: "#feca57",
+        }}
         text1Style={{
           fontSize: 20,
+          color: "#fff",
         }}
         text2Style={{
           fontSize: 15,
+          color: "#fff",
         }}
       />
     ),
