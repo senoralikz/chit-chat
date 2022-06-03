@@ -18,6 +18,7 @@ import {
 const ContactListItem = ({ friend, navigation }) => {
   const [friendInfo, setFriendInfo] = useState("");
   const [groups, setGroups] = useState("");
+  const [unreadMsgs, setUnreadMsgs] = useState([]);
 
   const user = auth.currentUser;
 
@@ -69,6 +70,31 @@ const ContactListItem = ({ friend, navigation }) => {
     updateFriendInfo();
   }, [friendInfo]);
 
+  useEffect(() => {
+    if (groups.length > 0) {
+      const chatsRef = collection(db, "chats");
+      const messagesRef = collection(chatsRef, groups[0].groupId, "messages");
+
+      const q = query(
+        messagesRef,
+        where("readBy", "array-contains", { readMsg: false, userId: user.uid })
+      );
+      // console.log("checking groupId from chat screen", route.params.groupId);
+      const unsubUnreadMsgs = onSnapshot(q, (snapshot) => {
+        setUnreadMsgs(
+          snapshot.docs.map((doc) => {
+            return {
+              ...doc.data(),
+              messageId: doc.id,
+            };
+          })
+        );
+      });
+
+      return unsubUnreadMsgs;
+    }
+  }, [groups]);
+
   const updateFriendInfo = async () => {
     if (friendInfo) {
       try {
@@ -113,6 +139,7 @@ const ContactListItem = ({ friend, navigation }) => {
               friendDisplayName: friend.displayName,
               groupMembers: [user.uid, friend.userId],
               groupId: groupDoc.id,
+              unreadMsgs: unreadMsgs,
             });
           })
           .catch((error) =>
@@ -129,6 +156,7 @@ const ContactListItem = ({ friend, navigation }) => {
           friendDisplayName: friend.displayName,
           groupMembers: [user.uid, friend.userId],
           groupId: groups[0].groupId,
+          unreadMsgs: unreadMsgs,
         });
       }
     } catch (error) {

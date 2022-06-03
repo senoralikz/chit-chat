@@ -26,6 +26,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const ChatsListScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
+  const [totalUnreadMsgs, setTotalUnreadMsgs] = useState(0);
 
   const user = auth.currentUser;
   const groupsRef = collection(db, "groups");
