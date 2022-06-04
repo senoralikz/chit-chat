@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Pressable, Alert, Button } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { auth, db } from "../firebaseConfig";
 import {
   doc,
@@ -16,11 +16,13 @@ import {
 import { Avatar, ListItem, Icon, Badge } from "react-native-elements";
 import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
+import { UnreadMsgContext } from "../context/UnreadMsgContext";
 
-const ChatListItem = ({ chat, navigation, totalUnreadMessagesLength }) => {
+const ChatListItem = ({ chat, navigation }) => {
   const [unreadMsgs, setUnreadMsgs] = useState([]);
   const [memberNames, setMemberNames] = useState([]);
   const [membersInfo, setMembersInfo] = useState("");
+  const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
 
   const user = auth.currentUser;
   // const userRef = doc(db, "users", user.uid);
@@ -72,6 +74,10 @@ const ChatListItem = ({ chat, navigation, totalUnreadMessagesLength }) => {
 
     return unsubUnreadMsgs;
   }, []);
+
+  useEffect(() => {
+    setTotalUnreadMsgs((prevState) => prevState + unreadMsgs.length);
+  }, [unreadMsgs]);
 
   const deleteMessagesColl = async () => {
     try {

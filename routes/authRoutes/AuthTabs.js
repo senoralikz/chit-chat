@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import ChatsStack from "./ChatsStack";
 import ContactsStack from "./ContactsStack";
 import ProfileScreen from "../../screens/authScreens/ProfileScreen";
 import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import ChatsListScreen from "../../screens/authScreens/ChatsListScreen";
+import { UnreadMsgContext } from "../../context/UnreadMsgContext";
 
 const Tab = createBottomTabNavigator();
 
 const AuthTabs = () => {
+  const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
+
   return (
     <Tab.Navigator
       initialRouteName="ChatsTab"
@@ -25,13 +27,16 @@ const AuthTabs = () => {
       <Tab.Screen
         name="ChatsTab"
         component={ChatsListScreen}
-        options={({ route }) => ({
+        options={{
           tabBarAccessibilityLabel: "Chats",
-          tabBarBadge: 9,
+          tabBarBadge: totalUnreadMsgs,
+          // tabBarBadge: () => {
+          //   totalUnreadMsgs.length > 0 && totalUnreadMsgs.length;
+          // },
           tabBarIcon: ({ color }) => (
             <Ionicons name="ios-chatbubbles" size={28} color={color} />
           ),
-        })}
+        }}
       />
       <Tab.Screen
         name="ContactsTab"

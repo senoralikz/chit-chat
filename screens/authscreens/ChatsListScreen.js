@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -23,10 +23,11 @@ import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { Avatar } from "react-native-elements";
 import Toast from "react-native-toast-message";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { UnreadMsgContext } from "../../context/UnreadMsgContext";
 
 const ChatsListScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
-  const [totalUnreadMsgs, setTotalUnreadMsgs] = useState(0);
+  const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
 
   const user = auth.currentUser;
   const groupsRef = collection(db, "groups");

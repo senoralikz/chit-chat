@@ -6,7 +6,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import UnauthStack from "./routes/unauthRoutes/UnauthStack";
 import AuthTabs from "./routes/authRoutes/AuthTabs";
-import { UserContext } from "./context/UserContext";
+import { UnreadMsgContext } from "./context/UnreadMsgContext";
 import ChatsStack from "./routes/authRoutes/ChatsStack";
 import Toast, {
   BaseToast,
@@ -17,6 +17,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function App() {
   const [user, setUser] = useState("");
+  const [totalUnreadMsgs, setTotalUnreadMsgs] = useState(0);
 
   const toastConfig = {
     success: (props) => (
@@ -98,14 +99,18 @@ export default function App() {
 
   return (
     <>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          {!user ? <UnauthStack /> : <ChatsStack />}
-          {/* {!user ? <UnauthStack /> : <AuthTabs />} */}
-          <StatusBar style="auto" />
-        </NavigationContainer>
-        <Toast config={toastConfig} />
-      </SafeAreaProvider>
+      <UnreadMsgContext.Provider
+        value={{ totalUnreadMsgs, setTotalUnreadMsgs }}
+      >
+        <SafeAreaProvider>
+          <NavigationContainer>
+            {!user ? <UnauthStack /> : <ChatsStack />}
+            {/* {!user ? <UnauthStack /> : <AuthTabs />} */}
+            <StatusBar style="auto" />
+          </NavigationContainer>
+          <Toast config={toastConfig} />
+        </SafeAreaProvider>
+      </UnreadMsgContext.Provider>
     </>
   );
 }
