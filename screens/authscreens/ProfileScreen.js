@@ -79,14 +79,6 @@ const ProfileScreen = () => {
     return unsubDisplayNames;
   }, [displayName]);
 
-  // useEffect(() => {
-  //   if (email === user.email || displayName === user.displayName) {
-  //     setCanSave(true);
-  //   } else {
-  //     setCanSave(false);
-  //   }
-  // }, [email, displayName]);
-
   const selectProfilePic = async () => {
     try {
       // No permissions request is necessary for launching the image library

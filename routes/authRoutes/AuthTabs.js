@@ -6,6 +6,8 @@ import ProfileScreen from "../../screens/authScreens/ProfileScreen";
 import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import ChatsListScreen from "../../screens/authScreens/ChatsListScreen";
 import { UnreadMsgContext } from "../../context/UnreadMsgContext";
+import { db, auth } from "../../firebaseConfig";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 const Tab = createBottomTabNavigator();
 
@@ -30,9 +32,13 @@ const AuthTabs = () => {
         options={{
           tabBarAccessibilityLabel: "Chats",
           tabBarBadge: totalUnreadMsgs,
-          // tabBarBadge: () => {
-          //   totalUnreadMsgs.length > 0 && totalUnreadMsgs.length;
-          // },
+          tabBarBadgeStyle: {
+            backgroundColor: "#9b59b6",
+            display: totalUnreadMsgs === 0 ? "none" : "flex",
+            // paddingVertical: 2,
+            justifyContent: "center",
+            alignItems: "center",
+          },
           tabBarIcon: ({ color }) => (
             <Ionicons name="ios-chatbubbles" size={28} color={color} />
           ),

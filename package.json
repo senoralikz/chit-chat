@@ -38,7 +38,8 @@
     "react-native-screens": "~3.11.1",
     "react-native-toast-message": "^2.1.5",
     "react-native-web": "0.17.7",
-    "uuidv4": "^6.2.13"
+    "uuidv4": "^6.2.13",
+    "expo-modules-autolinking": "~0.8.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

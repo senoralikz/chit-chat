@@ -38,17 +38,18 @@ import {
 import Message from "../../components/Message";
 import { Button } from "react-native-elements";
 import Toast from "react-native-toast-message";
+import { useRoute } from "@react-navigation/native";
 
 const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
   const [messages, setMessages] = useState([]);
   const [textInput, setTextInput] = useState("");
   const scrollViewRef = useRef();
 
+  const currentRoute = useRoute();
   const user = auth.currentUser;
   const groupsRef = collection(db, "groups");
   const chatsRef = collection(db, "chats");
   const messagesRef = collection(chatsRef, route.params.groupId, "messages");
-
   const q = query(messagesRef, orderBy("createdAt"));
 
   // useEffect(() => {
@@ -74,6 +75,47 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
   useEffect(() => {
     readMsgs();
   }, [messages]);
+
+  // useEffect(() => {
+  //   const messagesRef = collection(db, "groups");
+  //   const q = query(messagesRef, where("members", "array-contains", user.uid));
+
+  //   const unsubNewMsgs = onSnapshot(q, (querySnapshot) => {
+  //     querySnapshot.docs.forEach((doc) => {
+  //       console.log("the group info:", doc.data());
+  //       if (currentRoute.name === "ChatScreen") {
+  //         if (doc.data().groupId !== route.params.groupId) {
+  //           if (
+  //             doc.data().lastMessage &&
+  //             doc.data().lastMessage?.sentBy !== user.uid
+  //           ) {
+  //             Toast.show({
+  //               type: "newMessage",
+  //               // photoURL: doc.data().lastMessage?.senderPhotoURL,
+  //               text1: doc.data().lastMessage?.senderDisplayName,
+  //               text2: doc.data().lastMessage?.message,
+  //               props: { photoURL: doc.data().lastMessage?.senderPhotoURL },
+  //             });
+  //           }
+  //         }
+  //       } else {
+  //         if (
+  //           doc.data().lastMessage &&
+  //           doc.data().lastMessage?.sentBy !== user.uid
+  //         ) {
+  //           Toast.show({
+  //             type: "newMessage",
+  //             // photoURL: doc.data().lastMessage?.senderPhotoURL,
+  //             text1: doc.data().lastMessage?.senderDisplayName,
+  //             text2: doc.data().lastMessage?.message,
+  //             props: { photoURL: doc.data().lastMessage?.senderPhotoURL },
+  //           });
+  //         }
+  //       }
+  //     });
+  //   });
+  //   return unsubNewMsgs;
+  // }, []);
 
   useEffect(
     () =>
@@ -166,6 +208,8 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
               message: textInput,
               createdAt: serverTimestamp(),
               sentBy: user.uid,
+              senderDisplayName: user.displayName,
+              senderPhotoURL: user.photoURL,
             },
           });
         });

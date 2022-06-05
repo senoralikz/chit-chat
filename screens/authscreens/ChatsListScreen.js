@@ -24,12 +24,14 @@ import { Avatar } from "react-native-elements";
 import Toast from "react-native-toast-message";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { UnreadMsgContext } from "../../context/UnreadMsgContext";
+import { useRoute } from "@react-navigation/native";
 
 const ChatsListScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
   const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
 
   const user = auth.currentUser;
+  const currentRoute = useRoute();
   const groupsRef = collection(db, "groups");
   const q = query(
     groupsRef,
@@ -47,6 +49,47 @@ const ChatsListScreen = ({ navigation }) => {
     });
 
     return unsubChatDetails;
+  }, []);
+
+  useEffect(() => {
+    const messagesRef = collection(db, "groups");
+    const q = query(messagesRef, where("members", "array-contains", user.uid));
+
+    const unsubNewMsgs = onSnapshot(q, (querySnapshot) => {
+      querySnapshot.docs.forEach((doc) => {
+        console.log("the group info:", doc.data());
+        if (currentRoute.name === "ChatScreen") {
+          if (doc.data().groupId !== route.params.groupId) {
+            if (
+              doc.data().lastMessage &&
+              doc.data().lastMessage?.sentBy !== user.uid
+            ) {
+              Toast.show({
+                type: "newMessage",
+                // photoURL: doc.data().lastMessage?.senderPhotoURL,
+                text1: doc.data().lastMessage?.senderDisplayName,
+                text2: doc.data().lastMessage?.message,
+                props: { photoURL: doc.data().lastMessage?.senderPhotoURL },
+              });
+            }
+          }
+        } else {
+          if (
+            doc.data().lastMessage &&
+            doc.data().lastMessage?.sentBy !== user.uid
+          ) {
+            Toast.show({
+              type: "newMessage",
+              // photoURL: doc.data().lastMessage?.senderPhotoURL,
+              text1: doc.data().lastMessage?.senderDisplayName,
+              text2: doc.data().lastMessage?.message,
+              props: { photoURL: doc.data().lastMessage?.senderPhotoURL },
+            });
+          }
+        }
+      });
+    });
+    return unsubNewMsgs;
   }, []);
 
   return (

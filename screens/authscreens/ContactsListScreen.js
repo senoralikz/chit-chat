@@ -17,8 +17,10 @@ import {
   onSnapshot,
   orderBy,
   query,
+  where,
   getDocs,
 } from "firebase/firestore";
+import Toast from "react-native-toast-message";
 
 const ContactsListScreen = ({ navigation }) => {
   const [friends, setFriends] = useState([]);
@@ -42,7 +44,28 @@ const ContactsListScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={{ fontSize: 36, fontWeight: "800" }}>Friends</Text>
+        <View style={{ flexDirection: "row" }}>
+          <Text style={{ fontSize: 36, fontWeight: "800" }}>Friends</Text>
+          {friends.length === 1 && (
+            <View style={{ justifyContent: "center" }}>
+              <Text style={{ paddingLeft: 5, fontSize: 22 }}>
+                ({friends.length})
+              </Text>
+            </View>
+          )}
+          {friends.length > 1 && (
+            <View style={{ justifyContent: "center" }}>
+              <Text
+                style={{
+                  paddingLeft: 5,
+                  fontSize: 22,
+                }}
+              >
+                ({friends.length})
+              </Text>
+            </View>
+          )}
+        </View>
         <Pressable
           onPress={() => navigation.navigate("AddContactScreen")}
           // onPress={() => alert("adding a new contact")}
@@ -51,16 +74,7 @@ const ContactsListScreen = ({ navigation }) => {
           <Ionicons name="ios-person-add" size={28} color="#22a6b3" />
         </Pressable>
       </View>
-      {friends.length === 1 && (
-        <Text style={{ paddingLeft: 5, fontSize: 22 }}>
-          {friends.length} friend
-        </Text>
-      )}
-      {friends.length > 1 && (
-        <Text style={{ paddingLeft: 5, fontSize: 22 }}>
-          {friends.length} friends
-        </Text>
-      )}
+
       <FlatList
         ItemSeparatorComponent={() => (
           <View

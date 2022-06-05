@@ -184,15 +184,22 @@ const ChatListItem = ({ chat, navigation }) => {
         <View style={{ position: "absolute", top: 13, left: 52 }}>
           {unreadMsgs.length > 0 && (
             <Badge
-              value={unreadMsgs.length}
-              textStyle={{ fontSize: 12 }}
+              value={unreadMsgs.length > 99 ? "99+" : unreadMsgs.length}
+              textStyle={{ fontSize: 14 }}
               badgeStyle={{
-                width: 23,
+                // width: 23,
                 height: 23,
+                minWidth: 23,
+                // maxWidth: 35,
+                alignItems: "center",
+                justifyContent: "center",
                 borderRadius: 15,
                 borderColor: "#fff",
                 borderWidth: 2,
                 backgroundColor: "#9b59b6",
+                // position: "absolute",
+                // top: 0,
+                // left: 52,
               }}
             />
           )}
@@ -205,7 +212,11 @@ const ChatListItem = ({ chat, navigation }) => {
               justifyContent: "space-between",
             }}
           >
-            <ListItem.Title style={{ fontWeight: "bold" }}>
+            <ListItem.Title
+              style={{ fontWeight: "bold" }}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {memberNames.join(", ")}
             </ListItem.Title>
             <ListItem.Title right={true} style={{ fontSize: 14 }}>
