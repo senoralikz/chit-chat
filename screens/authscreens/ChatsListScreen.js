@@ -58,32 +58,17 @@ const ChatsListScreen = ({ navigation }) => {
     const unsubNewMsgs = onSnapshot(q, (querySnapshot) => {
       querySnapshot.docs.forEach((doc) => {
         console.log("the group info:", doc.data());
-        if (currentRoute.name === "ChatScreen") {
-          if (doc.data().groupId !== route.params.groupId) {
-            if (
-              doc.data().lastMessage &&
-              doc.data().lastMessage?.sentBy !== user.uid
-            ) {
-              Toast.show({
-                type: "newMessage",
-                // photoURL: doc.data().lastMessage?.senderPhotoURL,
-                text1: doc.data().lastMessage?.senderDisplayName,
-                text2: doc.data().lastMessage?.message,
-                props: { photoURL: doc.data().lastMessage?.senderPhotoURL },
-              });
-            }
-          }
-        } else {
+        if (currentRoute.name !== "ChatScreen") {
           if (
             doc.data().lastMessage &&
             doc.data().lastMessage?.sentBy !== user.uid
           ) {
             Toast.show({
               type: "newMessage",
-              // photoURL: doc.data().lastMessage?.senderPhotoURL,
               text1: doc.data().lastMessage?.senderDisplayName,
               text2: doc.data().lastMessage?.message,
               props: { photoURL: doc.data().lastMessage?.senderPhotoURL },
+              position: "top",
             });
           }
         }

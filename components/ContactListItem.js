@@ -17,7 +17,7 @@ import {
 
 const ContactListItem = ({ friend, navigation }) => {
   const [friendInfo, setFriendInfo] = useState("");
-  const [groups, setGroups] = useState("");
+  const [groups, setGroups] = useState([]);
   const [unreadMsgs, setUnreadMsgs] = useState([]);
 
   const user = auth.currentUser;
@@ -47,6 +47,7 @@ const ContactListItem = ({ friend, navigation }) => {
           // );
           return {
             ...doc.data(),
+            groupId: doc.id,
           };
         })
       );

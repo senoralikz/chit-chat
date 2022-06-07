@@ -11,7 +11,14 @@ import {
   View,
   Platform,
 } from "react-native";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+  useContext,
+} from "react";
+import { UnreadMsgContext } from "../../context/UnreadMsgContext";
 import {
   addDoc,
   setDoc,
@@ -43,6 +50,8 @@ import { useRoute } from "@react-navigation/native";
 const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
   const [messages, setMessages] = useState([]);
   const [textInput, setTextInput] = useState("");
+  const [unreadMsgs, setUnreadMsgs] = useState([]);
+  const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
   const scrollViewRef = useRef();
 
   const currentRoute = useRoute();
@@ -51,10 +60,6 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
   const chatsRef = collection(db, "chats");
   const messagesRef = collection(chatsRef, route.params.groupId, "messages");
   const q = query(messagesRef, orderBy("createdAt"));
-
-  // useEffect(() => {
-  //   setMessages(route.params.messages);
-  // }, [route.params.messages]);
 
   useEffect(() => {
     // console.log("checking groupId from chat screen", route.params.groupId);
@@ -73,49 +78,59 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
   }, []);
 
   useEffect(() => {
+    const chatsRef = collection(db, "chats");
+    const messagesRef = collection(chatsRef, route.params.groupId, "messages");
+
+    const q = query(
+      messagesRef,
+      where("readBy", "array-contains", { readMsg: false, userId: user.uid })
+    );
+    // console.log("checking groupId from chat screen", route.params.groupId);
+    const unsubUnreadMsgs = onSnapshot(q, (snapshot) => {
+      setUnreadMsgs(
+        snapshot.docs.map((doc) => {
+          return {
+            ...doc.data(),
+            messageId: doc.id,
+          };
+        })
+      );
+    });
+
+    return unsubUnreadMsgs;
+  }, []);
+
+  useEffect(() => {
     readMsgs();
-  }, [messages]);
+  }, [unreadMsgs]);
 
-  // useEffect(() => {
-  //   const messagesRef = collection(db, "groups");
-  //   const q = query(messagesRef, where("members", "array-contains", user.uid));
+  useEffect(() => {
+    const messagesRef = collection(db, "groups");
+    const q = query(messagesRef, where("members", "array-contains", user.uid));
 
-  //   const unsubNewMsgs = onSnapshot(q, (querySnapshot) => {
-  //     querySnapshot.docs.forEach((doc) => {
-  //       console.log("the group info:", doc.data());
-  //       if (currentRoute.name === "ChatScreen") {
-  //         if (doc.data().groupId !== route.params.groupId) {
-  //           if (
-  //             doc.data().lastMessage &&
-  //             doc.data().lastMessage?.sentBy !== user.uid
-  //           ) {
-  //             Toast.show({
-  //               type: "newMessage",
-  //               // photoURL: doc.data().lastMessage?.senderPhotoURL,
-  //               text1: doc.data().lastMessage?.senderDisplayName,
-  //               text2: doc.data().lastMessage?.message,
-  //               props: { photoURL: doc.data().lastMessage?.senderPhotoURL },
-  //             });
-  //           }
-  //         }
-  //       } else {
-  //         if (
-  //           doc.data().lastMessage &&
-  //           doc.data().lastMessage?.sentBy !== user.uid
-  //         ) {
-  //           Toast.show({
-  //             type: "newMessage",
-  //             // photoURL: doc.data().lastMessage?.senderPhotoURL,
-  //             text1: doc.data().lastMessage?.senderDisplayName,
-  //             text2: doc.data().lastMessage?.message,
-  //             props: { photoURL: doc.data().lastMessage?.senderPhotoURL },
-  //           });
-  //         }
-  //       }
-  //     });
-  //   });
-  //   return unsubNewMsgs;
-  // }, []);
+    const unsubNewMsgs = onSnapshot(q, (querySnapshot) => {
+      querySnapshot.docs.forEach((doc) => {
+        console.log("the group info:", doc.data());
+        if (currentRoute.name === "ChatScreen") {
+          if (doc.data().groupId !== route.params.groupId) {
+            if (
+              doc.data().lastMessage &&
+              doc.data().lastMessage?.sentBy !== user.uid
+            ) {
+              Toast.show({
+                type: "newMessage",
+                text1: doc.data().lastMessage?.senderDisplayName,
+                text2: doc.data().lastMessage?.message,
+                props: { photoURL: doc.data().lastMessage?.senderPhotoURL },
+                position: "top",
+              });
+            }
+          }
+        }
+      });
+    });
+    return unsubNewMsgs;
+  }, []);
 
   useEffect(
     () =>
@@ -149,14 +164,14 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
 
   const readMsgs = () => {
     try {
-      route.params.unreadMsgs.forEach((unreadMsg) => {
+      unreadMsgs.forEach((unreadMsg) => {
         unreadMsg.readBy.map((userRead) => {
           if (userRead.userId === user.uid) {
             userRead.readMsg = true;
           }
         });
       });
-      route.params.unreadMsgs.forEach(async (unreadMsg) => {
+      unreadMsgs.forEach(async (unreadMsg) => {
         const unReadMsgRef = doc(
           db,
           "chats",
@@ -168,6 +183,7 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
           readBy: unreadMsg.readBy,
         });
       });
+      setTotalUnreadMsgs((prevState) => prevState - unreadMsgs.length);
     } catch (error) {
       Toast.show({
         type: "error",

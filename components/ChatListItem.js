@@ -76,13 +76,13 @@ const ChatListItem = ({ chat, navigation }) => {
   }, []);
 
   useEffect(() => {
-    setTotalUnreadMsgs((prevState) => prevState + unreadMsgs.length);
+    setTotalUnreadMsgs(unreadMsgs.length);
   }, [unreadMsgs]);
 
   const deleteMessagesColl = async () => {
     try {
-      const q = query(chatRef, "messages");
-      const snapshot = await getDocs(q);
+      const messagesRef = collection(chatRef, "messages");
+      const snapshot = await getDocs(messagesRef);
       const results = snapshot.docs.map((doc) => ({
         ...doc.data(),
         messageId: doc.id,
@@ -114,7 +114,7 @@ const ChatListItem = ({ chat, navigation }) => {
         groupId: chat.groupId,
         groupName: chat.groupName,
         groupMembers: chat.members,
-        unreadMsgs: unreadMsgs,
+        // unreadMsgs: unreadMsgs,
         sentBy: chat.lastMessage.sentBy,
         friendUserId: membersInfo[0]?.userId,
         friendDisplayName: membersInfo[0]?.displayName,
@@ -125,7 +125,7 @@ const ChatListItem = ({ chat, navigation }) => {
         groupId: chat.groupId,
         groupName: chat.groupName,
         groupMembers: chat.members,
-        unreadMsgs: unreadMsgs,
+        // unreadMsgs: unreadMsgs,
         // friendUserId: membersInfo[0]?.userId,
         friendDisplayName: membersInfo.length,
         // friendPhotoURL: membersInfo[0]?.photoURL,
@@ -190,6 +190,7 @@ const ChatListItem = ({ chat, navigation }) => {
                 // width: 23,
                 height: 23,
                 minWidth: 23,
+                maxWidth: 35,
                 // maxWidth: 35,
                 alignItems: "center",
                 justifyContent: "center",

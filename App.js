@@ -179,7 +179,7 @@ export default function App() {
             {/* {!user ? <UnauthStack /> : <AuthTabs />} */}
             <StatusBar style="auto" />
           </NavigationContainer>
-          <Toast config={toastConfig} />
+          <Toast config={toastConfig} position="bottom" bottomOffset={85} />
         </SafeAreaProvider>
       </UnreadMsgContext.Provider>
     </>
