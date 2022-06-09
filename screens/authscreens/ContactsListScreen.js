@@ -20,7 +20,6 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-import Toast from "react-native-toast-message";
 
 const ContactsListScreen = ({ navigation }) => {
   const [friends, setFriends] = useState([]);

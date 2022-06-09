@@ -4,10 +4,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { db, auth } from "../firebaseConfig";
 import { doc, collection, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import Toast from "react-native-toast-message";
+import { useToast } from "react-native-toast-notifications";
 
 const AddFriendListItem = ({ user, currentFriends }) => {
   const [alreadyFriends, setAlreadyFriends] = useState(false);
+
+  const toast = useToast();
 
   const friendsCollRef = collection(
     db,
@@ -64,10 +66,8 @@ const AddFriendListItem = ({ user, currentFriends }) => {
             <Pressable
               onPress={
                 () =>
-                  Toast.show({
+                  toast.show(`You are chatting with ${user.displayName}`, {
                     type: "success",
-                    text1: "Chatting!",
-                    text2: `You are chatting with ${user.displayName}`,
                   })
                 // navigation.navigate("ChatScreen")
               }

@@ -44,8 +44,9 @@ import {
 } from "@expo/vector-icons";
 import Message from "../../components/Message";
 import { Button } from "react-native-elements";
-import Toast from "react-native-toast-message";
+import { useToast } from "react-native-toast-notifications";
 import { useRoute } from "@react-navigation/native";
+import { Badge } from "react-native-elements";
 
 const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
   const [messages, setMessages] = useState([]);
@@ -53,6 +54,8 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
   const [unreadMsgs, setUnreadMsgs] = useState([]);
   const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
   const scrollViewRef = useRef();
+
+  const toast = useToast();
 
   const currentRoute = useRoute();
   const user = auth.currentUser;
@@ -63,6 +66,7 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
 
   useEffect(() => {
     // console.log("checking groupId from chat screen", route.params.groupId);
+
     const unsubMessages = onSnapshot(q, (snapshot) => {
       setMessages(
         snapshot.docs.map((doc) => {
@@ -104,33 +108,34 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
     readMsgs();
   }, [unreadMsgs]);
 
-  useEffect(() => {
-    const messagesRef = collection(db, "groups");
-    const q = query(messagesRef, where("members", "array-contains", user.uid));
+  // useEffect(() => {
+  //   const messagesRef = collection(db, "groups");
+  //   const q = query(messagesRef, where("members", "array-contains", user.uid));
 
-    const unsubNewMsgs = onSnapshot(q, (querySnapshot) => {
-      querySnapshot.docs.forEach((doc) => {
-        console.log("the group info:", doc.data());
-        if (currentRoute.name === "ChatScreen") {
-          if (doc.data().groupId !== route.params.groupId) {
-            if (
-              doc.data().lastMessage &&
-              doc.data().lastMessage?.sentBy !== user.uid
-            ) {
-              Toast.show({
-                type: "newMessage",
-                text1: doc.data().lastMessage?.senderDisplayName,
-                text2: doc.data().lastMessage?.message,
-                props: { photoURL: doc.data().lastMessage?.senderPhotoURL },
-                position: "top",
-              });
-            }
-          }
-        }
-      });
-    });
-    return unsubNewMsgs;
-  }, []);
+  //   const unsubNewMsgs = onSnapshot(q, (querySnapshot) => {
+  //     querySnapshot.docs.forEach((doc) => {
+  //       console.log("the group info:", doc.data());
+  //       if (currentRoute.name === "ChatScreen") {
+  //         if (doc.data().groupId !== route.params.groupId) {
+  //           if (
+  //             doc.data().lastMessage &&
+  //             doc.data().lastMessage?.sentBy !== user.uid
+  //           ) {
+  //             toast.show(doc.data().lastMessage?.message, {
+  //               type: "newMessage",
+  //               message: doc.data().lastMessage?.message,
+  //               displayName: doc.data().lastMessage?.senderDisplayName,
+  //               photoURL: doc.data().lastMessage?.senderPhotoURL,
+  //               placement: "top",
+  //               duration: 5000,
+  //             });
+  //           }
+  //         }
+  //       }
+  //     });
+  //   });
+  //   return unsubNewMsgs;
+  // }, []);
 
   useEffect(
     () =>
@@ -152,11 +157,28 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
         : route.params.friendDisplayName,
       headerLeft: () => (
         <Pressable onPress={() => goBack()}>
-          <Ionicons name="chevron-back" size={32} color="#9b59b6" />
+          <View style={{ flexDirection: "row" }}>
+            <Ionicons name="chevron-back" size={32} color="#9b59b6" />
+            <View style={{ justifyContent: "center" }}>
+              {totalUnreadMsgs > 0 && (
+                <Badge
+                  value={totalUnreadMsgs > 99 ? "99+" : totalUnreadMsgs}
+                  textStyle={{ fontSize: 16 }}
+                  badgeStyle={{
+                    height: 23,
+                    minWidth: 23,
+                    maxWidth: 35,
+                    borderRadius: 15,
+                    backgroundColor: "#9b59b6",
+                  }}
+                />
+              )}
+            </View>
+          </View>
         </Pressable>
       ),
     });
-  }, [navigation]);
+  }, [navigation, totalUnreadMsgs]);
 
   const onPressFunction = () => {
     scrollViewRef.current.scrollToEnd({ animating: true });
@@ -185,10 +207,8 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
       });
       setTotalUnreadMsgs((prevState) => prevState - unreadMsgs.length);
     } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Sorry!",
-        text2: "Trouble updating messages to read",
+      toast.show("Trouble updating messages to read", {
+        type: "danger",
       });
       console.error(
         error.code,
@@ -231,10 +251,8 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
         });
       setTextInput("");
     } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Sorry!",
-        text2: "Trouble sending the message",
+      toast.show("Trouble sending the message", {
+        type: "danger",
       });
       console.error(error.code, "-- error sending message --", error.message);
     }

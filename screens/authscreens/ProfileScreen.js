@@ -24,10 +24,11 @@ import { auth, db, storage } from "../../firebaseConfig";
 import { Avatar } from "react-native-elements";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import Toast from "react-native-toast-message";
+import { useToast } from "react-native-toast-notifications";
 
 const ProfileScreen = () => {
   const user = auth.currentUser;
+  const toast = useToast();
 
   const [pickedPhoto, setPickedPhoto] = useState("");
   const [email, setEmail] = useState(user.email);
@@ -35,7 +36,6 @@ const ProfileScreen = () => {
   const [emailVerified, setEmailVerified] = useState(user.emailVerified);
   const [emailAvailable, setEmailAvailable] = useState(true);
   const [displayNameAvailable, setDisplayNameAvailable] = useState(true);
-  const [canSave, setCanSave] = useState(true);
 
   const usersRef = collection(db, "users");
   const qEmail = query(usersRef, where("email", "==", email));
@@ -93,9 +93,8 @@ const ProfileScreen = () => {
         setPickedPhoto(result.uri);
       }
     } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Trouble selecting profile pic",
+      toast.show("Trouble selecting profile pic", {
+        type: "danger",
       });
       console.error(
         error.code,
@@ -131,10 +130,8 @@ const ProfileScreen = () => {
             })
             .then(() => {
               setPickedPhoto("");
-              Toast.show({
+              toast.show("Successfully updated profile", {
                 type: "success",
-                text1: "Success!",
-                text2: "Successfully updated profile",
               });
               // console.log("Profile was updated succesfully");
             });
@@ -146,10 +143,8 @@ const ProfileScreen = () => {
         "--- trouble signing up with profile pic ---",
         error.message
       );
-      Toast.show({
-        type: "error",
-        text1: "Sorry!",
-        text2: "Trouble updating profile",
+      toast.show("Trouble updating profile", {
+        type: "danger",
       });
     }
   };
@@ -157,16 +152,12 @@ const ProfileScreen = () => {
   const handleUpdateProfile = async () => {
     try {
       if (!email || !displayName) {
-        Toast.show({
-          type: "error",
-          text1: "Missing Info",
-          text2: "Please make sure there is an email and display name",
+        toast.show("Please enter email and display name", {
+          type: "danger",
         });
       } else if (email === user.email && displayName === user.displayName) {
-        Toast.show({
-          type: "info",
-          text1: "Sorry",
-          text2: "No changes to be saved",
+        toast.show("No changes to be saved", {
+          type: "warning",
         });
       } else {
         if (pickedPhoto) {
@@ -184,20 +175,16 @@ const ProfileScreen = () => {
               });
             })
             .then(() => {
-              Toast.show({
+              toast.show("Successfully updated profile", {
                 type: "success",
-                text1: "Success!",
-                text2: "Successfully updated profile",
               });
               // console.log("Profile was updated succesfully");
             });
         }
       }
     } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Sorry!",
-        text1: "Trouble updating profile",
+      toast.show("Trouble updating profile", {
+        type: "danger",
       });
       console.error(error.code, "-- error updating profile --", error.message);
     }

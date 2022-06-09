@@ -21,14 +21,16 @@ import {
 import ChatListItem from "../../components/ChatListItem";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { Avatar } from "react-native-elements";
-import Toast from "react-native-toast-message";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { UnreadMsgContext } from "../../context/UnreadMsgContext";
 import { useRoute } from "@react-navigation/native";
+import { useToast } from "react-native-toast-notifications";
 
 const ChatsListScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
   const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
+
+  const toast = useToast();
 
   const user = auth.currentUser;
   const currentRoute = useRoute();
@@ -52,30 +54,19 @@ const ChatsListScreen = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    const messagesRef = collection(db, "groups");
-    const q = query(messagesRef, where("members", "array-contains", user.uid));
-
-    const unsubNewMsgs = onSnapshot(q, (querySnapshot) => {
-      querySnapshot.docs.forEach((doc) => {
-        console.log("the group info:", doc.data());
-        if (currentRoute.name !== "ChatScreen") {
-          if (
-            doc.data().lastMessage &&
-            doc.data().lastMessage?.sentBy !== user.uid
-          ) {
-            Toast.show({
-              type: "newMessage",
-              text1: doc.data().lastMessage?.senderDisplayName,
-              text2: doc.data().lastMessage?.message,
-              props: { photoURL: doc.data().lastMessage?.senderPhotoURL },
-              position: "top",
-            });
-          }
-        }
-      });
-    });
-    return unsubNewMsgs;
-  }, []);
+    if (currentRoute.name !== "ChatScreen") {
+      if (chats.length > 0 && chats[0].lastMessage?.sentBy !== user.uid) {
+        toast.show(chats[0].lastMessage?.message, {
+          type: "newMessage",
+          message: chats[0].lastMessage?.message,
+          displayName: chats[0].lastMessage?.senderDisplayName,
+          photoURL: chats[0].lastMessage?.senderPhotoURL,
+          placement: "top",
+          duration: 5000,
+        });
+      }
+    }
+  }, [chats]);
 
   return (
     <SafeAreaView style={styles.container}>
