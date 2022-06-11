@@ -105,6 +105,12 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
   }, []);
 
   useEffect(() => {
+    setTotalUnreadMsgs(
+      (prevState) => prevState - route.params.unreadMsgs.length
+    );
+  }, []);
+
+  useEffect(() => {
     readMsgs();
   }, [unreadMsgs]);
 
@@ -160,7 +166,7 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
           <View style={{ flexDirection: "row" }}>
             <Ionicons name="chevron-back" size={32} color="#9b59b6" />
             <View style={{ justifyContent: "center" }}>
-              {totalUnreadMsgs > 0 && (
+              {totalUnreadMsgs !== 0 && (
                 <Badge
                   value={totalUnreadMsgs > 99 ? "99+" : totalUnreadMsgs}
                   textStyle={{ fontSize: 16 }}
@@ -205,7 +211,6 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
           readBy: unreadMsg.readBy,
         });
       });
-      setTotalUnreadMsgs((prevState) => prevState - unreadMsgs.length);
     } catch (error) {
       toast.show("Trouble updating messages to read", {
         type: "danger",

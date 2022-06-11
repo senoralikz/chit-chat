@@ -18,7 +18,7 @@ import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { UnreadMsgContext } from "../context/UnreadMsgContext";
 
-const ChatListItem = ({ chat, navigation }) => {
+const ChatListItem = ({ chat, navigation, gettingTtlUnreadMsgs }) => {
   const [unreadMsgs, setUnreadMsgs] = useState([]);
   const [memberNames, setMemberNames] = useState([]);
   const [membersInfo, setMembersInfo] = useState("");
@@ -75,10 +75,6 @@ const ChatListItem = ({ chat, navigation }) => {
     return unsubUnreadMsgs;
   }, []);
 
-  useEffect(() => {
-    setTotalUnreadMsgs(unreadMsgs.length);
-  }, [unreadMsgs]);
-
   const deleteMessagesColl = async () => {
     try {
       const messagesRef = collection(chatRef, "messages");
@@ -114,7 +110,7 @@ const ChatListItem = ({ chat, navigation }) => {
         groupId: chat.groupId,
         groupName: chat.groupName,
         groupMembers: chat.members,
-        // unreadMsgs: unreadMsgs,
+        unreadMsgs: unreadMsgs,
         sentBy: chat.lastMessage.sentBy,
         friendUserId: membersInfo[0]?.userId,
         friendDisplayName: membersInfo[0]?.displayName,

@@ -15,6 +15,7 @@ import {
   doc,
   query,
   where,
+  getDocs,
   onSnapshot,
   orderBy,
 } from "firebase/firestore";
@@ -45,13 +46,34 @@ const ChatsListScreen = ({ navigation }) => {
     const unsubChatDetails = onSnapshot(q, (querySnapshot) => {
       setChats(
         querySnapshot.docs.map((doc) => {
-          return { ...doc.data() };
+          return { ...doc.data(), groupId: doc.id };
         })
       );
     });
 
     return unsubChatDetails;
   }, []);
+
+  useEffect(() => {
+    let totalMsgs = [];
+    chats.forEach(async (chat) => {
+      const messagesRef = collection(db, "chats", chat.groupId, "messages");
+      const q = query(
+        messagesRef,
+        where("readBy", "array-contains", {
+          readMsg: false,
+          userId: user.uid,
+        })
+      );
+
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        totalMsgs.push(doc.data());
+      });
+      setTotalUnreadMsgs(totalMsgs.length);
+    });
+  }, [chats]);
 
   useEffect(() => {
     if (currentRoute.name !== "ChatScreen") {
@@ -107,7 +129,11 @@ const ChatsListScreen = ({ navigation }) => {
         )}
         data={chats}
         renderItem={({ item }) => (
-          <ChatListItem chat={item} navigation={navigation} />
+          <ChatListItem
+            chat={item}
+            navigation={navigation}
+            // gettingTtlUnreadMsgs={gettingTtlUnreadMsgs}
+          />
         )}
         keyExtractor={(item) => item.groupId}
         ListEmptyComponent={() => (
