@@ -18,7 +18,7 @@ import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { UnreadMsgContext } from "../context/UnreadMsgContext";
 
-const ChatListItem = ({ chat, navigation, gettingTtlUnreadMsgs }) => {
+const ChatListItem = ({ chat, navigation }) => {
   const [unreadMsgs, setUnreadMsgs] = useState([]);
   const [memberNames, setMemberNames] = useState([]);
   const [membersInfo, setMembersInfo] = useState("");

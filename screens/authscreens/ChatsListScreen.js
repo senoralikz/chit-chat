@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useLayoutEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -41,6 +41,32 @@ const ChatsListScreen = ({ navigation }) => {
     where("members", "array-contains", user.uid),
     orderBy("lastModified", "desc")
   );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "Chats",
+      headerTitleStyle: { fontSize: 36, fontWeight: "800" },
+      headerLeft: () => (
+        <View style={{ paddingLeft: 10 }}>
+          <Avatar
+            source={{ uri: user.photoURL }}
+            size="small"
+            rounded
+            onPress={() => navigation.navigate("Profile")}
+          />
+        </View>
+      ),
+      headerRight: () => (
+        <Pressable
+          // onPress={() => alert("creating a new chat")}
+          onPress={() => navigation.navigate("SelectChattersScreen")}
+          style={{ paddingRight: 10 }}
+        >
+          <Ionicons name="create-outline" size={28} color="#22a6b3" />
+        </Pressable>
+      ),
+    });
+  }, [navigation]);
 
   useEffect(() => {
     const unsubChatDetails = onSnapshot(q, (querySnapshot) => {
@@ -91,31 +117,7 @@ const ChatsListScreen = ({ navigation }) => {
   }, [chats]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Avatar
-          source={{ uri: user.photoURL }}
-          size="small"
-          rounded
-          onPress={() => navigation.navigate("Profile")}
-          containerStyle={{ alignSelf: "center" }}
-        />
-        <Text
-          style={{
-            fontSize: 36,
-            fontWeight: "800",
-          }}
-        >
-          Chats
-        </Text>
-        <Pressable
-          // onPress={() => alert("creating a new chat")}
-          onPress={() => navigation.navigate("SelectChattersScreen")}
-          style={{ alignSelf: "center" }}
-        >
-          <Ionicons name="create-outline" size={28} color="#22a6b3" />
-        </Pressable>
-      </View>
+    <View style={styles.container}>
       <FlatList
         ItemSeparatorComponent={() => (
           <View
@@ -129,11 +131,7 @@ const ChatsListScreen = ({ navigation }) => {
         )}
         data={chats}
         renderItem={({ item }) => (
-          <ChatListItem
-            chat={item}
-            navigation={navigation}
-            // gettingTtlUnreadMsgs={gettingTtlUnreadMsgs}
-          />
+          <ChatListItem chat={item} navigation={navigation} />
         )}
         keyExtractor={(item) => item.groupId}
         ListEmptyComponent={() => (
@@ -146,9 +144,9 @@ const ChatsListScreen = ({ navigation }) => {
             <Text style={{ fontSize: 18, color: "#bdc3c7" }}>No Chats</Text>
           </View>
         )}
-        style={{ paddingTop: 10 }}
+        // style={{ paddingTop: 10 }}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -159,9 +157,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 5,
-  },
+  // header: {
+  //   flexDirection: "row",
+  //   justifyContent: "space-between",
+  //   paddingHorizontal: 5,
+  // },
 });

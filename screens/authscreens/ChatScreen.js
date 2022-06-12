@@ -43,7 +43,7 @@ import {
   Ionicons,
 } from "@expo/vector-icons";
 import Message from "../../components/Message";
-import { Button } from "react-native-elements";
+import { Avatar, Button } from "react-native-elements";
 import { useToast } from "react-native-toast-notifications";
 import { useRoute } from "@react-navigation/native";
 import { Badge } from "react-native-elements";
@@ -63,6 +63,56 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
   const chatsRef = collection(db, "chats");
   const messagesRef = collection(chatsRef, route.params.groupId, "messages");
   const q = query(messagesRef, orderBy("createdAt"));
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () =>
+        route.params.groupName ? (
+          <Text>{route.params.groupName}</Text>
+        ) : (
+          <View style={{ flexDirection: "row" }}>
+            <Avatar
+              source={{ uri: route.params.friendPhotoURL }}
+              size="small"
+              rounded
+              containerStyle={{ marginRight: 5 }}
+            />
+            <Text
+              style={{
+                alignSelf: "center",
+                marginLeft: 5,
+                fontSize: 20,
+                fontWeight: "bold",
+              }}
+            >
+              {route.params.friendDisplayName}
+            </Text>
+          </View>
+        ),
+      headerLeft: () => (
+        <Pressable onPress={() => goBack()}>
+          <View style={{ flexDirection: "row" }}>
+            <Ionicons name="chevron-back" size={32} color="#9b59b6" />
+            <View style={{ justifyContent: "center" }}>
+              {totalUnreadMsgs !== 0 && (
+                <Badge
+                  value={totalUnreadMsgs > 99 ? "99+" : totalUnreadMsgs}
+                  textStyle={{ fontSize: 16 }}
+                  badgeStyle={{
+                    height: 23,
+                    minWidth: 23,
+                    maxWidth: 35,
+                    borderRadius: 15,
+                    backgroundColor: "#9b59b6",
+                  }}
+                />
+              )}
+            </View>
+          </View>
+        </Pressable>
+      ),
+    });
+  }, [navigation, totalUnreadMsgs]);
 
   useEffect(() => {
     // console.log("checking groupId from chat screen", route.params.groupId);
@@ -155,36 +205,6 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
       }),
     [navigation, messages]
   );
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: route.params.groupName
-        ? route.params.groupName
-        : route.params.friendDisplayName,
-      headerLeft: () => (
-        <Pressable onPress={() => goBack()}>
-          <View style={{ flexDirection: "row" }}>
-            <Ionicons name="chevron-back" size={32} color="#9b59b6" />
-            <View style={{ justifyContent: "center" }}>
-              {totalUnreadMsgs !== 0 && (
-                <Badge
-                  value={totalUnreadMsgs > 99 ? "99+" : totalUnreadMsgs}
-                  textStyle={{ fontSize: 16 }}
-                  badgeStyle={{
-                    height: 23,
-                    minWidth: 23,
-                    maxWidth: 35,
-                    borderRadius: 15,
-                    backgroundColor: "#9b59b6",
-                  }}
-                />
-              )}
-            </View>
-          </View>
-        </Pressable>
-      ),
-    });
-  }, [navigation, totalUnreadMsgs]);
 
   const onPressFunction = () => {
     scrollViewRef.current.scrollToEnd({ animating: true });

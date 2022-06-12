@@ -1,7 +1,9 @@
 import { useEffect, useState, useContext } from "react";
+import { Pressable } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import ChatsStack from "./ChatsStack";
 import ContactsStack from "./ContactsStack";
+import ProfileStack from "./ProfileStack";
 import ProfileScreen from "../../screens/authScreens/ProfileScreen";
 import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import ChatsListScreen from "../../screens/authScreens/ChatsListScreen";
@@ -20,7 +22,11 @@ const AuthTabs = () => {
       shifting={true}
       labeled={false}
       screenOptions={{
-        headerShown: false,
+        // headerShown: false,
+        headerTitleStyle: {
+          fontSize: 36,
+          fontWeight: "800",
+        },
         tabBarShowLabel: false,
         tabBarActiveTintColor: "#22a6b3",
         tabBarInactiveTintColor: "#bdc3c7",
@@ -49,6 +55,7 @@ const AuthTabs = () => {
         name="ContactsTab"
         component={ContactsStack}
         options={{
+          headerShown: false,
           tabBarAccessibilityLabel: "Friends",
           tabBarIcon: ({ color }) => (
             <FontAwesome5 name="user-friends" size={28} color={color} />
@@ -57,8 +64,9 @@ const AuthTabs = () => {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileStack}
         options={{
+          headerShown: false,
           tabBarAccessibilityLabel: "Profile",
           tabBarIcon: ({ color }) => (
             <Ionicons name="settings-sharp" size={28} color={color} />

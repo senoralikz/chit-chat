@@ -77,7 +77,7 @@ export default function App() {
         const uid = user.uid;
         // ...
         setUser(user);
-        // console.log(user);
+        console.log(user);
       } else {
         // User is signed out
         // ...

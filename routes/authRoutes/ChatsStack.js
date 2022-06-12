@@ -21,6 +21,7 @@ const ChatsStack = () => {
         options={{
           title: "Select Chatters",
           // headerTintColor: "#22a6b3",
+          headerBackTitleVisible: false,
         }}
       />
       <Stack.Screen

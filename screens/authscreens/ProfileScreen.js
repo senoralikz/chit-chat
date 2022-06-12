@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -22,11 +22,11 @@ import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import { signOut, updateProfile } from "firebase/auth";
 import { auth, db, storage } from "../../firebaseConfig";
 import { Avatar } from "react-native-elements";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Entypo } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useToast } from "react-native-toast-notifications";
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   const user = auth.currentUser;
   const toast = useToast();
 
@@ -78,6 +78,23 @@ const ProfileScreen = () => {
 
     return unsubDisplayNames;
   }, [displayName]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "",
+      headerLeft: () => (
+        <Text style={{ fontSize: 36, fontWeight: "800" }}>Profile</Text>
+      ),
+      headerRight: () => (
+        <Avatar
+          source={{ uri: user.photoURL }}
+          size="small"
+          rounded
+          onPress={() => navigation.navigate("Profile")}
+        />
+      ),
+    });
+  }, [navigation, user.photoURL]);
 
   const selectProfilePic = async () => {
     try {
@@ -155,7 +172,11 @@ const ProfileScreen = () => {
         toast.show("Please enter email and display name", {
           type: "danger",
         });
-      } else if (email === user.email && displayName === user.displayName) {
+      } else if (
+        email === user.email &&
+        displayName === user.displayName &&
+        !pickedPhoto
+      ) {
         toast.show("No changes to be saved", {
           type: "warning",
         });
@@ -191,10 +212,7 @@ const ProfileScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={{ fontSize: 36, fontWeight: "800" }}>Profile</Text>
-      </View>
+    <View style={styles.container}>
       <View style={styles.settingsBodyView}>
         <View style={{ alignItems: "center", marginVertical: 20 }}>
           {!pickedPhoto ? (
@@ -263,31 +281,53 @@ const ProfileScreen = () => {
             )}
           </View>
         </View>
-        <View style={{ alignItems: "center" }}>
-          <Pressable
-            onPress={handleUpdateProfile}
-            // style={
-            //   email === user.email || displayName === user.displayName
-            //     ? styles.disabledSignUpBtn
-            //     : styles.signUpBtn
-            // }
-            // disabled={
-            //   email === user.email || displayName === user.displayName
-            //     ? true
-            //     : false
-            // }
-            style={
-              !displayNameAvailable || !emailAvailable
-                ? styles.disabledSignUpBtn
-                : styles.signUpBtn
-            }
-            disabled={!emailAvailable || !displayNameAvailable ? true : false}
+        {user.providerData[0].providerId === "password" && (
+          <View
+            style={{
+              flexDirection: "row",
+              alignSelf: "flex-end",
+            }}
           >
-            <Text style={{ margin: 10, fontSize: 24, color: "#34495e" }}>
-              Save Changes
-            </Text>
-          </Pressable>
-        </View>
+            <View style={{ justifyContent: "center" }}>
+              <Text
+                onPress={() => navigation.navigate("ChangePasswordScreen")}
+                style={{
+                  paddingLeft: 10,
+                  fontSize: 18,
+                  fontWeight: "bold",
+                }}
+              >
+                Change Password
+              </Text>
+            </View>
+            <Entypo name="chevron-small-right" size={24} color="black" />
+          </View>
+        )}
+      </View>
+      <View style={{ alignItems: "center" }}>
+        <Pressable
+          onPress={handleUpdateProfile}
+          // style={
+          //   email === user.email || displayName === user.displayName
+          //     ? styles.disabledSignUpBtn
+          //     : styles.signUpBtn
+          // }
+          // disabled={
+          //   email === user.email || displayName === user.displayName
+          //     ? true
+          //     : false
+          // }
+          style={
+            !displayNameAvailable || !emailAvailable
+              ? styles.disabledUpdateBtn
+              : styles.updateBtn
+          }
+          disabled={!emailAvailable || !displayNameAvailable ? true : false}
+        >
+          <Text style={{ margin: 10, fontSize: 24, color: "#34495e" }}>
+            Save Changes
+          </Text>
+        </Pressable>
       </View>
       <View
         style={{
@@ -301,7 +341,7 @@ const ProfileScreen = () => {
           </Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -361,7 +401,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     fontSize: 18,
   },
-  signUpBtn: {
+  updateBtn: {
     backgroundColor: "#fff",
     borderRadius: 10,
     borderColor: "#34495e",
@@ -376,7 +416,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 2,
   },
-  disabledSignUpBtn: {
+  disabledUpdateBtn: {
     backgroundColor: "#bdc3c7",
     borderRadius: 10,
     borderColor: "#34495e",

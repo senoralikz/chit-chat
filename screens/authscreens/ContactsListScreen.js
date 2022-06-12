@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ContactListItem from "../../components/ContactListItem";
 import { auth, db } from "../../firebaseConfig";
@@ -40,40 +40,31 @@ const ContactsListScreen = ({ navigation }) => {
     return unsubFriends;
   }, []);
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "",
+      headerLeft: () => (
         <View style={{ flexDirection: "row" }}>
           <Text style={{ fontSize: 36, fontWeight: "800" }}>Friends</Text>
-          {friends.length === 1 && (
+          {friends.length > 0 && (
             <View style={{ justifyContent: "center" }}>
               <Text style={{ paddingLeft: 5, fontSize: 22 }}>
                 ({friends.length})
               </Text>
             </View>
           )}
-          {friends.length > 1 && (
-            <View style={{ justifyContent: "center" }}>
-              <Text
-                style={{
-                  paddingLeft: 5,
-                  fontSize: 22,
-                }}
-              >
-                ({friends.length})
-              </Text>
-            </View>
-          )}
         </View>
-        <Pressable
-          onPress={() => navigation.navigate("AddContactScreen")}
-          // onPress={() => alert("adding a new contact")}
-          style={{ alignSelf: "center" }}
-        >
+      ),
+      headerRight: () => (
+        <Pressable onPress={() => navigation.navigate("AddContactScreen")}>
           <Ionicons name="ios-person-add" size={28} color="#22a6b3" />
         </Pressable>
-      </View>
+      ),
+    });
+  }, [navigation, friends]);
 
+  return (
+    <View style={styles.container}>
       <FlatList
         ItemSeparatorComponent={() => (
           <View
@@ -100,9 +91,9 @@ const ContactsListScreen = ({ navigation }) => {
             <Text style={{ fontSize: 18, color: "#bdc3c7" }}>No Friends</Text>
           </View>
         )}
-        style={{ paddingTop: 10 }}
+        // style={{ paddingTop: 10 }}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -112,10 +103,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 5,
   },
 });
