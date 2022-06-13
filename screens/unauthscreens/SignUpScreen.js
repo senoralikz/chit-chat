@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   screenTitleText: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: "800",
     textAlign: "center",
     justifyContent: "center",

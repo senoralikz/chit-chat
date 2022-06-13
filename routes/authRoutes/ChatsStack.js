@@ -29,7 +29,8 @@ const ChatsStack = () => {
         component={ChatScreen}
         options={{
           title: "ChitterChat",
-          headerBackTitleVisible: false,
+          // headerBackTitleVisible: false,
+          headerBackVisible: false,
           // headerTintColor: "#22a6b3",
         }}
       />

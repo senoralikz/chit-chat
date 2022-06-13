@@ -6,17 +6,27 @@ import {
   KeyboardAvoidingView,
   Alert,
   Pressable,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useLayoutEffect } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { auth } from "../../firebaseConfig";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import GoogleSignInBtn from "../../components/GoogleSignInBtn";
+import { useToast } from "react-native-toast-notifications";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const LogInScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+
+  const toast = useToast();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -26,8 +36,9 @@ const LogInScreen = ({ navigation }) => {
 
   const handleSignIn = () => {
     if (!email || !password) {
-      Alert.alert("Sorry", "Please enter a valid email and password", {
-        text: "Ok",
+      toast.show("Please enter a valid email and password", {
+        type: "warning",
+        placement: "top",
       });
     } else {
       signInWithEmailAndPassword(auth, email, password)
@@ -43,6 +54,36 @@ const LogInScreen = ({ navigation }) => {
         });
     }
   };
+
+  // const handleResetPassword = (email, setEmail) => {
+  //   if (email) {
+  //     sendPasswordResetEmail(auth, email)
+  //       .then(() => {
+  //         setModalVisible(false);
+  //         setEmail("");
+  //         toast.show("Sent Password Reset Email", {
+  //           type: "success",
+  //           placement: "top",
+  //         });
+  //       })
+  //       .catch((error) => {
+  //         toast.show("Error sending password reset email", {
+  //           type: "danger",
+  //           placement: "top",
+  //         });
+  //         console.error(
+  //           error.code,
+  //           "-- error sending password reset email --",
+  //           error.message
+  //         );
+  //       });
+  //   } else {
+  //     toast.show("Please enter an email", {
+  //       type: "danger",
+  //       placement: "top",
+  //     });
+  //   }
+  // };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -108,6 +149,25 @@ const LogInScreen = ({ navigation }) => {
             secureTextEntry
           />
         </View>
+        <View
+          style={{
+            // backgroundColor: "purple",
+            justifyContent: "flex-start",
+            width: "80%",
+          }}
+        >
+          <Text
+            style={{ fontWeight: "bold" }}
+            onPress={() => setModalVisible(true)}
+          >
+            Forgot Password?
+          </Text>
+        </View>
+        <ForgotPasswordModal
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          // handleResetPassword={handleResetPassword}
+        />
         <View>
           <Pressable onPress={handleSignIn} style={styles.logInBtn}>
             <MaterialCommunityIcons name="login" size={24} color="#fff" />
@@ -169,7 +229,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   screenTitleText: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: "800",
   },
   userInfoInputView: {

@@ -39,7 +39,6 @@ import { auth, db } from "../../firebaseConfig";
 import {
   FontAwesome,
   MaterialCommunityIcons,
-  AntDesign,
   Ionicons,
 } from "@expo/vector-icons";
 import Message from "../../components/Message";
@@ -104,6 +103,7 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
                     maxWidth: 35,
                     borderRadius: 15,
                     backgroundColor: "#9b59b6",
+                    marginRight: 15,
                   }}
                 />
               )}
