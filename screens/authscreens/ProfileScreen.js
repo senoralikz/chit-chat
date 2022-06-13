@@ -19,12 +19,14 @@ import {
 } from "firebase/firestore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
-import { signOut, updateProfile } from "firebase/auth";
+import { signOut, updateEmail, updateProfile } from "firebase/auth";
 import { auth, db, storage } from "../../firebaseConfig";
 import { Avatar } from "react-native-elements";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useToast } from "react-native-toast-notifications";
+import UpdateEmailModal from "./UpdateEmailModal";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 const ProfileScreen = ({ navigation }) => {
   const user = auth.currentUser;
@@ -34,31 +36,32 @@ const ProfileScreen = ({ navigation }) => {
   const [email, setEmail] = useState(user.email);
   const [displayName, setDisplayName] = useState(user.displayName);
   const [emailVerified, setEmailVerified] = useState(user.emailVerified);
-  const [emailAvailable, setEmailAvailable] = useState(true);
   const [displayNameAvailable, setDisplayNameAvailable] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
 
   const usersRef = collection(db, "users");
   const qEmail = query(usersRef, where("email", "==", email));
   const qDisplayName = query(usersRef, where("displayName", "==", displayName));
 
-  useEffect(() => {
-    const unsubEmails = onSnapshot(qEmail, (querySnapshot) => {
-      let userEmails = [];
-      querySnapshot.docs.forEach((doc) => {
-        if (doc.data().email !== user.email) {
-          userEmails.push(doc.data().email);
-        }
-      });
+  // useEffect(() => {
+  //   const unsubEmails = onSnapshot(qEmail, (querySnapshot) => {
+  //     let userEmails = [];
+  //     querySnapshot.docs.forEach((doc) => {
+  //       if (doc.data().email !== user.email) {
+  //         userEmails.push(doc.data().email);
+  //       }
+  //     });
 
-      if (userEmails.length > 0) {
-        setEmailAvailable(false);
-      } else {
-        setEmailAvailable(true);
-      }
-    });
+  //     if (userEmails.length > 0) {
+  //       setEmailAvailable(false);
+  //     } else {
+  //       setEmailAvailable(true);
+  //     }
+  //   });
 
-    return unsubEmails;
-  }, [email]);
+  //   return unsubEmails;
+  // }, [email]);
 
   useEffect(() => {
     const unsubDisplayNames = onSnapshot(qDisplayName, (querySnapshot) => {
@@ -121,7 +124,7 @@ const ProfileScreen = ({ navigation }) => {
     }
   };
 
-  const updateWithProfilePic = async () => {
+  const handleUpdateProfilePic = async () => {
     try {
       const fileName = pickedPhoto.replace(/^.*[\\\/]/, "");
       const imageRef = ref(storage, `users/${user.uid}/images/${fileName}`);
@@ -134,20 +137,16 @@ const ProfileScreen = ({ navigation }) => {
         getDownloadURL(imageRef).then(async (url) => {
           await updateProfile(user, {
             photoURL: url,
-            displayName: displayName,
-            email: email,
           })
             .then(async () => {
               const userRef = doc(db, "users", user.uid);
               await updateDoc(userRef, {
-                email: email,
-                displayName: displayName,
                 photoURL: url,
               });
             })
             .then(() => {
               setPickedPhoto("");
-              toast.show("Successfully updated profile", {
+              toast.show("Successfully updated profile picture", {
                 type: "success",
               });
               // console.log("Profile was updated succesfully");
@@ -157,13 +156,41 @@ const ProfileScreen = ({ navigation }) => {
     } catch (error) {
       console.error(
         error.code,
-        "--- trouble signing up with profile pic ---",
+        "--- error updating profile picture ---",
         error.message
       );
-      toast.show("Trouble updating profile", {
+      toast.show("Error updating profile pricture", {
         type: "danger",
       });
     }
+  };
+
+  const handleUpdateDisplayName = async () => {
+    await updateProfile(user, {
+      displayName: displayName,
+    })
+      .then(async () => {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          displayName: displayName,
+        });
+      })
+      .then(() => {
+        toast.show("Successfully updated display name", {
+          type: "success",
+        });
+        // console.log("Display Name was updated succesfully");
+      })
+      .catch((error) => {
+        toast.show("Error updating display name", {
+          type: "danger",
+        });
+        console.error(
+          error.code,
+          "-- error updating display name --",
+          error.message
+        );
+      });
   };
 
   const handleUpdateProfile = async () => {
@@ -181,26 +208,14 @@ const ProfileScreen = ({ navigation }) => {
           type: "warning",
         });
       } else {
+        if (email !== user.email) {
+          setModalVisible(true);
+        }
         if (pickedPhoto) {
-          updateWithProfilePic();
-        } else {
-          await updateProfile(user, {
-            email: email,
-            displayName: displayName,
-          })
-            .then(async () => {
-              const userRef = doc(db, "users", user.uid);
-              await updateDoc(userRef, {
-                email: email,
-                displayName: displayName,
-              });
-            })
-            .then(() => {
-              toast.show("Successfully updated profile", {
-                type: "success",
-              });
-              // console.log("Profile was updated succesfully");
-            });
+          handleUpdateProfilePic();
+        }
+        if (displayName !== user.displayName) {
+          handleUpdateDisplayName();
         }
       }
     } catch (error) {
@@ -245,15 +260,6 @@ const ProfileScreen = ({ navigation }) => {
               style={styles.credentialInput}
             />
           </View>
-          {!emailAvailable && (
-            <View style={{ paddingRight: 10 }}>
-              <Text
-                style={{ color: "#e84118", fontSize: 14, textAlign: "right" }}
-              >
-                Email already in use
-              </Text>
-            </View>
-          )}
           <View style={styles.credentialInputView}>
             <Text style={styles.credentialPropertyText}>Display Name: </Text>
             <TextInput
@@ -290,7 +296,7 @@ const ProfileScreen = ({ navigation }) => {
           >
             <View style={{ justifyContent: "center" }}>
               <Text
-                onPress={() => navigation.navigate("ChangePasswordScreen")}
+                onPress={() => setPasswordModalVisible(true)}
                 style={{
                   paddingLeft: 10,
                   fontSize: 18,
@@ -299,6 +305,10 @@ const ProfileScreen = ({ navigation }) => {
               >
                 Change Password
               </Text>
+              <ChangePasswordModal
+                passwordModalVisible={passwordModalVisible}
+                setPasswordModalVisible={setPasswordModalVisible}
+              />
             </View>
             <Entypo name="chevron-small-right" size={24} color="black" />
           </View>
@@ -307,27 +317,21 @@ const ProfileScreen = ({ navigation }) => {
       <View style={{ alignItems: "center" }}>
         <Pressable
           onPress={handleUpdateProfile}
-          // style={
-          //   email === user.email || displayName === user.displayName
-          //     ? styles.disabledSignUpBtn
-          //     : styles.signUpBtn
-          // }
-          // disabled={
-          //   email === user.email || displayName === user.displayName
-          //     ? true
-          //     : false
-          // }
           style={
-            !displayNameAvailable || !emailAvailable
-              ? styles.disabledUpdateBtn
-              : styles.updateBtn
+            !displayNameAvailable ? styles.disabledUpdateBtn : styles.updateBtn
           }
-          disabled={!emailAvailable || !displayNameAvailable ? true : false}
+          disabled={!displayNameAvailable ? true : false}
         >
           <Text style={{ margin: 10, fontSize: 24, color: "#34495e" }}>
             Save Changes
           </Text>
         </Pressable>
+        <UpdateEmailModal
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          email={email}
+          user={user}
+        />
       </View>
       <View
         style={{

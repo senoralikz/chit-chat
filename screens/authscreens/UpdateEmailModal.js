@@ -10,35 +10,45 @@ import {
   Platform,
 } from "react-native";
 import { useToast } from "react-native-toast-notifications";
-import { auth } from "../../firebaseConfig";
-import { sendPasswordResetEmail } from "firebase/auth";
+import { db } from "../../firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
+import { StatusBar } from "expo-status-bar";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updateEmail,
+} from "firebase/auth";
+import { updateDoc, doc } from "firebase/firestore";
 
-const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
-  const [email, setEmail] = useState("");
+const UpdateEmailModal = ({ modalVisible, setModalVisible, email, user }) => {
+  const [password, setPassword] = useState("");
 
   const toast = useToast();
 
-  const handleResetPassword = () => {
-    sendPasswordResetEmail(auth, email)
+  const handleUpdateEmail = async () => {
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential)
+      .then(async () => {
+        await updateEmail(user, email);
+      })
+      .then(async () => {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          email: email,
+        });
+      })
       .then(() => {
         setModalVisible(false);
-        setEmail("");
-        toast.show("Sent Password Reset Email", {
+        setPassword("");
+        toast.show("Successfully updated email", {
           type: "success",
-          placement: "top",
         });
       })
       .catch((error) => {
-        toast.show("Error sending password reset email", {
+        toast.show("Error updating email", {
           type: "danger",
-          placement: "top",
         });
-        console.error(
-          error.code,
-          "-- error sending password reset email --",
-          error.message
-        );
+        console.error(error.code, "-- error updating email --", error.message);
       });
   };
 
@@ -59,7 +69,7 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
         </Pressable>
         <View style={{ justifyContent: "center", alignSelf: "center" }}>
           <Text style={{ fontSize: 36, fontWeight: "800" }}>
-            Forgot Password
+            Confirm Password
           </Text>
         </View>
       </View>
@@ -80,8 +90,7 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
           }}
         >
           <Text style={{ fontSize: 18 }}>
-            Enter your email below and press the 'Reset Email' button. You will
-            receive and email with instructions on how to reset your password.
+            Enter your password below to authorize email update.
           </Text>
           {/* <Text>Email:</Text> */}
           <View
@@ -95,9 +104,10 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
               behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
               <TextInput
-                value={email}
-                placeholder="Email..."
-                onChangeText={(text) => setEmail(text)}
+                value={password}
+                placeholder="Password..."
+                placeholderTextColor="#bbb"
+                onChangeText={(text) => setPassword(text)}
                 style={{
                   // backgroundColor: "orange",
                   borderBottomWidth: 1,
@@ -105,17 +115,18 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
                   textAlignVertical: "bottom",
                   fontSize: 20,
                 }}
+                secureTextEntry
               />
               <View style={{ alignItems: "center" }}>
                 <Pressable
-                  onPress={handleResetPassword}
+                  onPress={handleUpdateEmail}
                   style={
-                    email ? styles.passwordResetBtn : styles.disabledPWResetBtn
+                    password ? styles.confirmBtn : styles.disabledConfirmBtn
                   }
-                  disabled={email ? false : true}
+                  disabled={password ? false : true}
                 >
                   <Text style={{ margin: 10, fontSize: 24, color: "#fff" }}>
-                    Reset Email
+                    Confirm
                   </Text>
                 </Pressable>
               </View>
@@ -123,14 +134,15 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
           </View>
         </View>
       </View>
+      <StatusBar style="light" />
     </Modal>
   );
 };
 
-export default ForgotPasswordModal;
+export default UpdateEmailModal;
 
 const styles = StyleSheet.create({
-  passwordResetBtn: {
+  confirmBtn: {
     backgroundColor: "#34495e",
     borderRadius: 10,
     width: 200,
@@ -142,7 +154,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 2,
   },
-  disabledPWResetBtn: {
+  disabledConfirmBtn: {
     backgroundColor: "#bdc3c7",
     borderRadius: 10,
     borderColor: "#34495e",
