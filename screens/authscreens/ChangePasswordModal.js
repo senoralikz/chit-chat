@@ -104,55 +104,76 @@ const ChangePasswordModal = ({
       <View style={styles.container}>
         <View
           style={{
-            width: "80%",
+            width: "90%",
             flexDirection: "row",
             justifyContent: "space-between",
             marginVertical: 10,
           }}
         >
-          <Text>Current Password:</Text>
+          <View style={{ justifyContent: "center" }}>
+            <Text style={{ fontSize: 18 }}>Current Password:</Text>
+          </View>
           <TextInput
             value={currentPassword}
             placeholder="Current Password..."
             placeholderTextColor="#bbb"
             onChangeText={(text) => setCurrentPassword(text)}
-            style={{ borderBottomWidth: 1, width: "50%" }}
+            style={{
+              borderBottomWidth: 1,
+              width: "50%",
+              height: 30,
+              fontSize: 20,
+            }}
             secureTextEntry
           />
         </View>
         <View
           style={{
-            width: "80%",
+            width: "90%",
             flexDirection: "row",
             justifyContent: "space-between",
             marginVertical: 10,
           }}
         >
-          <Text>New Password:</Text>
+          <View style={{ justifyContent: "center" }}>
+            <Text style={{ fontSize: 18 }}>New Password:</Text>
+          </View>
           <TextInput
             value={newPassword}
             placeholder="New Password..."
             placeholderTextColor="#bbb"
             onChangeText={(text) => setNewPassword(text)}
-            style={{ borderBottomWidth: 1, width: "50%" }}
+            style={{
+              borderBottomWidth: 1,
+              width: "50%",
+              height: 30,
+              fontSize: 20,
+            }}
             secureTextEntry
           />
         </View>
         <View
           style={{
-            width: "80%",
+            width: "90%",
             flexDirection: "row",
             justifyContent: "space-between",
             marginVertical: 10,
           }}
         >
-          <Text>Confirm New Password:</Text>
+          <View style={{ justifyContent: "center" }}>
+            <Text style={{ fontSize: 18 }}>Confirm New Password:</Text>
+          </View>
           <TextInput
             value={confirmNewPassword}
-            placeholder="Current Password..."
+            placeholder="Confirm New Password..."
             placeholderTextColor="#bbb"
             onChangeText={(text) => setConfirmNewPassword(text)}
-            style={{ borderBottomWidth: 1, width: "50%" }}
+            style={{
+              borderBottomWidth: 1,
+              width: "50%",
+              height: 30,
+              fontSize: 20,
+            }}
             secureTextEntry
           />
         </View>
