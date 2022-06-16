@@ -7,7 +7,7 @@ import {
   Modal,
   Pressable,
 } from "react-native";
-import { SearchBar } from "react-native-elements";
+import { Button, SearchBar } from "react-native-elements";
 import ChatFriendListItem from "../../components/ChatFriendListItem";
 import { auth, db } from "../../firebaseConfig";
 import {
@@ -90,11 +90,20 @@ const SelectChattersListModal = ({ modalVisible, setModalVisible }) => {
     }
   };
 
+  const closingModal = () => {
+    let resetFriendsChattingWith = friends;
+    resetFriendsChattingWith.forEach((friend) => friend.chattingWith === false);
+    setFriends(resetFriendsChattingWith);
+    setModalVisible(false);
+    setChatWith([]);
+  };
+
   return (
     <Modal
       animationType="slide"
       presentationStyle="formSheet"
       visible={modalVisible}
+      // onRequestClose={() => closingModal()}
       onRequestClose={() => {
         setModalVisible(false);
         setChatWith([]);
@@ -102,6 +111,7 @@ const SelectChattersListModal = ({ modalVisible, setModalVisible }) => {
     >
       <View style={{ flexDirection: "row" }}>
         <Pressable
+          // onPress={() => closingModal()}
           onPress={() => {
             setModalVisible(false);
             setChatWith([]);
@@ -167,6 +177,14 @@ const SelectChattersListModal = ({ modalVisible, setModalVisible }) => {
             horizontal={true}
           />
         </View>
+        <Button
+          title="Create Chat"
+          onPress={() => alert("Creating chat")}
+          // style={{ width: "99%", alignSelf: "center" }}
+          containerStyle={{ marginTop: 5 }}
+          buttonStyle={{ backgroundColor: "#9b59b6" }}
+          raised={true}
+        />
         <FlatList
           ItemSeparatorComponent={() => (
             <View
@@ -184,6 +202,7 @@ const SelectChattersListModal = ({ modalVisible, setModalVisible }) => {
               friend={item}
               chatWith={chatWith}
               setChatWith={setChatWith}
+              modalVisible={modalVisible}
               // selectingChatters={selectingChatters}
             />
           )}

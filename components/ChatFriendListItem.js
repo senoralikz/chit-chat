@@ -8,6 +8,7 @@ const ContactListItem = ({
   chatWith,
   setChatWith,
   selectingChatters,
+  modalVisible,
 }) => {
   const [checked, setChecked] = useState(friend.chattingWith);
 
@@ -36,6 +37,13 @@ const ContactListItem = ({
       setChatWith(chatters);
     }
   }, [checked]);
+
+  useEffect(() => {
+    if (!modalVisible) {
+      friend.chattingWith = false;
+      setChecked(false);
+    }
+  }, [modalVisible]);
 
   return (
     <ListItem>
