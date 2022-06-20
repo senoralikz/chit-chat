@@ -64,7 +64,7 @@ const ChatsListScreen = ({ navigation }) => {
           onPress={() => setModalVisible(true)}
           style={{ paddingRight: 10 }}
         >
-          <Ionicons name="create-outline" size={28} color="#22a6b3" />
+          <Ionicons name="create-outline" size={28} color="#9b59b6" />
         </Pressable>
       ),
     });

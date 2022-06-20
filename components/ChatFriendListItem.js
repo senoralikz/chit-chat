@@ -3,47 +3,79 @@ import { useState, useEffect } from "react";
 import { ListItem, Avatar } from "react-native-elements";
 import { CheckBox } from "react-native-elements";
 
-const ContactListItem = ({
+const ChatFriendListItem = ({
   friend,
+  friends,
+  setFriends,
   chatWith,
   setChatWith,
   selectingChatters,
   modalVisible,
+  chatterIds,
+  setChatterIds,
 }) => {
   const [checked, setChecked] = useState(friend.chattingWith);
 
   useEffect(() => {
-    // selectingChatters(friend, checked);
-
     if (checked) {
-      friend.chattingWith = true;
+      let newFriends = friends.map((person) => {
+        if (friend.userId === person.userId) {
+          return { ...person, chattingWith: true };
+        } else {
+          return person;
+        }
+      });
+      setFriends(newFriends);
+
       let chatters = chatWith;
-      // chatters.push(friend);
-      console.log("chatting with these people", chatters);
       {
         !chatters.some((chatter) => chatter.userId === friend.userId) &&
           chatters.push(friend);
       }
 
       setChatWith(chatters);
+
+      setChatterIds(
+        chatters.map((chatter) => {
+          return chatter.userId;
+        })
+      );
     } else {
-      friend.chattingWith = false;
+      let newFriends = friends.map((person) => {
+        if (friend.userId === person.userId) {
+          return { ...person, chattingWith: false };
+        } else {
+          return person;
+        }
+      });
+      setFriends(newFriends);
+
       let chatters = chatWith.filter((chatter) => {
         if (chatter.userId !== friend.userId) {
           return chatter;
         }
       });
-      // console.log("chatting with these people", chatters);
       setChatWith(chatters);
+
+      setChatterIds(
+        chatters.map((chatter) => {
+          return chatter.userId;
+        })
+      );
     }
   }, [checked]);
 
-  useEffect(() => {
-    if (!modalVisible) {
-      friend.chattingWith = false;
-      setChecked(false);
-    }
-  }, [modalVisible]);
+  // useEffect(() => {
+  //   if (!modalVisible) {
+  //     setFriends(
+  //       friends.map((person) => {
+  //         return { ...person, chattingWith: false };
+  //       })
+  //     );
+  //     setChecked(false);
+  //     setChatWith([]);
+  //   }
+  // }, [modalVisible]);
 
   return (
     <ListItem>
@@ -77,6 +109,6 @@ const ContactListItem = ({
   );
 };
 
-export default ContactListItem;
+export default ChatFriendListItem;
 
 const styles = StyleSheet.create({});

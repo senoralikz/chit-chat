@@ -6,6 +6,7 @@ import {
   FlatList,
   Modal,
   Pressable,
+  ScrollView,
 } from "react-native";
 import { Button, SearchBar } from "react-native-elements";
 import ChatFriendListItem from "../../components/ChatFriendListItem";
@@ -16,24 +17,25 @@ import {
   orderBy,
   query,
   onSnapshot,
+  where,
 } from "firebase/firestore";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
+import { useToast } from "react-native-toast-notifications";
 
 const SelectChattersListModal = ({ modalVisible, setModalVisible }) => {
+  const user = auth.currentUser;
+  const toast = useToast();
+
   const [search, setSearch] = useState("");
   const [friends, setFriends] = useState("");
   const [filteredFriends, setFilteredFriends] = useState("");
   const [chatWith, setChatWith] = useState([]);
-
-  const user = auth.currentUser;
+  const [groups, setGroups] = useState([]);
+  const [chatterIds, setChatterIds] = useState([]);
 
   const friendsRef = collection(db, "users", user.uid, "friends");
   const q = query(friendsRef, orderBy("displayName"));
-
-  useEffect(() => {
-    console.log("friends in the chatWith state", chatWith);
-  }, [chatWith]);
 
   useEffect(() => {
     const unsubFriends = onSnapshot(q, (querySnapshot) => {
@@ -47,25 +49,45 @@ const SelectChattersListModal = ({ modalVisible, setModalVisible }) => {
   }, []);
 
   useEffect(() => {
+    if (!modalVisible && friends.length > 0) {
+      setFriends(
+        friends.map((person) => {
+          return { ...person, chattingWith: false };
+        })
+      );
+      setChatWith([]);
+    }
+  }, [modalVisible]);
+
+  // useEffect(() => {
+  //   // console.log("user id is", user.uid);
+  //   // console.log("friend id is", friend.userId);
+  //   const groupsRef = collection(db, "groups");
+  //   const qGroups = query(groupsRef, where("members", "in", [chatterIds]));
+
+  //   const unsubGroups = onSnapshot(qGroups, (snapshot) => {
+  //     setGroups(
+  //       snapshot.docs.map((doc) => {
+  //         // console.log(
+  //         //   "checking doc data from contact list item",
+  //         //   doc.data(),
+  //         //   "and doc id is:",
+  //         //   doc.id
+  //         // );
+  //         return {
+  //           ...doc.data(),
+  //           groupId: doc.id,
+  //         };
+  //       })
+  //     );
+  //   });
+
+  //   return unsubGroups;
+  // }, []);
+
+  useEffect(() => {
     setFilteredFriends(friends);
   }, [friends]);
-
-  // const selectingChatters = (selectedChatter, checked) => {
-  //   if (checked) {
-  //     let chatters = chatWith;
-  //     chatters.push(selectedChatter);
-  //     // console.log("chatting with these people", chatters);
-  //     setChatWith(chatters);
-  //   } else {
-  //     let chatters = chatWith.filter((chatter) => {
-  //       if (chatter.userId !== selectedChatter.userId) {
-  //         return chatter;
-  //       }
-  //     });
-  //     // console.log("chatting with these people", chatters);
-  //     setChatWith(chatters);
-  //   }
-  // };
 
   const searchFilterFunction = (text) => {
     // Check if searched text is not blank
@@ -98,32 +120,104 @@ const SelectChattersListModal = ({ modalVisible, setModalVisible }) => {
     setChatWith([]);
   };
 
+  // const goToChatScreen = async () => {
+  //   try {
+  //     if (groups.length === 0) {
+  //       const groupDoc = await addDoc(groupsRef, {
+  //         groupName: "",
+  //         members: [user.uid, friend.userId],
+  //       })
+  //         .then(async (groupDoc) => {
+  //           console.log("new group id:", groupDoc.id);
+  //           await updateDoc(doc(groupsRef, groupDoc.id), {
+  //             groupId: groupDoc.id,
+  //           });
+  //           navigation.navigate("ChatScreen", {
+  //             friendUserId: friend.userId,
+  //             friendPhotoURL: friend.photoURL,
+  //             friendDisplayName: friend.displayName,
+  //             groupMembers: [user.uid, friend.userId],
+  //             groupId: groupDoc.id,
+  //             unreadMsgs: unreadMsgs,
+  //           });
+  //         })
+  //         .catch((error) =>
+  //           console.error(
+  //             error.code,
+  //             "-- error adding new group --",
+  //             error.message
+  //           )
+  //         );
+  //     } else {
+  //       navigation.navigate("ChatScreen", {
+  //         friendUserId: friend.userId,
+  //         friendPhotoURL: friend.photoURL,
+  //         friendDisplayName: friend.displayName,
+  //         groupMembers: chatWith,
+  //         groupId: groups[0].groupId,
+  //         unreadMsgs: unreadMsgs,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error(
+  //       error.code,
+  //       "-- error going to chat screen --",
+  //       error.message
+  //     );
+  //   }
+  // };
+
   return (
     <Modal
       animationType="slide"
       presentationStyle="formSheet"
       visible={modalVisible}
-      // onRequestClose={() => closingModal()}
+      // onRequestClose={closingModal}
       onRequestClose={() => {
-        setModalVisible(false);
         setChatWith([]);
+        setModalVisible(false);
       }}
     >
-      <View style={{ flexDirection: "row" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          paddingHorizontal: 5,
+        }}
+      >
         <Pressable
-          // onPress={() => closingModal()}
+          style={{ justifyContent: "center" }}
+          // onPress={closingModal}
           onPress={() => {
-            setModalVisible(false);
             setChatWith([]);
+            setModalVisible(false);
           }}
         >
-          <View style={{ justifyContent: "center" }}>
-            <Ionicons name="chevron-back" size={32} color="#9b59b6" />
-          </View>
+          <Ionicons name="chevron-back" size={32} color="#9b59b6" />
         </Pressable>
         <View style={{ justifyContent: "center", alignSelf: "center" }}>
           <Text style={{ fontSize: 36, fontWeight: "800" }}>New Message</Text>
         </View>
+        <Button
+          title="Create Chat"
+          titleStyle={{ fontWeight: "bold" }}
+          // onPress={goToChatScreen}
+          onPress={() => {
+            // console.log("friends in the chatWith state", chatWith);
+            // console.log("friends in the chatterIds state", chatterIds);
+            // console.log("all friends:", friends);
+
+            toast.show("Creating a chat", {
+              type: "success",
+              placement: "top",
+            });
+          }}
+          containerStyle={{
+            marginTop: 5,
+            borderRadius: 10,
+          }}
+          buttonStyle={{ backgroundColor: "#9b59b6" }}
+        />
       </View>
       <View style={styles.container}>
         <SearchBar
@@ -146,45 +240,94 @@ const SelectChattersListModal = ({ modalVisible, setModalVisible }) => {
             paddingHorizontal: 10,
             borderBottomWidth: 1,
             marginTop: 5,
-            height: 25,
-            justifyContent: "center",
+            height: 30,
           }}
         >
+          {/* <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}> */}
           <View style={{ justifyContent: "flex-end" }}>
             <Text style={{ fontSize: 18 }}>Chat With: </Text>
           </View>
-          {/* {chatWith.length > 0 &&
-            chatWith.map((friend) => (
-              <View key={friend.userId}>
-                <Text>{friend.displayName}, </Text>
-              </View>
-            ))} */}
-          <FlatList
-            ItemSeparatorComponent={() => (
-              <View style={{ justifyContent: "flex-end" }}>
-                <Text style={{ fontSize: 22 }}>, </Text>
+
+          {chatWith.length > 0 && (
+            <ScrollView
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+            >
+              {chatWith.map((friend) => (
+                <View
+                  key={friend.userId}
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignSelf: "flex-end",
+                    backgroundColor: "#9b59b6",
+                    borderRadius: 5,
+                    marginHorizontal: 3,
+                    marginBottom: 2,
+                    paddingHorizontal: 5,
+                    paddingVertical: 2,
+                    maxWidth: 100,
+                    // height: 25,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 22,
+                      fontWeight: "600",
+                      color: "#fff",
+                    }}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {friend.displayName}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+
+          {/* <FlatList
+            data={chatWith}
+            ListHeaderComponent={() => (
+              <View style={{ paddingTop: 7 }}>
+                <Text style={{ fontSize: 18 }}>Chat With: </Text>
               </View>
             )}
-            data={chatWith}
             renderItem={({ item }) => (
-              <View style={{ justifyContent: "flex-end" }}>
-                <Text style={{ fontSize: 22, fontWeight: "600" }}>
+              <View
+                key={item.userId}
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignSelf: "center",
+                  backgroundColor: "#9b59b6",
+                  borderRadius: 5,
+                  marginHorizontal: 3,
+                  // marginBottom: 9,
+                  paddingHorizontal: 5,
+                  paddingVertical: 2,
+                  // maxWidth: "95%",
+                  // height: 25,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 22,
+                    fontWeight: "600",
+                    color: "#fff",
+                  }}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {item.displayName}
                 </Text>
               </View>
             )}
             keyExtractor={(item) => item.userId}
             horizontal={true}
-          />
+            showsHorizontalScrollIndicator={false}
+          /> */}
         </View>
-        <Button
-          title="Create Chat"
-          onPress={() => alert("Creating chat")}
-          // style={{ width: "99%", alignSelf: "center" }}
-          containerStyle={{ marginTop: 5 }}
-          buttonStyle={{ backgroundColor: "#9b59b6" }}
-          raised={true}
-        />
         <FlatList
           ItemSeparatorComponent={() => (
             <View
@@ -200,9 +343,13 @@ const SelectChattersListModal = ({ modalVisible, setModalVisible }) => {
           renderItem={({ item }) => (
             <ChatFriendListItem
               friend={item}
+              friends={friends}
+              setFriends={setFriends}
               chatWith={chatWith}
               setChatWith={setChatWith}
               modalVisible={modalVisible}
+              chatterIds={chatterIds}
+              setChatterIds={setChatterIds}
               // selectingChatters={selectingChatters}
             />
           )}

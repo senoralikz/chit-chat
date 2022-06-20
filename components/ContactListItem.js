@@ -107,7 +107,6 @@ const ContactListItem = ({ friend, navigation }) => {
           friend.userId
         );
 
-        // Set the "capital" field of the city 'DC'
         await updateDoc(friendDocRef, {
           displayName: friendInfo.displayName,
           photoURL: friendInfo.photoURL,
