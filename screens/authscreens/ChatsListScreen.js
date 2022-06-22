@@ -26,7 +26,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { UnreadMsgContext } from "../../context/UnreadMsgContext";
 import { useRoute } from "@react-navigation/native";
 import { useToast } from "react-native-toast-notifications";
-import SelectChattersListModal from "./SelectChattersListModal";
 
 const ChatsListScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
@@ -60,8 +59,8 @@ const ChatsListScreen = ({ navigation }) => {
       ),
       headerRight: () => (
         <Pressable
-          // onPress={() => alert("creating a new chat")}
-          onPress={() => setModalVisible(true)}
+          onPress={() => navigation.navigate("SelectChattersListScreen")}
+          // onPress={() => setModalVisible(true)}
           style={{ paddingRight: 10 }}
         >
           <Ionicons name="create-outline" size={28} color="#9b59b6" />
@@ -147,10 +146,6 @@ const ChatsListScreen = ({ navigation }) => {
           </View>
         )}
         // style={{ paddingTop: 10 }}
-      />
-      <SelectChattersListModal
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
       />
     </View>
   );

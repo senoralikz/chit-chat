@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { onAuthStateChanged } from "firebase/auth";
@@ -90,30 +90,26 @@ export default function App() {
   }, []);
 
   return (
-    <>
-      <UnreadMsgContext.Provider
-        value={{ totalUnreadMsgs, setTotalUnreadMsgs }}
+    <UnreadMsgContext.Provider value={{ totalUnreadMsgs, setTotalUnreadMsgs }}>
+      <ToastProvider
+        renderType={renderType}
+        offsetBottom={80}
+        offsetTop={50}
+        textStyle={{ fontSize: 16 }}
+        duration={3000}
+        successIcon={
+          <Ionicons name="checkmark-circle-sharp" size={24} color="#fff" />
+        }
+        dangerIcon={<Ionicons name="md-warning" size={24} color="#fff" />}
+        warningIcon={<MaterialIcons name="error" size={24} color="#fff" />}
       >
-        <ToastProvider
-          renderType={renderType}
-          offsetBottom={80}
-          offsetTop={50}
-          textStyle={{ fontSize: 16 }}
-          duration={3000}
-          successIcon={
-            <Ionicons name="checkmark-circle-sharp" size={24} color="#fff" />
-          }
-          dangerIcon={<Ionicons name="md-warning" size={24} color="#fff" />}
-          warningIcon={<MaterialIcons name="error" size={24} color="#fff" />}
-        >
-          <SafeAreaProvider>
-            <NavigationContainer>
-              {!user ? <UnauthStack /> : <ChatsStack />}
-              <StatusBar style="auto" />
-            </NavigationContainer>
-          </SafeAreaProvider>
-        </ToastProvider>
-      </UnreadMsgContext.Provider>
-    </>
+        <SafeAreaProvider>
+          <NavigationContainer>
+            {!user ? <UnauthStack /> : <ChatsStack />}
+            <StatusBar style="auto" />
+          </NavigationContainer>
+        </SafeAreaProvider>
+      </ToastProvider>
+    </UnreadMsgContext.Provider>
   );
 }
