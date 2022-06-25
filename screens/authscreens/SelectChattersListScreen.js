@@ -20,9 +20,7 @@ import {
   where,
 } from "firebase/firestore";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import { useToast } from "react-native-toast-notifications";
-import Toast from "react-native-toast-notifications";
 import SelectChatsListModal from "./SelectChatsListModal";
 
 const SelectChattersListScreen = ({
@@ -61,22 +59,25 @@ const SelectChattersListScreen = ({
           title="Create Chat"
           // titleStyle={{ fontWeight: "bold" }}
           // onPress={goToChatScreen}
-          onPress={() => {
-            setModalVisible(true);
+          onPress={showAllAvailableChats}
+          // onPress={() => {
+          //   setModalVisible(true);
 
-            // console.log("friends in the chatWith state", chatWith);
-            // console.log("friends in the chatterIds state", chatterIds);
-            // console.log("all friends:", friends);
+          //   // console.log("friends in the chatWith state", chatWith);
+          //   console.log("friends in the chatterIds state", chatterIds);
+          //   console.log("all chats containing selected chatters", groups);
+          //   // console.log("all friends:", friends);
 
-            // toast.show("Creating a chat", {
-            //   type: "success",
-            //   placement: "top",
-            // });
-          }}
+          //   // toast.show("Creating a chat", {
+          //   //   type: "success",
+          //   //   placement: "top",
+          //   // });
+          // }}
           containerStyle={{
             borderRadius: 10,
           }}
           buttonStyle={{ backgroundColor: "#9b59b6" }}
+          disabled={chatterIds.length > 0 ? false : true}
         />
       ),
     });
@@ -94,45 +95,113 @@ const SelectChattersListScreen = ({
   }, []);
 
   // useEffect(() => {
-  //   if (!modalVisible && friends.length > 0) {
-  //     setFriends(
-  //       friends.map((person) => {
-  //         return { ...person, chattingWith: false };
-  //       })
-  //     );
-  //     setChatWith([]);
-  //   }
-  // }, [modalVisible]);
-
-  // useEffect(() => {
   //   // console.log("user id is", user.uid);
   //   // console.log("friend id is", friend.userId);
-  //   const groupsRef = collection(db, "groups");
-  //   const qGroups = query(groupsRef, where("members", "in", [chatterIds]));
+  //   // let gettingAllChatterIds = chatterIds;
+  //   // gettingAllChatterIds.push(user.uid);
 
-  //   const unsubGroups = onSnapshot(qGroups, (snapshot) => {
-  //     setGroups(
-  //       snapshot.docs.map((doc) => {
-  //         // console.log(
-  //         //   "checking doc data from contact list item",
-  //         //   doc.data(),
-  //         //   "and doc id is:",
-  //         //   doc.id
-  //         // );
-  //         return {
-  //           ...doc.data(),
-  //           groupId: doc.id,
-  //         };
-  //       })
+  //   if (chatterIds.length > 0) {
+  //     let gettingAllChatterIds = chatterIds;
+  //     console.log("chatters ids before adding user uid:", chatterIds);
+  //     {
+  //       !gettingAllChatterIds.some((id) => id === user.uid) &&
+  //         gettingAllChatterIds.push(user.uid);
+  //     }
+  //     console.log("chatters ids after adding user uid:", gettingAllChatterIds);
+
+  //     const groupsRef = collection(db, "groups");
+  //     const qGroups = query(
+  //       groupsRef,
+  //       where("members", "array-contains", gettingAllChatterIds)
   //     );
-  //   });
 
-  //   return unsubGroups;
-  // }, []);
+  //     const unsubGroups = onSnapshot(qGroups, (snapshot) => {
+  //       setGroups(
+  //         snapshot.docs.map((doc) => {
+  //           console.log(
+  //             "checking doc data from create chat screen",
+  //             doc.data(),
+  //             "and doc id is:",
+  //             doc.id
+  //           );
+  //           return {
+  //             ...doc.data(),
+  //             groupId: doc.id,
+  //           };
+  //         })
+  //       );
+  //     });
+
+  //     return unsubGroups;
+  //   }
+  // }, [chatterIds]);
 
   useEffect(() => {
     setFilteredFriends(friends);
   }, [friends]);
+
+  const showAllAvailableChats = async () => {
+    try {
+      let gettingGroups = [];
+      let matchingGroups = [];
+      let gettingAllChatterIds = chatterIds;
+      console.log("chatters ids before adding user uid:", chatterIds);
+      {
+        !gettingAllChatterIds.some((id) => id === user.uid) &&
+          gettingAllChatterIds.push(user.uid);
+      }
+
+      console.log("chatters ids after adding user uid:", gettingAllChatterIds);
+
+      const groupsRef = collection(db, "groups");
+      const qGroups = query(
+        groupsRef,
+        where("members", "array-contains", user.uid)
+      );
+
+      const querySnapshot = await getDocs(qGroups);
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+        gettingGroups.push(doc.data());
+      });
+      console.log("all groups", gettingGroups);
+
+      // gettingGroups.forEach((group) => {
+      //   if (group.members.includes(gettingAllChatterIds)) {
+      //     matchingGroups.push(group);
+      //   }
+      // });
+
+      gettingGroups.forEach((group) => {
+        if (
+          gettingAllChatterIds.every((id) => {
+            return group.members.includes(id);
+          })
+        ) {
+          matchingGroups.push(group);
+        }
+      });
+
+      // gettingAllChatterIds.every((id) => {
+      //   gettingGroups.forEach((group) => {
+      //     return group.members.includes(id)
+      //   });
+      // })
+
+      setGroups(matchingGroups);
+      setModalVisible(true);
+    } catch (error) {
+      toast.show("Error getting available chats", {
+        type: "danger",
+      });
+      console.error(
+        error.code,
+        "-- Error getting available chats --",
+        error.message
+      );
+    }
+  };
 
   const searchFilterFunction = (text) => {
     // Check if searched text is not blank
@@ -416,6 +485,8 @@ const SelectChattersListScreen = ({
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         chatWith={chatWith}
+        groups={groups}
+        navigation={navigation}
       />
     </View>
   );

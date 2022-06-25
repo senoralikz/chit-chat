@@ -89,7 +89,8 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
           </View>
         ),
       headerLeft: () => (
-        <Pressable onPress={() => goBack()}>
+        <Pressable onPress={() => navigation.navigate("ChatsListScreen")}>
+          {/* <Pressable onPress={() => goBack()}> */}
           <View style={{ flexDirection: "row" }}>
             <Ionicons name="chevron-back" size={32} color="#9b59b6" />
             <View style={{ justifyContent: "center" }}>
