@@ -18,7 +18,7 @@ import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { UnreadMsgContext } from "../context/UnreadMsgContext";
 
-const ChatListItem = ({ chat, navigation }) => {
+const ChatListItem = ({ chat, navigation, setModalVisible }) => {
   const [unreadMsgs, setUnreadMsgs] = useState([]);
   const [memberNames, setMemberNames] = useState([]);
   const [membersInfo, setMembersInfo] = useState("");
@@ -104,6 +104,11 @@ const ChatListItem = ({ chat, navigation }) => {
   };
 
   const goToChatScreen = () => {
+    const routes = navigation.getState()?.routes;
+    const prevRoute = routes[routes.length - 1];
+    if (prevRoute.name === "SelectChattersListScreen") {
+      setModalVisible(false);
+    }
     if (membersInfo.length === 1) {
       navigation.navigate("ChatScreen", {
         // messages: messages,

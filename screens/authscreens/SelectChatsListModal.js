@@ -7,14 +7,13 @@ import {
   FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Avatar, Button } from "react-native-elements";
+import { Button } from "react-native-elements";
 import { StatusBar } from "expo-status-bar";
 import ChatListItem from "../../components/ChatListItem.js";
 
 const SelectChatsListModal = ({
   modalVisible,
   setModalVisible,
-  chatWith,
   groups,
   navigation,
 }) => {
@@ -25,22 +24,52 @@ const SelectChatsListModal = ({
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <Pressable
-        style={{ justifyContent: "center" }}
-        onPress={() => setModalVisible(false)}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          borderBottomWidth: 1,
+        }}
       >
-        <Ionicons name="chevron-back" size={32} color="#9b59b6" />
-      </Pressable>
+        <Pressable
+          style={{ justifyContent: "center" }}
+          onPress={() => setModalVisible(false)}
+        >
+          <Ionicons name="chevron-back" size={32} color="#9b59b6" />
+        </Pressable>
+        <Text style={{ fontSize: 36, fontWeight: "800", padding: 10 }}>
+          Existing Chats
+        </Text>
+      </View>
       <View
         style={{ flex: 1, justifyContent: "center", paddingHorizontal: 10 }}
       >
+        <Button
+          title="Create New Chat"
+          icon={() => <Ionicons name="add" size={24} color="#fff" />}
+          containerStyle={{ marginTop: 10 }}
+          onPress={() => console.log("creating a new chat")}
+        />
         <FlatList
+          ItemSeparatorComponent={() => (
+            <View
+              style={{
+                width: "100%",
+                alignSelf: "center",
+                borderBottomColor: "#dfe6e9",
+                borderBottomWidth: 1,
+              }}
+            />
+          )}
           data={groups}
           renderItem={({ item }) => (
-            <ChatListItem chat={item} navigation={navigation} />
+            <ChatListItem
+              chat={item}
+              navigation={navigation}
+              setModalVisible={setModalVisible}
+            />
           )}
           keyExtractor={(item) => item.groupId}
-          ListEmptyComponent={() => <Button title="Create New Chat" />}
         />
       </View>
       <StatusBar style="inverted" />

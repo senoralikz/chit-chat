@@ -202,7 +202,6 @@ const ChatScreen = ({ route, navigation, navigation: { goBack } }) => {
           return;
         }
         await deleteDoc(doc(groupsRef, route.params.groupId));
-        console.log("leaving chat screen");
       }),
     [navigation, messages]
   );
