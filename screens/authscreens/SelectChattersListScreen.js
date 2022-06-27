@@ -13,32 +13,42 @@ import { auth, db } from "../../firebaseConfig";
 import {
   collection,
   getDocs,
+  getDoc,
   orderBy,
   query,
   onSnapshot,
   where,
+  addDoc,
+  updateDoc,
+  doc,
 } from "firebase/firestore";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useToast } from "react-native-toast-notifications";
 import SelectChatsListModal from "./SelectChatsListModal";
 
-const SelectChattersListScreen = ({ navigation, navigation: { goBack } }) => {
+const SelectChattersListScreen = ({
+  route,
+  navigation,
+  navigation: { goBack },
+}) => {
   const [search, setSearch] = useState("");
-  const [friends, setFriends] = useState("");
-  const [filteredFriends, setFilteredFriends] = useState("");
+  const [friends, setFriends] = useState();
+  const [filteredFriends, setFilteredFriends] = useState();
   const [chatWith, setChatWith] = useState([]);
   const [groups, setGroups] = useState([]);
   const [chatterIds, setChatterIds] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [unreadMsgs, setUnreadMsgs] = useState([]);
 
   const user = auth.currentUser;
   const toast = useToast();
 
   const friendsRef = collection(db, "users", user.uid, "friends");
-  const q = query(friendsRef, orderBy("displayName"));
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      title: "Select Chatters",
+      headerBackTitleVisible: false,
       headerLeft: () => (
         <Pressable
           style={{ justifyContent: "center" }}
@@ -50,7 +60,7 @@ const SelectChattersListScreen = ({ navigation, navigation: { goBack } }) => {
       headerRight: () => (
         <Button
           title="Create Chat"
-          onPress={showAllAvailableChats}
+          onPress={checkForExistingChats}
           containerStyle={{
             borderRadius: 10,
           }}
@@ -59,24 +69,46 @@ const SelectChattersListScreen = ({ navigation, navigation: { goBack } }) => {
         />
       ),
     });
-  }, [navigation, friends, chatWith, chatterIds, modalVisible]);
+  }, [navigation, chatterIds]);
 
   useEffect(() => {
-    const unsubFriends = onSnapshot(q, (querySnapshot) => {
-      setFriends(
-        querySnapshot.docs.map((doc) => {
-          return { ...doc.data(), chattingWith: false };
-        })
-      );
+    const extractFriendId = route.params.userFriendIds.map((friendId) => {
+      return friendId.userId;
     });
-    return unsubFriends;
+
+    const q = query(
+      collection(db, "users"),
+      where("userId", "in", extractFriendId),
+      orderBy("displayName")
+    );
+    const unsubFriendInfo = onSnapshot(q, (querySnapshot) => {
+      let gettingFriends = [];
+      querySnapshot.forEach((doc) => {
+        gettingFriends.push({ ...doc.data(), chattingWith: false });
+      });
+      console.log("listening to these friends:", gettingFriends);
+      setFriends(gettingFriends);
+    });
+
+    return unsubFriendInfo;
   }, []);
 
   useEffect(() => {
     setFilteredFriends(friends);
   }, [friends]);
 
-  const showAllAvailableChats = async () => {
+  // const fetchFriendsInfo = () => {
+  //   let friendsInfo = [];
+  //   userFriendIds.forEach(async (friendId) => {
+  //     const friendRef = doc(db, "users", friendId.userId);
+  //     const docSnap = await getDoc(friendRef);
+  //     friendsInfo.push({ ...docSnap.data(), chattingWith: false });
+  //   });
+  //   friendsInfo.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  //   setFriends(friendsInfo);
+  // };
+
+  const checkForExistingChats = async () => {
     try {
       let gettingGroups = [];
       let matchingGroups = [];
@@ -92,7 +124,8 @@ const SelectChattersListScreen = ({ navigation, navigation: { goBack } }) => {
       const groupsRef = collection(db, "groups");
       const qGroups = query(
         groupsRef,
-        where("members", "array-contains", user.uid)
+        where("members", "array-contains", user.uid),
+        orderBy("lastModified", "desc")
       );
 
       const querySnapshot = await getDocs(qGroups);
@@ -116,13 +149,52 @@ const SelectChattersListScreen = ({ navigation, navigation: { goBack } }) => {
         setGroups(matchingGroups);
         setModalVisible(true);
       } else {
-        toast.show("No existing chats with selected members", {
-          type: "warning",
-        });
-        // console.log("no existing chats with selected members");
+        let memberNames = [];
+        chatWith.forEach((chatter) => memberNames.push(chatter.displayName));
+
+        const groupDoc = await addDoc(groupsRef, {
+          groupName: "",
+          members: gettingAllChatterIds,
+        })
+          .then(async (groupDoc) => {
+            // console.log("new group id:", groupDoc.id);
+            await updateDoc(doc(groupsRef, groupDoc.id), {
+              groupId: groupDoc.id,
+            });
+            if (chatWith.length === 1) {
+              navigation.navigate("ChatScreen", {
+                friendUserId: chatWith[0].userId,
+                friendPhotoURL: chatWith[0].photoURL,
+                friendDisplayName: chatWith[0].displayName,
+                groupMembers: gettingAllChatterIds,
+                groupId: groupDoc.id,
+                unreadMsgs: unreadMsgs,
+              });
+            } else {
+              navigation.navigate("GroupChatScreen", {
+                groupId: groupDoc.id,
+                // groupName: chat.groupName,
+                groupMembers: gettingAllChatterIds,
+                unreadMsgs: unreadMsgs,
+                // friendUserId: membersInfo[0]?.userId,
+                friendDisplayName: memberNames,
+                // friendPhotoURL: membersInfo[0]?.photoURL,
+              });
+            }
+          })
+          .catch((error) => {
+            toast.show(error.message, {
+              type: "danger",
+            });
+            console.error(
+              error.code,
+              "-- error adding new group --",
+              error.message
+            );
+          });
       }
     } catch (error) {
-      toast.show("Error getting available chats", {
+      toast.show(error.message, {
         type: "danger",
       });
       console.error(
@@ -156,117 +228,7 @@ const SelectChattersListScreen = ({ navigation, navigation: { goBack } }) => {
     }
   };
 
-  const closingModal = () => {
-    setFriends(
-      friends.map((person) => {
-        return { ...person, chattingWith: false };
-      })
-    );
-    setChatWith([]);
-    setModalVisible(false);
-  };
-
-  const selectChatScreen = async () => {
-    try {
-      if (groups.length === 0) {
-        const groupDoc = await addDoc(groupsRef, {
-          groupName: "",
-          members: [user.uid, friend.userId],
-        })
-          .then(async (groupDoc) => {
-            console.log("new group id:", groupDoc.id);
-            await updateDoc(doc(groupsRef, groupDoc.id), {
-              groupId: groupDoc.id,
-            });
-            navigation.navigate("ChatScreen", {
-              friendUserId: friend.userId,
-              friendPhotoURL: friend.photoURL,
-              friendDisplayName: friend.displayName,
-              groupMembers: [user.uid, friend.userId],
-              groupId: groupDoc.id,
-              unreadMsgs: unreadMsgs,
-            });
-          })
-          .catch((error) =>
-            console.error(
-              error.code,
-              "-- error adding new group --",
-              error.message
-            )
-          );
-      } else {
-        navigation.navigate("ChatScreen", {
-          friendUserId: friend.userId,
-          friendPhotoURL: friend.photoURL,
-          friendDisplayName: friend.displayName,
-          groupMembers: chatWith,
-          groupId: groups[0].groupId,
-          unreadMsgs: unreadMsgs,
-        });
-      }
-    } catch (error) {
-      console.error(
-        error.code,
-        "-- error going to chat screen --",
-        error.message
-      );
-    }
-  };
-
-  // <View
-  //       style={{
-  //         flexDirection: "row",
-  //         justifyContent: "space-between",
-  //         paddingHorizontal: 5,
-  //       }}
-  //     >
-  // <Pressable
-  //   style={{ justifyContent: "center" }}
-  //   onPress={closingModal}
-  //   // onPress={() => {
-  //   //   setChatWith([]);
-  //   //   setModalVisible(false);
-  //   // }}
-  // >
-  //   <Ionicons name="chevron-back" size={32} color="#9b59b6" />
-  // </Pressable>
-  //       <View style={{ justifyContent: "center", alignSelf: "center" }}>
-  //         <Text style={{ fontSize: 36, fontWeight: "800" }}>New Message</Text>
-  //       </View>
-  // <Button
-  //   title="Create Chat"
-  //   titleStyle={{ fontWeight: "bold" }}
-  //   // onPress={goToChatScreen}
-  //   onPress={() => {
-  //     console.log("friends in the chatWith state", chatWith);
-  //     console.log("friends in the chatterIds state", chatterIds);
-  //     console.log("all friends:", friends);
-
-  //     // toast.show("Creating a chat", {
-  //     //   type: "success",
-  //     //   placement: "top",
-  //     // });
-  //   }}
-  //   containerStyle={{
-  //     marginTop: 5,
-  //     borderRadius: 10,
-  //   }}
-  //   buttonStyle={{ backgroundColor: "#9b59b6" }}
-  // />
-  //     </View>
-
   return (
-    // <Modal
-    //   animationType="slide"
-    //   presentationStyle="formSheet"
-    //   visible={modalVisible}
-    //   onRequestClose={closingModal}
-    //   // onRequestClose={() => {
-    //   //   setChatWith([]);
-    //   //   setModalVisible(false);
-    //   // }}
-    // >
-
     <View style={styles.container}>
       <SearchBar
         placeholder="Search Friends..."
@@ -330,49 +292,11 @@ const SelectChattersListScreen = ({ navigation, navigation: { goBack } }) => {
             ))}
           </ScrollView>
         )}
-
-        {/* <FlatList
-            data={chatWith}
-            ListHeaderComponent={() => (
-              <View style={{ paddingTop: 7 }}>
-                <Text style={{ fontSize: 18 }}>Chat With: </Text>
-              </View>
-            )}
-            renderItem={({ item }) => (
-              <View
-                key={item.userId}
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignSelf: "center",
-                  backgroundColor: "#9b59b6",
-                  borderRadius: 5,
-                  marginHorizontal: 3,
-                  // marginBottom: 9,
-                  paddingHorizontal: 5,
-                  paddingVertical: 2,
-                  // maxWidth: "95%",
-                  // height: 25,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 22,
-                    fontWeight: "600",
-                    color: "#fff",
-                  }}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {item.displayName}
-                </Text>
-              </View>
-            )}
-            keyExtractor={(item) => item.userId}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-          /> */}
       </View>
+      {/* <Button
+        title="check params friends"
+        onPress={() => console.log("checking params friends:", extractFriendId)}
+      /> */}
       <FlatList
         ItemSeparatorComponent={() => (
           <View
@@ -409,13 +333,15 @@ const SelectChattersListScreen = ({ navigation, navigation: { goBack } }) => {
             <Text style={{ fontSize: 18, color: "#bdc3c7" }}>No Friends</Text>
           </View>
         )}
-        style={{ paddingTop: 10 }}
+        // style={{ paddingTop: 10 }}
       />
       <SelectChatsListModal
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         groups={groups}
         navigation={navigation}
+        chatWith={chatWith}
+        chatterIds={chatterIds}
       />
     </View>
   );

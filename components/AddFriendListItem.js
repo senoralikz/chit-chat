@@ -25,8 +25,6 @@ const AddFriendListItem = ({ user, currentFriends }) => {
   const addFriend = async () => {
     try {
       await setDoc(doc(friendsCollRef, user.userId), {
-        photoURL: user.photoURL,
-        displayName: user.displayName,
         userId: user.userId,
       });
     } catch (error) {

@@ -2,6 +2,8 @@ import { StyleSheet, Text, View } from "react-native";
 import { useState, useEffect } from "react";
 import { ListItem, Avatar } from "react-native-elements";
 import { CheckBox } from "react-native-elements";
+import { onSnapshot, doc } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
 const ChatFriendListItem = ({
   friend,
@@ -14,7 +16,21 @@ const ChatFriendListItem = ({
   chatterIds,
   setChatterIds,
 }) => {
+  const [friendInfo, setFriendInfo] = useState("");
   const [checked, setChecked] = useState(friend.chattingWith);
+
+  const userRef = doc(db, "users", friend.userId);
+
+  // useEffect(() => {
+  //   const unsubFriendInfo = onSnapshot(userRef, (doc) => {
+  //     console.log("Current data: ", doc.data());
+  //     setFriendInfo(() => {
+  //       return { ...doc.data() };
+  //     });
+  //   });
+
+  //   return unsubFriendInfo;
+  // }, []);
 
   useEffect(() => {
     if (checked) {
@@ -65,18 +81,6 @@ const ChatFriendListItem = ({
     }
   }, [checked]);
 
-  // useEffect(() => {
-  //   if (!modalVisible) {
-  //     setFriends(
-  //       friends.map((person) => {
-  //         return { ...person, chattingWith: false };
-  //       })
-  //     );
-  //     setChecked(false);
-  //     setChatWith([]);
-  //   }
-  // }, [modalVisible]);
-
   return (
     <ListItem>
       <Avatar size="medium" source={{ uri: friend.photoURL }} rounded />
@@ -98,7 +102,6 @@ const ChatFriendListItem = ({
             {friend.displayName}
           </ListItem.Title>
           <CheckBox
-            // center
             checked={checked}
             checkedColor="#9b59b6"
             onPress={() => setChecked(!checked)}

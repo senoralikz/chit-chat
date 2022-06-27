@@ -9,14 +9,87 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "react-native-elements";
 import { StatusBar } from "expo-status-bar";
+import { addDoc, updateDoc, doc, collection } from "firebase/firestore";
 import ChatListItem from "../../components/ChatListItem.js";
+import { useToast } from "react-native-toast-notifications";
+import { db, auth } from "../../firebaseConfig.js";
+import { useState } from "react";
 
 const SelectChatsListModal = ({
   modalVisible,
   setModalVisible,
   groups,
   navigation,
+  chatWith,
+  chatterIds,
 }) => {
+  const [unreadMsgs, setUnreadMsgs] = useState([]);
+  const user = auth.currentUser;
+  const toast = useToast();
+
+  const handleCreateNewChat = async () => {
+    try {
+      const groupsRef = collection(db, "groups");
+      let memberNames = [];
+      chatWith.forEach((chatter) => memberNames.push(chatter.displayName));
+
+      let gettingAllChatterIds = chatterIds;
+      {
+        !gettingAllChatterIds.some((id) => id === user.uid) &&
+          gettingAllChatterIds.push(user.uid);
+      }
+
+      const groupDoc = await addDoc(groupsRef, {
+        groupPhotoUrl: "",
+        groupName: "",
+        members: gettingAllChatterIds,
+      })
+        .then(async (groupDoc) => {
+          // console.log("new group id:", groupDoc.id);
+          // console.log("new group info:", groupDoc.data());
+          await updateDoc(doc(groupsRef, groupDoc.id), {
+            groupId: groupDoc.id,
+          });
+          setModalVisible(false);
+          if (chatWith.length === 1) {
+            navigation.navigate("ChatScreen", {
+              friendUserId: chatWith[0].userId,
+              friendPhotoURL: chatWith[0].photoURL,
+              friendDisplayName: chatWith[0].displayName,
+              groupMembers: gettingAllChatterIds,
+              groupId: groupDoc.id,
+              unreadMsgs: unreadMsgs,
+            });
+          } else {
+            navigation.navigate("GroupChatScreen", {
+              groupId: groupDoc.id,
+              // groupName: chat.groupName,
+              groupMembers: gettingAllChatterIds,
+              unreadMsgs: unreadMsgs,
+              // friendUserId: membersInfo[0]?.userId,
+              friendDisplayName: memberNames,
+              // friendPhotoURL: membersInfo[0]?.photoURL,
+            });
+          }
+        })
+        .catch((error) => {
+          toast.show(error.message, {
+            type: "danger",
+          });
+          console.error(
+            error.code,
+            "-- error adding new group --",
+            error.message
+          );
+        });
+    } catch (error) {
+      toast.show(error.message, {
+        type: "danger",
+      });
+      console.error(error.code, "-- error adding new group --", error.message);
+    }
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -48,7 +121,8 @@ const SelectChatsListModal = ({
           title="Create New Chat"
           icon={() => <Ionicons name="add" size={24} color="#fff" />}
           containerStyle={{ marginTop: 10 }}
-          onPress={() => console.log("creating a new chat")}
+          onPress={handleCreateNewChat}
+          // onPress={() => console.log("creating a new chat")}
         />
         <FlatList
           ItemSeparatorComponent={() => (

@@ -40,6 +40,8 @@ import {
   FontAwesome,
   MaterialCommunityIcons,
   Ionicons,
+  EvilIcons,
+  Feather,
 } from "@expo/vector-icons";
 import Message from "../../components/Message";
 import { Avatar, Button } from "react-native-elements";
@@ -47,7 +49,7 @@ import { useToast } from "react-native-toast-notifications";
 import { useRoute } from "@react-navigation/native";
 import { Badge } from "react-native-elements";
 
-const ChatScreen = ({ route, navigation }) => {
+const GroupChatScreen = ({ route, navigation }) => {
   const [messages, setMessages] = useState([]);
   const [textInput, setTextInput] = useState("");
   const [unreadMsgs, setUnreadMsgs] = useState([]);
@@ -65,28 +67,74 @@ const ChatScreen = ({ route, navigation }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: () =>
-        route.params.groupName ? (
-          <Text>{route.params.groupName}</Text>
-        ) : (
-          <View style={{ flexDirection: "row" }}>
+      headerTitle: () => (
+        <View
+          style={{
+            // backgroundColor: "blue",
+            width: "80%",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {!route.params.groupPhotoUrl ? (
+            <View
+              style={{
+                backgroundColor: "#bdc3c7",
+                height: 35,
+                width: 35,
+                borderRadius: 20,
+                alignSelf: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#fff",
+                  textAlign: "center",
+                  fontSize: 28,
+                  // paddingVertical: 3,
+                }}
+              >
+                {route.params.friendDisplayName.length}
+              </Text>
+            </View>
+          ) : (
             <Avatar
-              source={{ uri: route.params.friendPhotoURL }}
               size="small"
+              source={{ uri: route.params.groupPhotoUrl }}
               rounded
             />
+          )}
+          <View style={{ alignSelf: "center", width: "80%" }}>
             <Text
               style={{
-                alignSelf: "center",
                 marginLeft: 5,
                 fontSize: 20,
                 fontWeight: "bold",
               }}
+              numberOfLines={1}
+              ellipsizeMode="tail"
             >
-              {route.params.friendDisplayName}
+              {route.params.groupName
+                ? route.params.groupName
+                : route.params.friendDisplayName.join(", ")}
             </Text>
           </View>
-        ),
+          <Pressable
+            onPress={() => {
+              navigation.navigate("GroupChatInfoScreen", {
+                friendDisplayName: route.params.friendDisplayName,
+                membersInfo: route.params.membersInfo,
+                chatInfo: route.params.chatInfo,
+                groupName: route.params.groupName,
+              });
+            }}
+          >
+            <Feather name="chevron-right" size={24} color="#bdc3c7" />
+          </Pressable>
+        </View>
+      ),
       headerLeft: () => (
         <Pressable onPress={() => navigation.navigate("ChatsListScreen")}>
           {/* <Pressable onPress={() => goBack()}> */}
@@ -112,10 +160,10 @@ const ChatScreen = ({ route, navigation }) => {
         </Pressable>
       ),
     });
-  }, [navigation, totalUnreadMsgs]);
+  }, [navigation, totalUnreadMsgs, route]);
 
   useEffect(() => {
-    // console.log("checking groupId from chat screen", route.params.groupId);
+    console.log("checking groupId from chat screen", route.params.groupId);
 
     const unsubMessages = onSnapshot(q, (snapshot) => {
       setMessages(
@@ -163,35 +211,6 @@ const ChatScreen = ({ route, navigation }) => {
   useEffect(() => {
     readMsgs();
   }, [unreadMsgs]);
-
-  // useEffect(() => {
-  //   const messagesRef = collection(db, "groups");
-  //   const q = query(messagesRef, where("members", "array-contains", user.uid));
-
-  //   const unsubNewMsgs = onSnapshot(q, (querySnapshot) => {
-  //     querySnapshot.docs.forEach((doc) => {
-  //       console.log("the group info:", doc.data());
-  //       if (currentRoute.name === "ChatScreen") {
-  //         if (doc.data().groupId !== route.params.groupId) {
-  //           if (
-  //             doc.data().lastMessage &&
-  //             doc.data().lastMessage?.sentBy !== user.uid
-  //           ) {
-  //             toast.show(doc.data().lastMessage?.message, {
-  //               type: "newMessage",
-  //               message: doc.data().lastMessage?.message,
-  //               displayName: doc.data().lastMessage?.senderDisplayName,
-  //               photoURL: doc.data().lastMessage?.senderPhotoURL,
-  //               placement: "top",
-  //               duration: 5000,
-  //             });
-  //           }
-  //         }
-  //       }
-  //     });
-  //   });
-  //   return unsubNewMsgs;
-  // }, []);
 
   useEffect(
     () =>
@@ -315,8 +334,10 @@ const ChatScreen = ({ route, navigation }) => {
           )}
         </ScrollView>
         {/* <Button
-          title="read msgs"
-          onPress={() => console.log(route.params.unreadMsgs)}
+          title="read chat info"
+          onPress={() =>
+            console.log("checking chat info:", route.params.chatInfo)
+          }
         /> */}
         <View style={styles.footer}>
           <TextInput
@@ -344,7 +365,7 @@ const ChatScreen = ({ route, navigation }) => {
   );
 };
 
-export default ChatScreen;
+export default GroupChatScreen;
 
 const styles = StyleSheet.create({
   container: {

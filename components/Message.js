@@ -1,10 +1,28 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
-import { auth } from "../firebaseConfig";
+import { useEffect, useState } from "react";
+import { auth, db } from "../firebaseConfig";
 import { Avatar } from "react-native-elements";
+import { getDoc, doc } from "firebase/firestore";
 
-const Message = ({ message, index, messages, route }) => {
+const Message = ({ message, index, messages }) => {
+  const [senderInfo, setSenderInfo] = useState("");
+
   const user = auth.currentUser;
+
+  useEffect(() => {
+    fetchSenderInfo();
+  }, []);
+
+  const fetchSenderInfo = async () => {
+    const userRef = doc(db, "users", message.senderUserId);
+    const docSnap = await getDoc(userRef);
+    if (docSnap.exists()) {
+      setSenderInfo(docSnap.data());
+    } else {
+      // doc.data() will be undefined in this case
+      console.log("No such document!");
+    }
+  };
 
   const formattedTime = new Date(message.createdAt * 1000).toLocaleTimeString(
     "en-US",
@@ -95,12 +113,16 @@ const Message = ({ message, index, messages, route }) => {
               <Avatar
                 size="small"
                 rounded
-                source={{ uri: route.params.friendPhotoURL }}
+                source={{ uri: senderInfo.photoURL }}
               />
             </View>
             <View style={{ flexDirection: "column" }}>
-              <Text style={{ paddingLeft: 10, color: "#95a5a6" }}>
-                {route.params.friendDisplayName}
+              <Text
+                style={{ paddingLeft: 10, color: "#95a5a6" }}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {senderInfo.displayName}
               </Text>
               <View style={styles.messagesReceived}>
                 <Text style={{ fontSize: 16 }}>{message.message}</Text>

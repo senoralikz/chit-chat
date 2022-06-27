@@ -17,6 +17,7 @@ import {
   where,
   getDocs,
   onSnapshot,
+  getDoc,
   orderBy,
 } from "firebase/firestore";
 import ChatListItem from "../../components/ChatListItem";
@@ -29,13 +30,15 @@ import { useToast } from "react-native-toast-notifications";
 
 const ChatsListScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [userFriendIds, setUserFriendIds] = useState([]);
+  const [friends, setFriends] = useState("");
   const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
 
   const toast = useToast();
 
   const user = auth.currentUser;
   const currentRoute = useRoute();
+  const friendsRef = collection(db, "users", user.uid, "friends");
   const groupsRef = collection(db, "groups");
   const q = query(
     groupsRef,
@@ -59,7 +62,11 @@ const ChatsListScreen = ({ navigation }) => {
       ),
       headerRight: () => (
         <Pressable
-          onPress={() => navigation.navigate("SelectChattersListScreen")}
+          onPress={() =>
+            navigation.navigate("SelectChattersListScreen", {
+              userFriendIds: userFriendIds,
+            })
+          }
           // onPress={() => setModalVisible(true)}
           style={{ paddingRight: 10 }}
         >
@@ -67,7 +74,7 @@ const ChatsListScreen = ({ navigation }) => {
         </Pressable>
       ),
     });
-  }, [navigation]);
+  }, [navigation, userFriendIds]);
 
   useEffect(() => {
     const unsubChatDetails = onSnapshot(q, (querySnapshot) => {
@@ -103,6 +110,17 @@ const ChatsListScreen = ({ navigation }) => {
   }, [chats]);
 
   useEffect(() => {
+    const unsubFriendIds = onSnapshot(friendsRef, (querySnapshot) => {
+      setUserFriendIds(
+        querySnapshot.docs.map((doc) => {
+          return { ...doc.data() };
+        })
+      );
+    });
+    return unsubFriendIds;
+  }, []);
+
+  useEffect(() => {
     if (currentRoute.name !== "ChatScreen") {
       if (chats.length > 0 && chats[0].lastMessage?.sentBy !== user.uid) {
         toast.show(chats[0].lastMessage?.message, {
@@ -116,6 +134,27 @@ const ChatsListScreen = ({ navigation }) => {
       }
     }
   }, [chats]);
+
+  // useEffect(() => {
+  //   fetchFriendsInfo();
+  // }, [userFriendIds]);
+
+  // const fetchFriendsInfo = () => {
+  //   try {
+  //     let friendsInfo = [];
+  //     userFriendIds.forEach(async (friendId) => {
+  //       const friendRef = doc(db, "users", friendId.userId);
+  //       const docSnap = await getDoc(friendRef);
+  //       friendsInfo.push({ ...docSnap.data(), chattingWith: false });
+  //     });
+  //     friendsInfo.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  //     setFriends(friendsInfo);
+  //   } catch (error) {
+  //     toast.show(error.message, {
+  //       type: "danger",
+  //     });
+  //   }
+  // };
 
   return (
     <View style={styles.container}>
@@ -147,6 +186,10 @@ const ChatsListScreen = ({ navigation }) => {
         )}
         // style={{ paddingTop: 10 }}
       />
+      {/* <Button
+        title="Check friends"
+        onPress={() => console.log("reading friends from chat lists:", friends)}
+      /> */}
     </View>
   );
 };

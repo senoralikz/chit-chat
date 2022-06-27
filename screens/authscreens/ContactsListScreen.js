@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState, useLayoutEffect } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import ContactListItem from "../../components/ContactListItem";
 import { auth, db } from "../../firebaseConfig";
 import {
@@ -20,25 +19,60 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { Button } from "react-native-elements";
 
 const ContactsListScreen = ({ navigation }) => {
-  const [friends, setFriends] = useState([]);
+  const [friendIds, setFriendIds] = useState([]);
+  const [friendInfo, setFriendInfo] = useState([]);
 
   const user = auth.currentUser;
 
   const friendsRef = collection(db, "users", user.uid, "friends");
-  const q = query(friendsRef, orderBy("displayName"));
 
   useEffect(() => {
-    const unsubFriends = onSnapshot(q, (querySnapshot) => {
-      setFriends(
+    // let unsortedFriends = []
+
+    const unsubFriendIds = onSnapshot(friendsRef, (querySnapshot) => {
+      // querySnapshot.docs.map((doc) => {
+      //   unsortedFriends.push(doc.data())
+      // })
+
+      setFriendIds(
         querySnapshot.docs.map((doc) => {
           return { ...doc.data() };
         })
       );
     });
-    return unsubFriends;
+
+    // unsortedFriends.sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+    // setFriendIds(unsortedFriends)
+
+    return unsubFriendIds;
   }, []);
+
+  useEffect(() => {
+    if (friendIds.length > 0) {
+      const extractFriendId = friendIds.map((friendId) => {
+        return friendId.userId;
+      });
+      const q = query(
+        collection(db, "users"),
+        where("userId", "in", extractFriendId),
+        orderBy("displayName")
+      );
+      const unsubFriendInfo = onSnapshot(q, (querySnapshot) => {
+        let gettingFriends = [];
+        querySnapshot.forEach((doc) => {
+          gettingFriends.push(doc.data());
+        });
+        console.log("listening to these friends:", gettingFriends);
+        setFriendInfo(gettingFriends);
+      });
+
+      return unsubFriendInfo;
+    }
+  }, [friendIds]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -46,10 +80,10 @@ const ContactsListScreen = ({ navigation }) => {
       headerLeft: () => (
         <View style={{ flexDirection: "row" }}>
           <Text style={{ fontSize: 36, fontWeight: "800" }}>Friends</Text>
-          {friends.length > 0 && (
+          {friendIds.length > 0 && (
             <View style={{ justifyContent: "center" }}>
               <Text style={{ paddingLeft: 5, fontSize: 22 }}>
-                ({friends.length})
+                ({friendIds.length})
               </Text>
             </View>
           )}
@@ -61,10 +95,17 @@ const ContactsListScreen = ({ navigation }) => {
         </Pressable>
       ),
     });
-  }, [navigation, friends]);
+  }, [navigation, friendIds]);
 
   return (
     <View style={styles.container}>
+      {/* <Button
+        title="check friends"
+        onPress={() => {
+          console.log("checking friends info:", friendInfo);
+          // console.log("checking friend ids:", friendIds);
+        }}
+      /> */}
       <FlatList
         ItemSeparatorComponent={() => (
           <View
@@ -76,7 +117,7 @@ const ContactsListScreen = ({ navigation }) => {
             }}
           />
         )}
-        data={friends}
+        data={friendInfo}
         renderItem={({ item }) => (
           <ContactListItem friend={item} navigation={navigation} />
         )}

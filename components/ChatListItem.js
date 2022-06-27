@@ -122,14 +122,15 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
         friendPhotoURL: membersInfo[0]?.photoURL,
       });
     } else {
-      navigation.navigate("ChatScreen", {
+      navigation.navigate("GroupChatScreen", {
         groupId: chat.groupId,
+        groupPhotoUrl: chat.groupPhotoUrl,
         groupName: chat.groupName,
         groupMembers: chat.members,
-        // unreadMsgs: unreadMsgs,
-        // friendUserId: membersInfo[0]?.userId,
-        friendDisplayName: membersInfo.length,
-        // friendPhotoURL: membersInfo[0]?.photoURL,
+        unreadMsgs: unreadMsgs,
+        friendDisplayName: memberNames,
+        membersInfo: membersInfo,
+        chatInfo: chat,
       });
     }
   };
@@ -161,13 +162,15 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
             source={{ uri: membersInfo[0]?.photoURL }}
             rounded
           />
-        ) : (
+        ) : !chat.groupPhotoUrl ? (
           <View
             style={{
               backgroundColor: "#bdc3c7",
               height: 50,
               width: 50,
               borderRadius: 25,
+              alignSelf: "center",
+              justifyContent: "center",
             }}
           >
             <Text
@@ -175,12 +178,14 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
                 color: "#fff",
                 textAlign: "center",
                 fontSize: 42,
-                paddingVertical: 3,
+                // paddingVertical: 3,
               }}
             >
               {membersInfo.length}
             </Text>
           </View>
+        ) : (
+          <Avatar size="medium" source={{ uri: chat.groupPhotoUrl }} rounded />
         )}
         <View style={{ position: "absolute", top: 13, left: 52 }}>
           {unreadMsgs.length > 0 && (
@@ -215,7 +220,7 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
             }}
           >
             <ListItem.Title
-              style={{ fontWeight: "bold" }}
+              style={{ fontWeight: "bold", width: "70%" }}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -232,12 +237,8 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
               )}
             </ListItem.Title>
             {/* <Button
-              title="check members"
-              onPress={() => console.log("members in here", memberNames)}
-            /> */}
-            {/* <Button
-              title="check unread msgs"
-              onPress={() => console.log("see all unread msgs", unreadMsgs)}
+              title="check chat info"
+              onPress={() => console.log("members in here", chat)}
             /> */}
           </View>
           <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">

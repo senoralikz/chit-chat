@@ -56,20 +56,15 @@ const ContactListItem = ({ friend, navigation }) => {
     return unsubGroups;
   }, []);
 
-  useEffect(() => {
-    const unsubFriendInfo = onSnapshot(friendRef, (doc) => {
-      console.log("Current data: ", doc.data());
-      setFriendInfo(() => {
-        return { ...doc.data() };
-      });
-    });
+  // useEffect(() => {
+  //   const unsubFriendInfo = onSnapshot(friendRef, (doc) => {
+  //     setFriendInfo(() => {
+  //       return { ...doc.data() };
+  //     });
+  //   });
 
-    return unsubFriendInfo;
-  }, []);
-
-  useEffect(() => {
-    updateFriendInfo();
-  }, [friendInfo]);
+  //   return unsubFriendInfo;
+  // }, []);
 
   useEffect(() => {
     if (groups.length > 0) {
@@ -96,35 +91,11 @@ const ContactListItem = ({ friend, navigation }) => {
     }
   }, [groups]);
 
-  const updateFriendInfo = async () => {
-    if (friendInfo) {
-      try {
-        const friendDocRef = doc(
-          db,
-          "users",
-          user.uid,
-          "friends",
-          friend.userId
-        );
-
-        await updateDoc(friendDocRef, {
-          displayName: friendInfo.displayName,
-          photoURL: friendInfo.photoURL,
-        });
-      } catch (error) {
-        console.error(
-          error.code,
-          "-- error updating friend info --",
-          error.message
-        );
-      }
-    }
-  };
-
   const goToChatScreen = async () => {
     try {
       if (groups.length === 0) {
         const groupDoc = await addDoc(groupsRef, {
+          groupPhotoUrl: "",
           groupName: "",
           members: [user.uid, friend.userId],
         })
@@ -200,7 +171,7 @@ const ContactListItem = ({ friend, navigation }) => {
   return (
     <Swipeable renderRightActions={rightSwipeActions}>
       <ListItem>
-        <Avatar size="medium" source={{ uri: friendInfo.photoURL }} rounded />
+        <Avatar size="medium" source={{ uri: friend.photoURL }} rounded />
         <ListItem.Content>
           <View
             style={{
@@ -216,7 +187,7 @@ const ContactListItem = ({ friend, navigation }) => {
                 fontSize: 18,
               }}
             >
-              {friendInfo.displayName}
+              {friend.displayName}
             </ListItem.Title>
             <ListItem.Title>
               <Pressable onPress={goToChatScreen}>
