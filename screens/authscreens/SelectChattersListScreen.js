@@ -86,7 +86,7 @@ const SelectChattersListScreen = ({
       querySnapshot.forEach((doc) => {
         gettingFriends.push({ ...doc.data(), chattingWith: false });
       });
-      console.log("listening to these friends:", gettingFriends);
+      // console.log("listening to these friends:", gettingFriends);
       setFriends(gettingFriends);
     });
 

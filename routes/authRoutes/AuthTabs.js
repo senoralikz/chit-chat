@@ -43,8 +43,10 @@ const AuthTabs = () => {
             display: totalUnreadMsgs === 0 ? "none" : "flex",
             // display: totalUnreadMsgs > 0 ? "flex" : "none",
             // paddingVertical: 2,
+            // marginVertical: 2,
             justifyContent: "center",
-            alignItems: "center",
+            // alignItems: "center",
+            // alignSelf: "center",
           },
           tabBarIcon: ({ color }) => (
             <Ionicons name="ios-chatbubbles" size={28} color={color} />

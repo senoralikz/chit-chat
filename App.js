@@ -42,12 +42,14 @@ export default function App() {
             paddingLeft: 10,
           }}
         >
-          <Avatar
-            source={{ uri: toast.photoURL }}
-            size="small"
-            rounded
-            containerStyle={{ marginRight: 10 }}
-          />
+          <View style={{ alignSelf: "center" }}>
+            <Avatar
+              source={{ uri: toast.photoURL }}
+              size="small"
+              rounded
+              containerStyle={{ marginRight: 10 }}
+            />
+          </View>
           <View style={{ width: "85%" }}>
             <Text
               style={{ fontWeight: "bold", fontSize: 20 }}

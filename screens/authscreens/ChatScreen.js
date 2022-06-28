@@ -48,7 +48,7 @@ import { useRoute } from "@react-navigation/native";
 import { Badge } from "react-native-elements";
 
 const ChatScreen = ({ route, navigation }) => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(route.params.messages);
   const [textInput, setTextInput] = useState("");
   const [unreadMsgs, setUnreadMsgs] = useState([]);
   const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
@@ -132,32 +132,21 @@ const ChatScreen = ({ route, navigation }) => {
   }, []);
 
   useEffect(() => {
-    const chatsRef = collection(db, "chats");
-    const messagesRef = collection(chatsRef, route.params.groupId, "messages");
-
-    const q = query(
-      messagesRef,
-      where("readBy", "array-contains", { readMsg: false, userId: user.uid })
-    );
-    // console.log("checking groupId from chat screen", route.params.groupId);
-    const unsubUnreadMsgs = onSnapshot(q, (snapshot) => {
-      setUnreadMsgs(
-        snapshot.docs.map((doc) => {
-          return {
-            ...doc.data(),
-            messageId: doc.id,
-          };
-        })
-      );
-    });
-
-    return unsubUnreadMsgs;
-  }, []);
+    if (messages?.length > 0) {
+      let gettingUnreadMsgs = [];
+      messages.map((message) => {
+        message.readBy.map((checkRead) => {
+          if (checkRead.userId === user.uid && checkRead.readMsg === false) {
+            gettingUnreadMsgs.push(message);
+          }
+        });
+      });
+      setUnreadMsgs(gettingUnreadMsgs);
+    }
+  }, [messages]);
 
   useEffect(() => {
-    setTotalUnreadMsgs(
-      (prevState) => prevState - route.params.unreadMsgs.length
-    );
+    setTotalUnreadMsgs((prevState) => prevState - route.params.unreadMsgs);
   }, []);
 
   useEffect(() => {
@@ -196,7 +185,7 @@ const ChatScreen = ({ route, navigation }) => {
   useEffect(
     () =>
       navigation.addListener("beforeRemove", async () => {
-        if (messages.length > 0) {
+        if (messages?.length > 0) {
           // If we don't have unsaved changes, then we don't need to do anything
           return;
         }
@@ -295,7 +284,7 @@ const ChatScreen = ({ route, navigation }) => {
             scrollViewRef.current.scrollToEnd({ animated: true })
           }
         >
-          {messages?.length !== 0 ? (
+          {messages?.length > 0 ? (
             messages?.map((message, index) => (
               <View key={message.messageId}>
                 <Message message={message} index={index} messages={messages} />

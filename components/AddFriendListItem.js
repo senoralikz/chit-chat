@@ -61,7 +61,7 @@ const AddFriendListItem = ({ user, currentFriends }) => {
             {user.displayName}
           </ListItem.Title>
           <ListItem.Title>
-            <Pressable
+            {/* <Pressable
               onPress={
                 () =>
                   toast.show(`You are chatting with ${user.displayName}`, {
@@ -72,7 +72,7 @@ const AddFriendListItem = ({ user, currentFriends }) => {
               style={{ paddingRight: 20, paddingTop: 1 }}
             >
               <Ionicons name="chatbubble" size={28} color="#9b59b6" />
-            </Pressable>
+            </Pressable> */}
             <Pressable onPress={addFriend} disabled={alreadyFriends}>
               <Ionicons
                 name="add-circle"

@@ -13,14 +13,18 @@ import {
   onSnapshot,
   addDoc,
   updateDoc,
+  orderBy,
 } from "firebase/firestore";
+import { useToast } from "react-native-toast-notifications";
 
 const ContactListItem = ({ friend, navigation }) => {
   const [friendInfo, setFriendInfo] = useState("");
   const [groups, setGroups] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [unreadMsgs, setUnreadMsgs] = useState([]);
 
   const user = auth.currentUser;
+  const toast = useToast();
 
   const groupsRef = collection(db, "groups");
   const friendRef = doc(db, "users", friend.userId);
@@ -71,13 +75,10 @@ const ContactListItem = ({ friend, navigation }) => {
       const chatsRef = collection(db, "chats");
       const messagesRef = collection(chatsRef, groups[0].groupId, "messages");
 
-      const q = query(
-        messagesRef,
-        where("readBy", "array-contains", { readMsg: false, userId: user.uid })
-      );
+      const q = query(messagesRef, orderBy("createdAt"));
       // console.log("checking groupId from chat screen", route.params.groupId);
-      const unsubUnreadMsgs = onSnapshot(q, (snapshot) => {
-        setUnreadMsgs(
+      const unsubMessages = onSnapshot(q, (snapshot) => {
+        setMessages(
           snapshot.docs.map((doc) => {
             return {
               ...doc.data(),
@@ -87,9 +88,68 @@ const ContactListItem = ({ friend, navigation }) => {
         );
       });
 
-      return unsubUnreadMsgs;
+      return unsubMessages;
     }
   }, [groups]);
+
+  // useEffect(() => {
+  //   if (groups.length > 0) {
+  //     const chatsRef = collection(db, "chats");
+  //     const messagesRef = collection(chatsRef, groups[0].groupId, "messages");
+
+  //     const q = query(
+  //       messagesRef,
+  //       where("readBy", "array-contains", { readMsg: false, userId: user.uid })
+  //     );
+  //     // console.log("checking groupId from chat screen", route.params.groupId);
+  //     const unsubUnreadMsgs = onSnapshot(q, (snapshot) => {
+  //       setUnreadMsgs(
+  //         snapshot.docs.map((doc) => {
+  //           return {
+  //             ...doc.data(),
+  //             messageId: doc.id,
+  //           };
+  //         })
+  //       );
+  //     });
+
+  //     return unsubUnreadMsgs;
+  //   }
+  // }, [groups]);
+
+  // useEffect(() => {
+  //   const chatsRef = collection(db, "chats");
+  //   const messagesRef = collection(chatsRef, chat.groupId, "messages");
+
+  //   const q = query(messagesRef, orderBy("createdAt"));
+
+  //   const unsubMessages = onSnapshot(q, (snapshot) => {
+  //     setMessages(
+  //       snapshot.docs.map((doc) => {
+  //         return {
+  //           ...doc.data(),
+  //           messageId: doc.id,
+  //         };
+  //       })
+  //     );
+  //   });
+
+  //   return unsubMessages;
+  // }, []);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      let gettingUnreadMsgs = [];
+      messages.map((message) => {
+        message.readBy.map((checkRead) => {
+          if (checkRead.userId === user.uid && checkRead.readMsg === false) {
+            gettingUnreadMsgs.push(message);
+          }
+        });
+      });
+      setUnreadMsgs(gettingUnreadMsgs.length);
+    }
+  }, [messages]);
 
   const goToChatScreen = async () => {
     try {
@@ -113,13 +173,16 @@ const ContactListItem = ({ friend, navigation }) => {
               unreadMsgs: unreadMsgs,
             });
           })
-          .catch((error) =>
+          .catch((error) => {
+            toast.show(error.message, {
+              type: "danger",
+            });
             console.error(
               error.code,
               "-- error adding new group --",
               error.message
-            )
-          );
+            );
+          });
       } else {
         navigation.navigate("ChatScreen", {
           friendUserId: friend.userId,
@@ -127,6 +190,7 @@ const ContactListItem = ({ friend, navigation }) => {
           friendDisplayName: friend.displayName,
           groupMembers: [user.uid, friend.userId],
           groupId: groups[0].groupId,
+          messages: messages,
           unreadMsgs: unreadMsgs,
         });
       }

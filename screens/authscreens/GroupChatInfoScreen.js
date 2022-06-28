@@ -7,7 +7,7 @@ import {
   FlatList,
 } from "react-native";
 import { useEffect, useLayoutEffect, useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { auth, db } from "../../firebaseConfig";
 import { useToast } from "react-native-toast-notifications";
 import { Button } from "react-native-elements";
@@ -74,17 +74,24 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
           style={{
             color: "#fff",
             textAlign: "center",
-            fontSize: 110,
+            fontSize: 100,
           }}
         >
           {route.params.friendDisplayName.length}
         </Text>
       </View>
-      {route.params.chatInfo.groupName ? (
-        <Text>{route.params.chatInfo.groupName}</Text>
-      ) : (
-        <Text>{route.params.friendDisplayName.join(", ")}</Text>
-      )}
+      <View style={{ flexDirection: "row" }}>
+        <View style={{ borderBottomWidth: 1, justifyContent: "center" }}>
+          <Text>
+            {route.params.groupName
+              ? route.params.groupName
+              : route.params.friendDisplayName.join(", ")}
+          </Text>
+        </View>
+        <Pressable>
+          <AntDesign name="edit" size={24} color="black" />
+        </Pressable>
+      </View>
       <View style={{ width: "80%" }}>
         {/* {route.params.membersInfo.map((member) => (
             <View

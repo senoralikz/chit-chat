@@ -89,6 +89,7 @@ const ChatsListScreen = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
+    // let totalMsgs = 0;
     let totalMsgs = [];
     chats.forEach(async (chat) => {
       const messagesRef = collection(db, "chats", chat.groupId, "messages");
@@ -103,10 +104,13 @@ const ChatsListScreen = ({ navigation }) => {
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
+        // totalMsgs++;
         totalMsgs.push(doc.data());
       });
+
       setTotalUnreadMsgs(totalMsgs.length);
     });
+    // setTotalUnreadMsgs(totalMsgs);
   }, [chats]);
 
   useEffect(() => {

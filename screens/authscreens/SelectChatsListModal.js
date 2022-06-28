@@ -23,6 +23,7 @@ const SelectChatsListModal = ({
   chatWith,
   chatterIds,
 }) => {
+  const [messages, setMessages] = useState([]);
   const [unreadMsgs, setUnreadMsgs] = useState([]);
   const user = auth.currentUser;
   const toast = useToast();
@@ -59,6 +60,7 @@ const SelectChatsListModal = ({
               groupMembers: gettingAllChatterIds,
               groupId: groupDoc.id,
               unreadMsgs: unreadMsgs,
+              messages: messages,
             });
           } else {
             navigation.navigate("GroupChatScreen", {
@@ -66,6 +68,7 @@ const SelectChatsListModal = ({
               // groupName: chat.groupName,
               groupMembers: gettingAllChatterIds,
               unreadMsgs: unreadMsgs,
+              messages: messages,
               // friendUserId: membersInfo[0]?.userId,
               friendDisplayName: memberNames,
               // friendPhotoURL: membersInfo[0]?.photoURL,

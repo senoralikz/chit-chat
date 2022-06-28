@@ -71,7 +71,7 @@ const GroupChatScreen = ({ route, navigation }) => {
         <View
           style={{
             // backgroundColor: "blue",
-            width: "80%",
+            maxWidth: "80%",
             flexDirection: "row",
             justifyContent: "center",
             alignItems: "center",
@@ -106,7 +106,7 @@ const GroupChatScreen = ({ route, navigation }) => {
               rounded
             />
           )}
-          <View style={{ alignSelf: "center", width: "80%" }}>
+          <View style={{ alignSelf: "center", maxWidth: "80%" }}>
             <Text
               style={{
                 marginLeft: 5,
@@ -203,9 +203,7 @@ const GroupChatScreen = ({ route, navigation }) => {
   }, []);
 
   useEffect(() => {
-    setTotalUnreadMsgs(
-      (prevState) => prevState - route.params.unreadMsgs.length
-    );
+    setTotalUnreadMsgs((prevState) => prevState - route.params.unreadMsgs);
   }, []);
 
   useEffect(() => {

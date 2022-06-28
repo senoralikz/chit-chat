@@ -12,19 +12,25 @@ import {
   orderBy,
   updateDoc,
   arrayRemove,
+  getDoc,
 } from "firebase/firestore";
 import { Avatar, ListItem, Icon, Badge } from "react-native-elements";
 import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { UnreadMsgContext } from "../context/UnreadMsgContext";
+import { useToast } from "react-native-toast-notifications";
+import { useRoute } from "@react-navigation/native";
 
 const ChatListItem = ({ chat, navigation, setModalVisible }) => {
+  const [messages, setMessages] = useState([]);
   const [unreadMsgs, setUnreadMsgs] = useState([]);
   const [memberNames, setMemberNames] = useState([]);
   const [membersInfo, setMembersInfo] = useState("");
   const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
 
   const user = auth.currentUser;
+  const toast = useToast();
+  const currentRoute = useRoute();
   // const userRef = doc(db, "users", user.uid);
   const groupRef = doc(db, "groups", chat.groupId);
   const chatRef = doc(db, "chats", chat.groupId);
@@ -56,13 +62,10 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
     const chatsRef = collection(db, "chats");
     const messagesRef = collection(chatsRef, chat.groupId, "messages");
 
-    const q = query(
-      messagesRef,
-      where("readBy", "array-contains", { readMsg: false, userId: user.uid })
-    );
-    // console.log("checking groupId from chat screen", route.params.groupId);
-    const unsubUnreadMsgs = onSnapshot(q, (snapshot) => {
-      setUnreadMsgs(
+    const q = query(messagesRef, orderBy("createdAt"));
+
+    const unsubMessages = onSnapshot(q, (snapshot) => {
+      setMessages(
         snapshot.docs.map((doc) => {
           return {
             ...doc.data(),
@@ -72,8 +75,80 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
       );
     });
 
-    return unsubUnreadMsgs;
+    return unsubMessages;
   }, []);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      let gettingUnreadMsgs = [];
+      messages.map((message) => {
+        message.readBy.map((checkRead) => {
+          if (checkRead.userId === user.uid && checkRead.readMsg === false) {
+            gettingUnreadMsgs.push(message);
+          }
+        });
+      });
+      setUnreadMsgs(gettingUnreadMsgs.length);
+    }
+  }, [messages]);
+
+  // useEffect(() => {
+  //   const chatsRef = collection(db, "chats");
+  //   const messagesRef = collection(chatsRef, chat.groupId, "messages");
+
+  //   const q = query(
+  //     messagesRef,
+  //     where("readBy", "array-contains", { readMsg: false, userId: user.uid })
+  //   );
+  //   // console.log("checking groupId from chat screen", route.params.groupId);
+  //   const unsubUnreadMsgs = onSnapshot(q, (snapshot) => {
+  //     setUnreadMsgs(
+  //       snapshot.docs.map((doc) => {
+  //         return {
+  //           ...doc.data(),
+  //           messageId: doc.id,
+  //         };
+  //       })
+  //     );
+  //   });
+
+  //   return unsubUnreadMsgs;
+  // }, []);
+
+  // useEffect(() => {
+  //   getIncomingMessageInfo();
+  // }, [messages]);
+
+  const getIncomingMessageInfo = async () => {
+    try {
+      if (currentRoute.name !== "ChatScreen") {
+        if (messages.length > 0 && messages[0]?.senderUserId !== user.uid) {
+          const userRef = doc(db, "users", messages[0]?.senderUserId);
+          const docSnap = await getDoc(userRef);
+
+          const msgSenderInfo = docSnap.data();
+          // if (docSnap.exists()) {
+          //   console.log("Document data:", docSnap.data());
+          // } else {
+          //   // doc.data() will be undefined in this case
+          //   console.log("No such document!");
+          // }
+          toast.show(messages[0].message, {
+            type: "newMessage",
+            message: messages[0].message,
+            displayName: msgSenderInfo.displayName,
+            photoURL: msgSenderInfo.photoURL,
+            placement: "top",
+            duration: 5000,
+          });
+        }
+      }
+    } catch (error) {
+      toast.show(error.message, {
+        type: "danger",
+      });
+    }
+  };
 
   const deleteMessagesColl = async () => {
     try {
@@ -111,7 +186,7 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
     }
     if (membersInfo.length === 1) {
       navigation.navigate("ChatScreen", {
-        // messages: messages,
+        messages: messages,
         groupId: chat.groupId,
         groupName: chat.groupName,
         groupMembers: chat.members,
@@ -123,6 +198,7 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
       });
     } else {
       navigation.navigate("GroupChatScreen", {
+        messages: messages,
         groupId: chat.groupId,
         groupPhotoUrl: chat.groupPhotoUrl,
         groupName: chat.groupName,
@@ -188,9 +264,9 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
           <Avatar size="medium" source={{ uri: chat.groupPhotoUrl }} rounded />
         )}
         <View style={{ position: "absolute", top: 13, left: 52 }}>
-          {unreadMsgs.length > 0 && (
+          {unreadMsgs > 0 && (
             <Badge
-              value={unreadMsgs.length > 99 ? "99+" : unreadMsgs.length}
+              value={unreadMsgs > 99 ? "99+" : unreadMsgs}
               textStyle={{ fontSize: 14 }}
               badgeStyle={{
                 // width: 23,
