@@ -13,7 +13,7 @@ import { addDoc, updateDoc, doc, collection } from "firebase/firestore";
 import ChatListItem from "../../components/ChatListItem.js";
 import { useToast } from "react-native-toast-notifications";
 import { db, auth } from "../../firebaseConfig.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const SelectChatsListModal = ({
   modalVisible,
@@ -22,6 +22,7 @@ const SelectChatsListModal = ({
   navigation,
   chatWith,
   chatterIds,
+  chatExists,
 }) => {
   const [messages, setMessages] = useState([]);
   const [unreadMsgs, setUnreadMsgs] = useState([]);
@@ -125,6 +126,7 @@ const SelectChatsListModal = ({
           icon={() => <Ionicons name="add" size={24} color="#fff" />}
           containerStyle={{ marginTop: 10 }}
           onPress={handleCreateNewChat}
+          disabled={chatExists}
           // onPress={() => console.log("creating a new chat")}
         />
         <FlatList

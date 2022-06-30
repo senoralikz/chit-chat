@@ -39,11 +39,32 @@ const SelectChattersListScreen = ({
   const [chatterIds, setChatterIds] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [unreadMsgs, setUnreadMsgs] = useState([]);
+  const [chatExists, setChatExists] = useState(true);
 
   const user = auth.currentUser;
   const toast = useToast();
 
   const friendsRef = collection(db, "users", user.uid, "friends");
+
+  useEffect(() => {
+    const testingExists = groups.some((group) => {
+      let gettingMemberIds = [];
+
+      group.members.forEach((member) => gettingMemberIds.push(member));
+      if (gettingMemberIds.length !== chatterIds.length) {
+        // console.log("checking if lengths are the same:", false);
+        return false;
+      }
+      // console.log(
+      //   "after checking if chat exists:",
+      //   gettingMemberIds.every((val) => chatterIds.includes(val))
+      // );
+      return gettingMemberIds.every((val) => chatterIds.includes(val));
+    });
+
+    console.log("testing if chat exists:", testingExists);
+    setChatExists(testingExists);
+  }, [groups, chatterIds]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -113,13 +134,13 @@ const SelectChattersListScreen = ({
       let gettingGroups = [];
       let matchingGroups = [];
       let gettingAllChatterIds = chatterIds;
-      console.log("chatters ids before adding user uid:", chatterIds);
+      // console.log("chatters ids before adding user uid:", chatterIds);
       {
         !gettingAllChatterIds.some((id) => id === user.uid) &&
           gettingAllChatterIds.push(user.uid);
       }
 
-      console.log("chatters ids after adding user uid:", gettingAllChatterIds);
+      // console.log("chatters ids after adding user uid:", gettingAllChatterIds);
 
       const groupsRef = collection(db, "groups");
       const qGroups = query(
@@ -131,7 +152,7 @@ const SelectChattersListScreen = ({
       const querySnapshot = await getDocs(qGroups);
       querySnapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
-        console.log(doc.id, " => ", doc.data());
+        // console.log(doc.id, " => ", doc.data());
         gettingGroups.push(doc.data());
       });
 
@@ -342,6 +363,8 @@ const SelectChattersListScreen = ({
         navigation={navigation}
         chatWith={chatWith}
         chatterIds={chatterIds}
+        chatExists={chatExists}
+        setChatExists={setChatExists}
       />
     </View>
   );
