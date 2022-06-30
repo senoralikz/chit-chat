@@ -28,6 +28,7 @@ import {
   Ionicons,
 } from "@expo/vector-icons";
 import { Avatar } from "react-native-elements";
+import { useToast } from "react-native-toast-notifications";
 
 const SignUpScreen = ({ navigation: { goBack } }) => {
   const [email, setEmail] = useState("");
@@ -36,6 +37,8 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
   const [displayName, setDisplayName] = useState("");
   const [displayNameAvailable, setDisplayNameAvailable] = useState(true);
   const [pickedPhoto, setPickedPhoto] = useState("");
+
+  const toast = useToast();
 
   const usersRef = collection(db, "users");
   const qEmail = query(usersRef, where("email", "==", email));
@@ -60,7 +63,17 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
 
   const selectProfilePic = async () => {
     try {
-      // No permissions request is necessary for launching the image library
+      // Ask the user for the permission to access the media library
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (permissionResult.granted === false) {
+        toast.show("You've refused to allow this app to access your photos!", {
+          type: "danger",
+        });
+        return;
+      }
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -72,7 +85,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
         setPickedPhoto(result.uri);
       }
     } catch (error) {
-      Alert.alert(error.code, error.message, { text: "Ok" });
+      toast.show(error.message, { type: "danger" });
       console.error(error.code, "--- line 109 ----", error.message);
     }
   };

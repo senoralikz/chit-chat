@@ -101,7 +101,17 @@ const ProfileScreen = ({ navigation }) => {
 
   const selectProfilePic = async () => {
     try {
-      // No permissions request is necessary for launching the image library
+      // Ask the user for the permission to access the media library
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (permissionResult.granted === false) {
+        toast.show("You've refused to allow this app to access your photos!", {
+          type: "danger",
+        });
+        return;
+      }
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
