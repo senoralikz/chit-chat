@@ -27,6 +27,13 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [["expo-image-picker"]]
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "ChitChat needs access to your photos so you can select a profile picture"
+        }
+      ]
+    ]
   }
 }

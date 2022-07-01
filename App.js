@@ -13,6 +13,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Avatar } from "react-native-elements";
 import { ToastProvider } from "react-native-toast-notifications";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { MenuProvider } from "react-native-popup-menu";
 
 export default function App() {
   const [user, setUser] = useState("");
@@ -105,12 +106,14 @@ export default function App() {
         dangerIcon={<Ionicons name="md-warning" size={24} color="#fff" />}
         warningIcon={<MaterialIcons name="error" size={24} color="#fff" />}
       >
-        <SafeAreaProvider>
-          <NavigationContainer>
-            {!user ? <UnauthStack /> : <ChatsStack />}
-            <StatusBar style="auto" />
-          </NavigationContainer>
-        </SafeAreaProvider>
+        <MenuProvider>
+          <SafeAreaProvider>
+            <NavigationContainer>
+              {!user ? <UnauthStack /> : <ChatsStack />}
+              <StatusBar style="auto" />
+            </NavigationContainer>
+          </SafeAreaProvider>
+        </MenuProvider>
       </ToastProvider>
     </UnreadMsgContext.Provider>
   );

@@ -22,11 +22,18 @@ import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import { signOut, updateEmail, updateProfile } from "firebase/auth";
 import { auth, db, storage } from "../../firebaseConfig";
 import { Avatar } from "react-native-elements";
-import { Ionicons, Entypo } from "@expo/vector-icons";
+import { Ionicons, Entypo, FontAwesome, Feather } from "@expo/vector-icons";
+
 import * as ImagePicker from "expo-image-picker";
 import { useToast } from "react-native-toast-notifications";
 import UpdateEmailModal from "./UpdateEmailModal";
 import ChangePasswordModal from "./ChangePasswordModal";
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from "react-native-popup-menu";
 
 const ProfileScreen = ({ navigation }) => {
   const user = auth.currentUser;
@@ -106,9 +113,12 @@ const ProfileScreen = ({ navigation }) => {
         await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (permissionResult.granted === false) {
-        toast.show("You've refused to allow this app to access your photos!", {
-          type: "danger",
-        });
+        toast.show(
+          "You denied permission to allow this app to access your photos",
+          {
+            type: "danger",
+          }
+        );
         return;
       }
 
@@ -243,11 +253,42 @@ const ProfileScreen = ({ navigation }) => {
           {!pickedPhoto ? (
             <>
               <Avatar source={{ uri: user.photoURL }} size={150} rounded />
-              <Pressable onPress={selectProfilePic}>
+              {/* <Pressable onPress={selectProfilePic}>
                 <View style={styles.removeAddPhotoBtn}>
                   <Ionicons name="add-circle" size={34} color="green" />
                 </View>
-              </Pressable>
+              </Pressable> */}
+              <Menu>
+                <MenuTrigger>
+                  <View style={styles.removeAddPhotoBtn}>
+                    <Ionicons name="add-circle" size={34} color="green" />
+                  </View>
+                </MenuTrigger>
+                <MenuOptions>
+                  <MenuOption
+                    onSelect={selectProfilePic}
+                    style={{ marginVertical: 5 }}
+                  >
+                    <View style={{ flexDirection: "row", paddingLeft: 5 }}>
+                      <FontAwesome name="picture-o" size={20} color="#000" />
+                      <View style={{ alignSelf: "center", marginLeft: 5 }}>
+                        <Text style={{ fontSize: 18 }}>Select Photo</Text>
+                      </View>
+                    </View>
+                  </MenuOption>
+                  <MenuOption
+                    style={{ marginVertical: 5 }}
+                    onSelect={() => alert(`Opening camera`)}
+                  >
+                    <View style={{ flexDirection: "row", paddingLeft: 5 }}>
+                      <Feather name="camera" size={20} color="#000" />
+                      <View style={{ alignSelf: "center", marginLeft: 5 }}>
+                        <Text style={{ fontSize: 18 }}>Camera</Text>
+                      </View>
+                    </View>
+                  </MenuOption>
+                </MenuOptions>
+              </Menu>
             </>
           ) : (
             <>

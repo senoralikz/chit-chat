@@ -26,9 +26,17 @@ import {
   MaterialCommunityIcons,
   AntDesign,
   Ionicons,
+  FontAwesome,
+  Feather,
 } from "@expo/vector-icons";
 import { Avatar } from "react-native-elements";
 import { useToast } from "react-native-toast-notifications";
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from "react-native-popup-menu";
 
 const SignUpScreen = ({ navigation: { goBack } }) => {
   const [email, setEmail] = useState("");
@@ -68,9 +76,12 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
         await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (permissionResult.granted === false) {
-        toast.show("You've refused to allow this app to access your photos!", {
-          type: "danger",
-        });
+        toast.show(
+          "You denied permission to allow this app to access your photos",
+          {
+            type: "danger",
+          }
+        );
         return;
       }
 
@@ -233,9 +244,40 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
                 size={150}
                 rounded
               />
-              <View style={styles.removeAddPhotoBtn}>
+              {/* <View style={styles.removeAddPhotoBtn}>
                 <Ionicons name="add-circle" size={34} color="green" />
-              </View>
+              </View> */}
+              <Menu>
+                <MenuTrigger>
+                  <View style={styles.removeAddPhotoBtn}>
+                    <Ionicons name="add-circle" size={34} color="green" />
+                  </View>
+                </MenuTrigger>
+                <MenuOptions>
+                  <MenuOption
+                    onSelect={selectProfilePic}
+                    style={{ marginVertical: 5 }}
+                  >
+                    <View style={{ flexDirection: "row", paddingLeft: 5 }}>
+                      <FontAwesome name="picture-o" size={20} color="#000" />
+                      <View style={{ alignSelf: "center", marginLeft: 5 }}>
+                        <Text style={{ fontSize: 18 }}>Select Photo</Text>
+                      </View>
+                    </View>
+                  </MenuOption>
+                  <MenuOption
+                    style={{ marginVertical: 5 }}
+                    onSelect={() => alert(`Opening camera`)}
+                  >
+                    <View style={{ flexDirection: "row", paddingLeft: 5 }}>
+                      <Feather name="camera" size={20} color="#000" />
+                      <View style={{ alignSelf: "center", marginLeft: 5 }}>
+                        <Text style={{ fontSize: 18 }}>Camera</Text>
+                      </View>
+                    </View>
+                  </MenuOption>
+                </MenuOptions>
+              </Menu>
             </>
           ) : (
             <>
