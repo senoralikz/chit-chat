@@ -1,4 +1,4 @@
-import { useEffect, useState, useLayoutEffect } from "react";
+import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -25,6 +25,8 @@ import { Avatar } from "react-native-elements";
 import { Ionicons, Entypo, FontAwesome, Feather } from "@expo/vector-icons";
 
 import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
+import { Camera, CameraType } from "expo-camera";
 import { useToast } from "react-native-toast-notifications";
 import UpdateEmailModal from "./UpdateEmailModal";
 import ChangePasswordModal from "./ChangePasswordModal";
@@ -38,6 +40,7 @@ import {
 const ProfileScreen = ({ navigation }) => {
   const user = auth.currentUser;
   const toast = useToast();
+  let cameraRef = useRef();
 
   const [pickedPhoto, setPickedPhoto] = useState("");
   const [email, setEmail] = useState(user.email);
@@ -46,10 +49,32 @@ const ProfileScreen = ({ navigation }) => {
   const [displayNameAvailable, setDisplayNameAvailable] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [hasPermission, setHasPermission] = useState(null);
+  const [type, setType] = useState(CameraType.back);
 
   const usersRef = collection(db, "users");
   const qEmail = query(usersRef, where("email", "==", email));
   const qDisplayName = query(usersRef, where("displayName", "==", displayName));
+
+  // useEffect(() => {
+  //   // (async () => {
+  //   //   const { status } = await Camera.requestCameraPermissionsAsync();
+  //   //   setHasPermission(status === "granted");
+  //   // })();
+  //   checkCameraPermission();
+  // }, []);
+
+  const checkCameraPermission = async () => {
+    const { status } = await Camera.requestCameraPermissionsAsync();
+    setHasPermission(status === "granted");
+  };
+
+  // if (hasPermission === null) {
+  //   return <View />;
+  // }
+  // if (hasPermission === false) {
+  //   return <Text>No access to camera</Text>;
+  // }
 
   // useEffect(() => {
   //   const unsubEmails = onSnapshot(qEmail, (querySnapshot) => {
@@ -279,6 +304,14 @@ const ProfileScreen = ({ navigation }) => {
                   <MenuOption
                     style={{ marginVertical: 5 }}
                     onSelect={() => alert(`Opening camera`)}
+                    // onSelect={() => {
+                    //   setType(
+                    //     type === CameraType.back
+                    //       ? CameraType.front
+                    //       : CameraType.back
+                    //   );
+                    // }}
+                    // onSelect={checkCameraPermission}
                   >
                     <View style={{ flexDirection: "row", paddingLeft: 5 }}>
                       <Feather name="camera" size={20} color="#000" />

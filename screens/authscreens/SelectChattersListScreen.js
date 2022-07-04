@@ -62,7 +62,7 @@ const SelectChattersListScreen = ({
       return gettingMemberIds.every((val) => chatterIds.includes(val));
     });
 
-    console.log("testing if chat exists:", testingExists);
+    // console.log("testing if chat exists:", testingExists);
     setChatExists(testingExists);
   }, [groups, chatterIds]);
 
@@ -174,6 +174,7 @@ const SelectChattersListScreen = ({
         chatWith.forEach((chatter) => memberNames.push(chatter.displayName));
 
         const groupDoc = await addDoc(groupsRef, {
+          groupPhotoUrl: "",
           groupName: "",
           members: gettingAllChatterIds,
         })
@@ -194,12 +195,10 @@ const SelectChattersListScreen = ({
             } else {
               navigation.navigate("GroupChatScreen", {
                 groupId: groupDoc.id,
-                // groupName: chat.groupName,
                 groupMembers: gettingAllChatterIds,
                 unreadMsgs: unreadMsgs,
-                // friendUserId: membersInfo[0]?.userId,
+                membersInfo: chatWith,
                 friendDisplayName: memberNames,
-                // friendPhotoURL: membersInfo[0]?.photoURL,
               });
             }
           })

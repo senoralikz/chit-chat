@@ -19,6 +19,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import GoogleSignInBtn from "../../components/GoogleSignInBtn";
 import { useToast } from "react-native-toast-notifications";
 import ForgotPasswordModal from "./ForgotPasswordModal";
+import { Button } from "react-native-elements";
 
 const LogInScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -176,6 +177,16 @@ const LogInScreen = ({ navigation }) => {
             </Text>
           </Pressable>
         </View>
+        {/* <Button
+          title="Log in"
+          // titleStyle={{ margin: 10, fontSize: 24, color: "#fff" }}
+          icon={() => (
+            <MaterialCommunityIcons name="login" size={24} color="#fff" />
+          )}
+          iconContainerStyle={{ alignItems: "center" }}
+          buttonStyle={styles.logInBtn}
+          onPress={handleSignIn}
+        /> */}
         <Text style={{ fontSize: 16 }}>
           Don't have an account? You can
           <Text

@@ -50,6 +50,10 @@ import { useRoute } from "@react-navigation/native";
 import { Badge } from "react-native-elements";
 
 const GroupChatScreen = ({ route, navigation }) => {
+  const [groupChatName, setGroupChatName] = useState(route.params.groupName);
+  const [groupPhotoURL, setGroupPhotoURL] = useState(
+    route.params.groupPhotoUrl
+  );
   const [messages, setMessages] = useState([]);
   const [textInput, setTextInput] = useState("");
   const [unreadMsgs, setUnreadMsgs] = useState([]);
@@ -70,14 +74,14 @@ const GroupChatScreen = ({ route, navigation }) => {
       headerTitle: () => (
         <View
           style={{
-            // backgroundColor: "blue",
-            maxWidth: "80%",
+            // backgroundColor: "red",
+            // maxWidth: "80%",
             flexDirection: "row",
-            justifyContent: "center",
+            // justifyContent: "center",
             alignItems: "center",
           }}
         >
-          {!route.params.groupPhotoUrl ? (
+          {!groupPhotoURL ? (
             <View
               style={{
                 backgroundColor: "#bdc3c7",
@@ -93,20 +97,20 @@ const GroupChatScreen = ({ route, navigation }) => {
                   color: "#fff",
                   textAlign: "center",
                   fontSize: 28,
-                  // paddingVertical: 3,
                 }}
               >
                 {route.params.friendDisplayName.length}
               </Text>
             </View>
           ) : (
-            <Avatar
-              size="small"
-              source={{ uri: route.params.groupPhotoUrl }}
-              rounded
-            />
+            <Avatar size="small" source={{ uri: groupPhotoURL }} rounded />
           )}
-          <View style={{ alignSelf: "center", maxWidth: "80%" }}>
+          <View
+            style={{
+              alignSelf: "center",
+              maxWidth: "75%",
+            }}
+          >
             <Text
               style={{
                 marginLeft: 5,
@@ -116,8 +120,8 @@ const GroupChatScreen = ({ route, navigation }) => {
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {route.params.groupName
-                ? route.params.groupName
+              {groupChatName
+                ? groupChatName
                 : route.params.friendDisplayName.join(", ")}
             </Text>
           </View>
@@ -126,8 +130,10 @@ const GroupChatScreen = ({ route, navigation }) => {
               navigation.navigate("GroupChatInfoScreen", {
                 friendDisplayName: route.params.friendDisplayName,
                 membersInfo: route.params.membersInfo,
-                chatInfo: route.params.chatInfo,
+                // chatInfo: route.params.chatInfo,
                 groupName: route.params.groupName,
+                groupId: route.params.groupId,
+                groupPhotoURL: route.params.groupPhotoUrl,
               });
             }}
           >
@@ -140,7 +146,12 @@ const GroupChatScreen = ({ route, navigation }) => {
           {/* <Pressable onPress={() => goBack()}> */}
           <View style={{ flexDirection: "row" }}>
             <Ionicons name="chevron-back" size={32} color="#9b59b6" />
-            <View style={{ justifyContent: "center" }}>
+            <View
+              style={{
+                justifyContent: "center",
+                // backgroundColor: "blue"
+              }}
+            >
               {totalUnreadMsgs !== 0 && (
                 <Badge
                   value={totalUnreadMsgs > 99 ? "99+" : totalUnreadMsgs}
@@ -151,7 +162,7 @@ const GroupChatScreen = ({ route, navigation }) => {
                     maxWidth: 35,
                     borderRadius: 15,
                     backgroundColor: "#9b59b6",
-                    marginRight: 15,
+                    marginRight: 5,
                   }}
                 />
               )}
@@ -160,7 +171,7 @@ const GroupChatScreen = ({ route, navigation }) => {
         </Pressable>
       ),
     });
-  }, [navigation, totalUnreadMsgs, route]);
+  }, [navigation, totalUnreadMsgs, route, groupChatName, groupPhotoURL]);
 
   useEffect(() => {
     console.log("checking groupId from chat screen", route.params.groupId);

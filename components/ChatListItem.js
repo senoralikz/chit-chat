@@ -263,6 +263,38 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
         ) : (
           <Avatar size="medium" source={{ uri: chat.groupPhotoUrl }} rounded />
         )}
+        {/* {membersInfo.length === 1 && (
+          <Avatar
+            size="medium"
+            source={{ uri: membersInfo[0]?.photoURL }}
+            rounded
+          />
+        )}
+        {membersInfo.length > 1 && chat.groupPhotoURL ? (
+          <Avatar size="medium" source={{ uri: chat.groupPhotoURL }} rounded />
+        ) : (
+          <View
+            style={{
+              backgroundColor: "#bdc3c7",
+              height: 50,
+              width: 50,
+              borderRadius: 25,
+              alignSelf: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                textAlign: "center",
+                fontSize: 42,
+                // paddingVertical: 3,
+              }}
+            >
+              {membersInfo.length}
+            </Text>
+          </View>
+        )} */}
         <View style={{ position: "absolute", top: 13, left: 52 }}>
           {unreadMsgs > 0 && (
             <Badge
@@ -300,7 +332,7 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {memberNames.join(", ")}
+              {chat.groupName ? chat.groupName : memberNames.join(", ")}
             </ListItem.Title>
             <ListItem.Title right={true} style={{ fontSize: 14 }}>
               {new Date(chat.lastMessage?.createdAt * 1000).toLocaleTimeString(
@@ -313,8 +345,8 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
               )}
             </ListItem.Title>
             {/* <Button
-              title="check chat info"
-              onPress={() => console.log("members in here", chat)}
+              title="check chat id"
+              onPress={() => console.log("chat id is:", chat.groupId)}
             /> */}
           </View>
           <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">

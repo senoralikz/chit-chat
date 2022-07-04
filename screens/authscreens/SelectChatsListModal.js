@@ -66,13 +66,11 @@ const SelectChatsListModal = ({
           } else {
             navigation.navigate("GroupChatScreen", {
               groupId: groupDoc.id,
-              // groupName: chat.groupName,
               groupMembers: gettingAllChatterIds,
               unreadMsgs: unreadMsgs,
               messages: messages,
-              // friendUserId: membersInfo[0]?.userId,
               friendDisplayName: memberNames,
-              // friendPhotoURL: membersInfo[0]?.photoURL,
+              membersInfo: chatWith,
             });
           }
         })
