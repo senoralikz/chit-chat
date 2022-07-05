@@ -174,6 +174,19 @@ const GroupChatScreen = ({ route, navigation }) => {
   }, [navigation, totalUnreadMsgs, route, groupChatName, groupPhotoURL]);
 
   useEffect(() => {
+    const groupRef = doc(db, "groups", route.params.groupId);
+    // const groupRef = doc(db, "groups", route.params.chatInfo?.groupId);
+
+    const unsubChatDetails = onSnapshot(groupRef, (doc) => {
+      // console.log(doc.data());
+      setGroupPhotoURL(doc.data().groupPhotoUrl);
+      setGroupChatName(doc.data().groupName);
+    });
+
+    return unsubChatDetails;
+  }, []);
+
+  useEffect(() => {
     console.log("checking groupId from chat screen", route.params.groupId);
 
     const unsubMessages = onSnapshot(q, (snapshot) => {

@@ -286,7 +286,12 @@ const ProfileScreen = ({ navigation }) => {
               <Menu>
                 <MenuTrigger>
                   <View style={styles.removeAddPhotoBtn}>
-                    <Ionicons name="add-circle" size={34} color="green" />
+                    <Ionicons
+                      name="add-circle"
+                      size={34}
+                      color="green"
+                      style={{ bottom: 2 }}
+                    />
                   </View>
                 </MenuTrigger>
                 <MenuOptions>
@@ -328,7 +333,12 @@ const ProfileScreen = ({ navigation }) => {
               <Avatar source={{ uri: pickedPhoto }} size={150} rounded />
               <Pressable onPress={() => setPickedPhoto("")}>
                 <View style={styles.removeAddPhotoBtn}>
-                  <Ionicons name="remove-circle" size={34} color="tomato" />
+                  <Ionicons
+                    name="remove-circle"
+                    size={34}
+                    color="tomato"
+                    style={{ position: "relative", bottom: 2 }}
+                  />
                 </View>
               </Pressable>
             </>
@@ -450,25 +460,26 @@ const styles = StyleSheet.create({
   //   shadowOpacity: 0.5,
   //   shadowRadius: 4,
   // },
-  addPhotoBtn: {
-    position: "absolute",
-    bottom: 5,
-    right: -70,
-    width: 34,
-    height: 34,
-    borderRadius: 20,
-    borderWidth: 3,
-    borderColor: "#fff",
-    backgroundColor: "#fff",
-  },
+  // addPhotoBtn: {
+  //   position: "absolute",
+  //   bottom: 5,
+  //   right: -70,
+  //   width: 34,
+  //   height: 34,
+  //   borderRadius: 20,
+  //   borderWidth: 3,
+  //   borderColor: "#fff",
+  //   backgroundColor: "#fff",
+  // },
   removeAddPhotoBtn: {
     position: "absolute",
     bottom: 5,
     right: -70,
-    width: 34,
-    height: 34,
+    width: 32,
+    height: 32,
     borderRadius: 20,
     backgroundColor: "#fff",
+    // backgroundColor: "red",
   },
   settingsBodyView: {
     // justifyContent: "center",

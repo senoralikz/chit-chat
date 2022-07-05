@@ -26,6 +26,7 @@ import GroupChatMemberInfo from "../../components/GroupChatMemberInfo";
 const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
   const [groupChatPhoto, setGroupChatPhoto] = useState("");
   const [groupChatName, setGroupChatName] = useState("");
+  const [currentChatName, setCurrentChatName] = useState("");
   const [pickedPhoto, setPickedPhoto] = useState("");
   const [canEdit, setCanEdit] = useState(false);
 
@@ -47,7 +48,12 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
           title="Save Changes"
           onPress={handleUpdateGroupChatInfo}
           type="clear"
-          disabled={!pickedPhoto && !groupChatName ? true : false}
+          disabled={
+            (!pickedPhoto && !groupChatName) ||
+            groupChatName === currentChatName
+              ? true
+              : false
+          }
           titleStyle={{ fontSize: 20 }}
         />
       ),
@@ -59,9 +65,9 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
     // const groupRef = doc(db, "groups", route.params.chatInfo?.groupId);
 
     const unsubChatDetails = onSnapshot(groupRef, (doc) => {
-      console.log(doc.data());
+      // console.log(doc.data());
       setGroupChatPhoto(doc.data().groupPhotoUrl);
-      // setGroupChatName(doc.data().groupName);
+      setCurrentChatName(doc.data().groupName);
     });
 
     return unsubChatDetails;
@@ -149,6 +155,7 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
         groupName: groupChatName,
       }).then(() => {
         setCanEdit(false);
+        setGroupChatName("");
         toast.show("Successfully updated group chat name", {
           type: "success",
         });
@@ -167,18 +174,21 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
   };
 
   const handleUpdateGroupChatInfo = () => {
-    if (groupChatPhoto) {
+    if (pickedPhoto) {
       handleUpdateGroupPhoto();
+      console.log("now updating group chat pic");
     }
     if (groupChatName) {
       handleUpdateGroupChatName();
+      console.log("now updating group chat name");
     }
+    console.log("done updating group chat info");
   };
 
   return (
     <View style={styles.container}>
       {!groupChatPhoto && !pickedPhoto && (
-        <>
+        <View>
           <View
             style={{
               backgroundColor: "#bdc3c7",
@@ -238,26 +248,36 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
               </MenuOption>
             </MenuOptions>
           </Menu>
-        </>
+        </View>
       )}
 
       {!!pickedPhoto ? (
-        <>
+        <View>
           <Avatar source={{ uri: pickedPhoto }} size={150} rounded />
           <Pressable onPress={() => setPickedPhoto("")}>
             <View style={styles.removeAddPhotoBtn}>
-              <Ionicons name="remove-circle" size={34} color="tomato" />
+              <Ionicons
+                name="remove-circle"
+                size={34}
+                color="tomato"
+                style={{ bottom: 2 }}
+              />
             </View>
           </Pressable>
-        </>
+        </View>
       ) : (
         !!groupChatPhoto && (
-          <>
+          <View>
             <Avatar source={{ uri: groupChatPhoto }} size={150} rounded />
             <Menu>
               <MenuTrigger>
                 <View style={styles.removeAddPhotoBtn}>
-                  <Ionicons name="add-circle" size={34} color="green" />
+                  <Ionicons
+                    name="add-circle"
+                    size={34}
+                    color="green"
+                    style={{ bottom: 2 }}
+                  />
                 </View>
               </MenuTrigger>
               <MenuOptions>
@@ -293,7 +313,7 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
                 </MenuOption>
               </MenuOptions>
             </Menu>
-          </>
+          </View>
         )
       )}
 
@@ -304,8 +324,8 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
         <TextInput
           value={groupChatName}
           placeholder={
-            route.params.groupName
-              ? route.params.groupName
+            currentChatName
+              ? currentChatName
               : route.params.friendDisplayName.join(", ")
           }
           // inputContainerStyle={{
@@ -323,16 +343,13 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
           }}
           onChangeText={(text) => setGroupChatName(text)}
           editable={canEdit}
-          autoFocus={true}
         />
-        {/* <View> */}
         <Pressable
           onPress={() => setCanEdit(!canEdit)}
           style={{ alignSelf: "center", paddingLeft: 10 }}
         >
-          <Feather name="edit-2" size={24} color="black" />
+          <Feather name="edit-2" size={20} color="black" />
         </Pressable>
-        {/* </View> */}
       </View>
 
       <Text
@@ -394,11 +411,11 @@ const styles = StyleSheet.create({
   removeAddPhotoBtn: {
     position: "absolute",
     bottom: 5,
-    right: -70,
-    width: 34,
-    height: 34,
+    right: 5,
+    width: 32,
+    height: 32,
     borderRadius: 20,
     backgroundColor: "#fff",
-    // backgroundColor: "#ececec",
+    // backgroundColor: "red",
   },
 });

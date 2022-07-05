@@ -250,7 +250,12 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               <Menu>
                 <MenuTrigger>
                   <View style={styles.removeAddPhotoBtn}>
-                    <Ionicons name="add-circle" size={34} color="green" />
+                    <Ionicons
+                      name="add-circle"
+                      size={34}
+                      color="green"
+                      style={{ bottom: 2 }}
+                    />
                   </View>
                 </MenuTrigger>
                 <MenuOptions>
@@ -284,7 +289,12 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               <Avatar source={{ uri: pickedPhoto }} size={150} rounded />
               <View style={styles.removeAddPhotoBtn}>
                 <Pressable onPress={() => setPickedPhoto("")}>
-                  <Ionicons name="remove-circle" size={34} color="tomato" />
+                  <Ionicons
+                    name="remove-circle"
+                    size={34}
+                    color="tomato"
+                    style={{ bottom: 2 }}
+                  />
                 </Pressable>
               </View>
             </>
@@ -431,12 +441,13 @@ const styles = StyleSheet.create({
   },
   removeAddPhotoBtn: {
     position: "absolute",
-    bottom: 0,
-    right: 5,
-    width: 34,
-    height: 34,
+    bottom: 5,
+    right: -70,
+    width: 32,
+    height: 32,
     borderRadius: 20,
     backgroundColor: "#fff",
+    // backgroundColor: "red",
   },
   credentialInput: {
     flexDirection: "row",
