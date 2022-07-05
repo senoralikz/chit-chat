@@ -84,7 +84,7 @@ export default function App() {
       } else {
         // User is signed out
         // ...
-        console.log("user signed out");
+        // console.log("user signed out");
         setUser("");
       }
     });

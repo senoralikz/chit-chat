@@ -187,7 +187,7 @@ const GroupChatScreen = ({ route, navigation }) => {
   }, []);
 
   useEffect(() => {
-    console.log("checking groupId from chat screen", route.params.groupId);
+    // console.log("checking groupId from chat screen", route.params.groupId);
 
     const unsubMessages = onSnapshot(q, (snapshot) => {
       setMessages(

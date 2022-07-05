@@ -111,6 +111,29 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
     }
   };
 
+  // This function is triggered when the "Open camera" button pressed
+  const openCamera = async () => {
+    // Ask the user for the permission to access the camera
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      toast.show("Camera permissions are currently denied", {
+        type: "danger",
+      });
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync();
+
+    // Explore the result
+    // console.log(result);
+
+    if (!result.cancelled) {
+      setPickedPhoto(result.uri);
+      // console.log(result.uri);
+    }
+  };
+
   const handleUpdateGroupPhoto = async () => {
     try {
       const fileName = pickedPhoto.replace(/^.*[\\\/]/, "");
@@ -176,13 +199,13 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
   const handleUpdateGroupChatInfo = () => {
     if (pickedPhoto) {
       handleUpdateGroupPhoto();
-      console.log("now updating group chat pic");
+      // console.log("now updating group chat pic");
     }
     if (groupChatName) {
       handleUpdateGroupChatName();
-      console.log("now updating group chat name");
+      // console.log("now updating group chat name");
     }
-    console.log("done updating group chat info");
+    // console.log("done updating group chat info");
   };
 
   return (
@@ -229,15 +252,8 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
               </MenuOption>
               <MenuOption
                 style={{ marginVertical: 5 }}
-                onSelect={() => alert(`Opening camera`)}
-                // onSelect={() => {
-                //   setType(
-                //     type === CameraType.back
-                //       ? CameraType.front
-                //       : CameraType.back
-                //   );
-                // }}
-                // onSelect={checkCameraPermission}
+                // onSelect={() => alert(`Opening camera`)}
+                onSelect={openCamera}
               >
                 <View style={{ flexDirection: "row", paddingLeft: 5 }}>
                   <Feather name="camera" size={20} color="#000" />
@@ -294,15 +310,8 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
                 </MenuOption>
                 <MenuOption
                   style={{ marginVertical: 5 }}
-                  onSelect={() => alert(`Opening camera`)}
-                  // onSelect={() => {
-                  //   setType(
-                  //     type === CameraType.back
-                  //       ? CameraType.front
-                  //       : CameraType.back
-                  //   );
-                  // }}
-                  // onSelect={checkCameraPermission}
+                  // onSelect={() => alert(`Opening camera`)}
+                  onSelect={openCamera}
                 >
                   <View style={{ flexDirection: "row", paddingLeft: 5 }}>
                     <Feather name="camera" size={20} color="#000" />
@@ -328,13 +337,6 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
               ? currentChatName
               : route.params.friendDisplayName.join(", ")
           }
-          // inputContainerStyle={{
-          //   alignContent: "flex-end",
-          //   alignSelf: "flex-end",
-          //   alignItems: "flex-end",
-          //   justifyContent: "flex-end",
-          //   // backgroundColor: "red",
-          // }}
           style={{
             width: "65%",
             borderBottomWidth: 1,

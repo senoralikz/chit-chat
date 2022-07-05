@@ -66,7 +66,7 @@ const ContactsListScreen = ({ navigation }) => {
         querySnapshot.forEach((doc) => {
           gettingFriends.push(doc.data());
         });
-        console.log("listening to these friends:", gettingFriends);
+        // console.log("listening to these friends:", gettingFriends);
         setFriendInfo(gettingFriends);
       });
 

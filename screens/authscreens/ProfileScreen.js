@@ -169,6 +169,29 @@ const ProfileScreen = ({ navigation }) => {
     }
   };
 
+  // This function is triggered when the "Open camera" button pressed
+  const openCamera = async () => {
+    // Ask the user for the permission to access the camera
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      toast.show("Camera permissions are currently denied", {
+        type: "danger",
+      });
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync();
+
+    // Explore the result
+    // console.log(result);
+
+    if (!result.cancelled) {
+      setPickedPhoto(result.uri);
+      // console.log(result.uri);
+    }
+  };
+
   const handleUpdateProfilePic = async () => {
     try {
       const fileName = pickedPhoto.replace(/^.*[\\\/]/, "");
@@ -308,7 +331,7 @@ const ProfileScreen = ({ navigation }) => {
                   </MenuOption>
                   <MenuOption
                     style={{ marginVertical: 5 }}
-                    onSelect={() => alert(`Opening camera`)}
+                    // onSelect={() => alert(`Opening camera`)}
                     // onSelect={() => {
                     //   setType(
                     //     type === CameraType.back
@@ -316,7 +339,7 @@ const ProfileScreen = ({ navigation }) => {
                     //       : CameraType.back
                     //   );
                     // }}
-                    // onSelect={checkCameraPermission}
+                    onSelect={openCamera}
                   >
                     <View style={{ flexDirection: "row", paddingLeft: 5 }}>
                       <Feather name="camera" size={20} color="#000" />

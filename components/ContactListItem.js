@@ -160,7 +160,7 @@ const ContactListItem = ({ friend, navigation }) => {
           members: [user.uid, friend.userId],
         })
           .then(async (groupDoc) => {
-            console.log("new group id:", groupDoc.id);
+            // console.log("new group id:", groupDoc.id);
             await updateDoc(doc(groupsRef, groupDoc.id), {
               groupId: groupDoc.id,
             });

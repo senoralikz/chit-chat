@@ -101,6 +101,29 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
     }
   };
 
+  // This function is triggered when the "Open camera" button pressed
+  const openCamera = async () => {
+    // Ask the user for the permission to access the camera
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      toast.show("Camera permissions are currently denied", {
+        type: "danger",
+      });
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync();
+
+    // Explore the result
+    // console.log(result);
+
+    if (!result.cancelled) {
+      setPickedPhoto(result.uri);
+      // console.log(result.uri);
+    }
+  };
+
   const addUserToCollection = async (user) => {
     try {
       const userRef = doc(db, `users/${user.uid}`);
@@ -131,7 +154,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
     await uploadBytes(imageRef, bytes).then(() => {
       getDownloadURL(imageRef)
         .then((url) => {
-          console.log(url);
+          // console.log(url);
           updateProfile(user, {
             photoURL: url,
             displayName: displayName,
@@ -272,7 +295,8 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
                   </MenuOption>
                   <MenuOption
                     style={{ marginVertical: 5 }}
-                    onSelect={() => alert(`Opening camera`)}
+                    // onSelect={() => alert(`Opening camera`)}
+                    onSelect={openCamera}
                   >
                     <View style={{ flexDirection: "row", paddingLeft: 5 }}>
                       <Feather name="camera" size={20} color="#000" />
@@ -442,7 +466,7 @@ const styles = StyleSheet.create({
   removeAddPhotoBtn: {
     position: "absolute",
     bottom: 5,
-    right: -70,
+    right: 5,
     width: 32,
     height: 32,
     borderRadius: 20,
