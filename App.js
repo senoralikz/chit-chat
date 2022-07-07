@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState, useRef } from "react";
 import "react-native-gesture-handler";
@@ -14,10 +14,68 @@ import { Avatar } from "react-native-elements";
 import { ToastProvider } from "react-native-toast-notifications";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { MenuProvider } from "react-native-popup-menu";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function App() {
   const [user, setUser] = useState("");
   const [totalUnreadMsgs, setTotalUnreadMsgs] = useState(0);
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
+
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync();
+  }, []);
+
+  const registerForPushNotificationsAsync = async () => {
+    try {
+      if (Device.isDevice) {
+        const { status: existingStatus } =
+          await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== "granted") {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+        if (finalStatus !== "granted") {
+          alert("Failed to get push token for push notification!");
+          return;
+        }
+        const token = (await Notifications.getExpoPushTokenAsync()).data;
+        console.log(token);
+        setExpoPushToken(token);
+      } else {
+        alert("Must use physical device for Push Notifications");
+      }
+
+      if (Platform.OS === "android") {
+        Notifications.setNotificationChannelAsync("default", {
+          name: "default",
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: "#FF231F7C",
+        });
+      }
+    } catch (error) {
+      alert(error.message);
+      console.error(
+        error.code,
+        "-- error getting push token --",
+        error.message
+      );
+    }
+  };
 
   const renderType = {
     newMessage: (toast) => (
@@ -40,37 +98,69 @@ export default function App() {
         <View
           style={{
             flexDirection: "row",
-            paddingLeft: 10,
+            justifyContent: "space-between",
+            paddingHorizontal: 10,
+            // width: "85%",
           }}
         >
-          <View style={{ alignSelf: "center" }}>
-            <Avatar
-              source={{ uri: toast.photoURL }}
-              size="small"
-              rounded
-              containerStyle={{ marginRight: 10 }}
-            />
+          <View style={{ flexDirection: "row" }}>
+            <View style={{ alignSelf: "center" }}>
+              <Avatar
+                source={{ uri: toast.photoURL }}
+                size="small"
+                rounded
+                containerStyle={{ marginRight: 10 }}
+              />
+            </View>
+            <View>
+              <Text
+                style={{ fontWeight: "bold", fontSize: 20 }}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {toast.displayName}
+              </Text>
+              <Text
+                style={{ fontSize: 15 }}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {toast.message}
+              </Text>
+            </View>
           </View>
-          <View style={{ width: "85%" }}>
-            <Text
-              style={{ fontWeight: "bold", fontSize: 20 }}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {toast.displayName}
-            </Text>
-            <Text
-              style={{ fontSize: 15 }}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {toast.message}
-            </Text>
+          <View>
+            <Text>{toast.createdAt}</Text>
           </View>
         </View>
       </View>
     ),
   };
+
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync().then((token) =>
+  //     setExpoPushToken(token)
+  //   );
+
+  //   // This listener is fired whenever a notification is received while the app is foregrounded
+  //   notificationListener.current =
+  //     Notifications.addNotificationReceivedListener((notification) => {
+  //       setNotification(notification);
+  //     });
+
+  //   // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
+  //   responseListener.current =
+  //     Notifications.addNotificationResponseReceivedListener((response) => {
+  //       console.log(response);
+  //     });
+
+  //   return () => {
+  //     Notifications.removeNotificationSubscription(
+  //       notificationListener.current
+  //     );
+  //     Notifications.removeNotificationSubscription(responseListener.current);
+  //   };
+  // }, []);
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (user) => {

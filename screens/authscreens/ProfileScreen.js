@@ -21,7 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import { signOut, updateEmail, updateProfile } from "firebase/auth";
 import { auth, db, storage } from "../../firebaseConfig";
-import { Avatar } from "react-native-elements";
+import { Avatar, Button } from "react-native-elements";
 import { Ionicons, Entypo, FontAwesome, Feather } from "@expo/vector-icons";
 
 import * as ImagePicker from "expo-image-picker";
@@ -121,11 +121,13 @@ const ProfileScreen = ({ navigation }) => {
         <Text style={{ fontSize: 36, fontWeight: "800" }}>Profile</Text>
       ),
       headerRight: () => (
-        <Avatar
-          source={{ uri: user.photoURL }}
-          size="small"
-          rounded
-          onPress={() => navigation.navigate("Profile")}
+        <Button
+          title="Sign Out"
+          onPress={() => signOut(auth)}
+          // raised={true}
+          // buttonStyle={{ backgroundColor: "#22a6b3" }}
+          titleStyle={{ fontSize: 24, color: "#22a6b3" }}
+          type="clear"
         />
       ),
     });
@@ -331,14 +333,6 @@ const ProfileScreen = ({ navigation }) => {
                   </MenuOption>
                   <MenuOption
                     style={{ marginVertical: 5 }}
-                    // onSelect={() => alert(`Opening camera`)}
-                    // onSelect={() => {
-                    //   setType(
-                    //     type === CameraType.back
-                    //       ? CameraType.front
-                    //       : CameraType.back
-                    //   );
-                    // }}
                     onSelect={openCamera}
                   >
                     <View style={{ flexDirection: "row", paddingLeft: 5 }}>
@@ -450,18 +444,6 @@ const ProfileScreen = ({ navigation }) => {
           user={user}
         />
       </View>
-      <View
-        style={{
-          justifyContent: "flex-end",
-          alignItems: "center",
-        }}
-      >
-        <Pressable onPress={() => signOut(auth)} style={styles.signOutBtn}>
-          <Text style={{ margin: 10, fontSize: 24, color: "#fff" }}>
-            Sign Out
-          </Text>
-        </Pressable>
-      </View>
     </View>
   );
 };
@@ -472,28 +454,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
-  header: {
-    paddingHorizontal: 5,
-  },
-  // profilePic: {
-  //   elevation: 3,
-  //   shadowOffset: { width: 2, height: 2 },
-  //   shadowColor: "#333",
-  //   shadowOpacity: 0.5,
-  //   shadowRadius: 4,
-  // },
-  // addPhotoBtn: {
-  //   position: "absolute",
-  //   bottom: 5,
-  //   right: -70,
-  //   width: 34,
-  //   height: 34,
-  //   borderRadius: 20,
-  //   borderWidth: 3,
-  //   borderColor: "#fff",
-  //   backgroundColor: "#fff",
-  // },
   removeAddPhotoBtn: {
     position: "absolute",
     bottom: 5,
@@ -504,15 +467,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     // backgroundColor: "red",
   },
-  settingsBodyView: {
-    // justifyContent: "center",
-    // alignItems: "center",
-  },
   credentialInputView: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginVertical: 10,
-    paddingHorizontal: 10,
+    // paddingHorizontal: 10,
   },
   credentialPropertyText: {
     fontSize: 18,
@@ -556,7 +515,7 @@ const styles = StyleSheet.create({
   signOutBtn: {
     backgroundColor: "#22a6b3",
     borderRadius: 10,
-    width: 200,
+    width: 100,
     marginVertical: 20,
     alignItems: "center",
     justifyContent: "flex-end",

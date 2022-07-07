@@ -235,7 +235,12 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
           <Menu>
             <MenuTrigger>
               <View style={styles.removeAddPhotoBtn}>
-                <Ionicons name="add-circle" size={34} color="green" />
+                <Ionicons
+                  name="add-circle"
+                  size={34}
+                  color="green"
+                  style={{ bottom: 2 }}
+                />
               </View>
             </MenuTrigger>
             <MenuOptions>
@@ -326,7 +331,9 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
         )
       )}
 
-      <View style={{ flexDirection: "row", width: "90%" }}>
+      <View
+        style={{ flexDirection: "row", width: "90%", justifyContent: "center" }}
+      >
         <View style={{ justifyContent: "center", marginRight: 5 }}>
           <Text style={{ fontSize: 18, fontWeight: "bold" }}>Chat Name: </Text>
         </View>

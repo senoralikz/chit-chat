@@ -43,7 +43,8 @@ const ChatsListScreen = ({ navigation }) => {
   const q = query(
     groupsRef,
     where("members", "array-contains", user.uid),
-    orderBy("lastModified", "desc")
+    orderBy("lastMessage.createdAt", "desc")
+    // orderBy("lastModified", "desc")
   );
 
   useLayoutEffect(() => {
@@ -132,6 +133,13 @@ const ChatsListScreen = ({ navigation }) => {
           message: chats[0].lastMessage?.message,
           displayName: chats[0].lastMessage?.senderDisplayName,
           photoURL: chats[0].lastMessage?.senderPhotoURL,
+          createdAt: new Date(
+            chats[0].lastMessage?.createdAt * 1000
+          ).toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true,
+          }),
           placement: "top",
           duration: 5000,
         });
