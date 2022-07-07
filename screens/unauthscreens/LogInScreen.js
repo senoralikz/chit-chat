@@ -20,6 +20,7 @@ import GoogleSignInBtn from "../../components/GoogleSignInBtn";
 import { useToast } from "react-native-toast-notifications";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import { Button } from "react-native-elements";
+import { Link } from "@react-navigation/native";
 
 const LogInScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -28,12 +29,6 @@ const LogInScreen = ({ navigation }) => {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
 
   const toast = useToast();
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: "Hello",
-    });
-  }, [navigation]);
 
   const handleSignIn = () => {
     if (!email || !password) {
@@ -51,7 +46,11 @@ const LogInScreen = ({ navigation }) => {
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
-          Alert.alert(errorCode, errorMessage, { text: "Ok" });
+          console.error(errorCode, "-- error signing in --", errorMessage);
+          toast.show(errorMessage, {
+            type: "danger",
+            placement: "top",
+          });
         });
     }
   };
@@ -189,13 +188,13 @@ const LogInScreen = ({ navigation }) => {
         /> */}
         <Text style={{ fontSize: 16 }}>
           Don't have an account? You can
-          <Text
+          <Link
             style={{ color: "#3498db", fontWeight: "bold" }}
-            onPress={() => navigation.navigate("SignUp")}
+            to={{ screen: "SignUp" }}
           >
             {" "}
             sign up{" "}
-          </Text>
+          </Link>
           here!
         </Text>
         {/* <View style={{ flexDirection: "row", marginVertical: 25 }}>
@@ -220,6 +219,7 @@ const LogInScreen = ({ navigation }) => {
         <View>
           <GoogleSignInBtn />
         </View> */}
+        {/* <Button title="Sign Up" onPress={() => navigation.navigate("SignUp")} /> */}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

@@ -139,7 +139,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
         "--- trouble adding user to collection ---",
         error.message
       );
-      Alert.alert(error.code, error.message, { text: "Ok" });
+      toast.show(error.message, { type: "danger" });
     }
   };
 
@@ -168,20 +168,16 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
             "--- trouble signing up with profile pic ---",
             error.message
           );
-          Alert.alert(error.code, error.message, { text: "Ok" });
+          toast.show(error.message, { type: "danger" });
         });
     });
   };
 
   const handleSignUp = async () => {
     if (!email || !password || !displayName) {
-      Alert.alert(
-        "Missing Info",
-        "Please enter an email, password, and display name.",
-        {
-          text: "Ok",
-        }
-      );
+      toast.show("Please enter an email, password, and display name", {
+        type: "warning",
+      });
     } else {
       await createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
@@ -211,8 +207,8 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
           } else {
             signUpWithProfilePic(user);
           }
-          Alert.alert("Hello!", "Welcome to ChitChat!", {
-            text: "Ok",
+          toast.show("Welcome to ChitChat!", {
+            text: "success",
           });
         })
         .catch((error) => {
@@ -221,7 +217,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
             "--- trouble creating user ---",
             error.message
           );
-          Alert.alert(error.code, error.message, { text: "Ok" });
+          toast.show(error.message, { type: "danger" });
         });
     }
   };

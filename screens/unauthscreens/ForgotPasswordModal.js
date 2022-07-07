@@ -80,8 +80,9 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
           }}
         >
           <Text style={{ fontSize: 18 }}>
-            Enter your email below and press the 'Reset Email' button. You will
-            receive and email with instructions on how to reset your password.
+            Enter your email below and press the 'Reset Password' button. You
+            will receive and email with instructions on how to reset your
+            password.
           </Text>
           {/* <Text>Email:</Text> */}
           <View
@@ -115,7 +116,7 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
                   disabled={email ? false : true}
                 >
                   <Text style={{ margin: 10, fontSize: 24, color: "#fff" }}>
-                    Reset Email
+                    Reset Password
                   </Text>
                 </Pressable>
               </View>
