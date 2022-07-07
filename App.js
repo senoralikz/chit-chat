@@ -34,9 +34,9 @@ export default function App() {
   const notificationListener = useRef();
   const responseListener = useRef();
 
-  useEffect(() => {
-    registerForPushNotificationsAsync();
-  }, []);
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync();
+  // }, []);
 
   const registerForPushNotificationsAsync = async () => {
     try {

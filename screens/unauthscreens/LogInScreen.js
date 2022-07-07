@@ -198,7 +198,7 @@ const LogInScreen = ({ navigation }) => {
           </Text>
           here!
         </Text>
-        <View style={{ flexDirection: "row", marginVertical: 25 }}>
+        {/* <View style={{ flexDirection: "row", marginVertical: 25 }}>
           <View
             style={{
               backgroundColor: "lightgrey",
@@ -219,7 +219,7 @@ const LogInScreen = ({ navigation }) => {
         </View>
         <View>
           <GoogleSignInBtn />
-        </View>
+        </View> */}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
