@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Alert,
   Pressable,
+  Platform,
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -102,7 +103,7 @@ const LogInScreen = ({ navigation }) => {
         </Text>
       </View>
       <KeyboardAvoidingView
-        // behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.userInfoInputView}
       >
         {/* <View style={{ marginBottom: 20 }}>
@@ -219,7 +220,6 @@ const LogInScreen = ({ navigation }) => {
         <View>
           <GoogleSignInBtn />
         </View> */}
-        {/* <Button title="Sign Up" onPress={() => navigation.navigate("SignUp")} /> */}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Alert,
   Pressable,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
@@ -263,9 +264,6 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
                 size={150}
                 rounded
               />
-              {/* <View style={styles.removeAddPhotoBtn}>
-                <Ionicons name="add-circle" size={34} color="green" />
-              </View> */}
               <Menu>
                 <MenuTrigger>
                   <View style={styles.removeAddPhotoBtn}>
@@ -320,7 +318,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
             </>
           )}
         </Pressable>
-        <View>
+        <View style={{ alignItems: "center", width: "100%" }}>
           <View style={styles.credentialInput}>
             <MaterialCommunityIcons
               name="email"
@@ -406,9 +404,6 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               Passwords do not match
             </Text>
           )}
-          {/* <Button title="Sign Up" onPress={() => alert("signing up")} /> */}
-          {/* <Button title="Sign Up" onPress={handleSignUp} />
-           */}
           <View style={{ alignItems: "center" }}>
             <Pressable
               onPress={handleSignUp}
@@ -428,7 +423,6 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               </Text>
             </Pressable>
           </View>
-          {/* <Button title="Back To Log In" onPress={() => goBack()} /> */}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
