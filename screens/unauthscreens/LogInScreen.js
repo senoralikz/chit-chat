@@ -189,16 +189,17 @@ const LogInScreen = ({ navigation }) => {
         /> */}
         <Text style={{ fontSize: 16 }}>
           Don't have an account? You can
-          <Link
+          <Text
             style={{ color: "#3498db", fontWeight: "bold" }}
-            to={{ screen: "SignUp" }}
+            onPress={() => navigation.navigate("SignUp")}
+            // to={{ screen: "SignUp" }}
           >
             {" "}
             sign up{" "}
-          </Link>
+          </Text>
           here!
         </Text>
-        {/* <View style={{ flexDirection: "row", marginVertical: 25 }}>
+        <View style={{ flexDirection: "row", marginVertical: 25 }}>
           <View
             style={{
               backgroundColor: "lightgrey",
@@ -219,7 +220,7 @@ const LogInScreen = ({ navigation }) => {
         </View>
         <View>
           <GoogleSignInBtn />
-        </View> */}
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
