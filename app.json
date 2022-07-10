@@ -34,6 +34,7 @@
           "photosPermission": "ChitChat needs access to your photos so you can select a profile picture"
         }
       ]
-    ]
+    ],
+    "scheme": "https"
   }
 }
