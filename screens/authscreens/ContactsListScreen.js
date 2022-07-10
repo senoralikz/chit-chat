@@ -71,6 +71,8 @@ const ContactsListScreen = ({ navigation }) => {
       });
 
       return unsubFriendInfo;
+    } else {
+      setFriendInfo("");
     }
   }, [friendIds]);
 
