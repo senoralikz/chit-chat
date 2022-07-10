@@ -4,7 +4,6 @@ import {
   View,
   TextInput,
   KeyboardAvoidingView,
-  Alert,
   Pressable,
   Platform,
 } from "react-native";
@@ -18,7 +17,6 @@ import {
   doc,
   query,
   where,
-  getDocs,
   onSnapshot,
 } from "firebase/firestore";
 import { auth, storage, db } from "../../firebaseConfig";
@@ -50,7 +48,6 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
   const toast = useToast();
 
   const usersRef = collection(db, "users");
-  const qEmail = query(usersRef, where("email", "==", email));
   const qDisplayName = query(usersRef, where("displayName", "==", displayName));
 
   useEffect(() => {
@@ -367,14 +364,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               secureTextEntry
             />
           </View>
-          <View
-            style={styles.credentialInput}
-            // style={
-            //   password !== confirmPassword
-            //     ? styles.pwNotConfirmed
-            //     : styles.credentialInput
-            // }
-          >
+          <View style={styles.credentialInput}>
             {password !== confirmPassword ? (
               <AntDesign
                 name="close"

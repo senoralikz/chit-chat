@@ -52,13 +52,18 @@ const ChatsListScreen = ({ navigation }) => {
       title: "Chats",
       headerTitleStyle: { fontSize: 36, fontWeight: "800" },
       headerLeft: () => (
-        <View style={{ paddingLeft: 10 }}>
+        <View style={{ paddingLeft: 10, flexDirection: "row" }}>
           <Avatar
             source={{ uri: user.photoURL }}
             size="small"
             rounded
             onPress={() => navigation.navigate("Profile")}
           />
+          <View style={{ alignSelf: "flex-end", marginLeft: 5 }}>
+            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+              {user.displayName}
+            </Text>
+          </View>
         </View>
       ),
       headerRight: () => (

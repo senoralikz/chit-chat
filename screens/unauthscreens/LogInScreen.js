@@ -4,30 +4,24 @@ import {
   View,
   TextInput,
   KeyboardAvoidingView,
-  Alert,
   Pressable,
   Platform,
-  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useLayoutEffect } from "react";
-import {
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-} from "firebase/auth";
+import { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebaseConfig";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import GoogleSignInBtn from "../../components/GoogleSignInBtn";
 import { useToast } from "react-native-toast-notifications";
+import { SocialIcon } from "react-native-elements";
 import ForgotPasswordModal from "./ForgotPasswordModal";
-import { Button } from "react-native-elements";
-import { Link } from "@react-navigation/native";
 
 const LogInScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [googleModalVisible, setGoogleModalVisible] = useState(false);
 
   const toast = useToast();
 
@@ -56,36 +50,6 @@ const LogInScreen = ({ navigation }) => {
     }
   };
 
-  // const handleResetPassword = (email, setEmail) => {
-  //   if (email) {
-  //     sendPasswordResetEmail(auth, email)
-  //       .then(() => {
-  //         setModalVisible(false);
-  //         setEmail("");
-  //         toast.show("Sent Password Reset Email", {
-  //           type: "success",
-  //           placement: "top",
-  //         });
-  //       })
-  //       .catch((error) => {
-  //         toast.show("Error sending password reset email", {
-  //           type: "danger",
-  //           placement: "top",
-  //         });
-  //         console.error(
-  //           error.code,
-  //           "-- error sending password reset email --",
-  //           error.message
-  //         );
-  //       });
-  //   } else {
-  //     toast.show("Please enter an email", {
-  //       type: "danger",
-  //       placement: "top",
-  //     });
-  //   }
-  // };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.screenHeader}>
@@ -106,21 +70,6 @@ const LogInScreen = ({ navigation }) => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.userInfoInputView}
       >
-        {/* <View style={{ marginBottom: 20 }}>
-          <SocialIcon
-            type="apple"
-            title="Sign In With Apple"
-            fontStyle={{ fontSize: 20 }}
-            button={true}
-            onPress={() => alert("signing in with apple")}
-            style={{
-              width: 200,
-              backgroundColor: "#000",
-              borderRadius: 10,
-            }}
-          />
-          
-        </View> */}
         <View style={styles.credentialInput}>
           <MaterialCommunityIcons
             name="email"
@@ -167,7 +116,6 @@ const LogInScreen = ({ navigation }) => {
         <ForgotPasswordModal
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
-          // handleResetPassword={handleResetPassword}
         />
         <View>
           <Pressable onPress={handleSignIn} style={styles.logInBtn}>
@@ -177,29 +125,18 @@ const LogInScreen = ({ navigation }) => {
             </Text>
           </Pressable>
         </View>
-        {/* <Button
-          title="Log in"
-          // titleStyle={{ margin: 10, fontSize: 24, color: "#fff" }}
-          icon={() => (
-            <MaterialCommunityIcons name="login" size={24} color="#fff" />
-          )}
-          iconContainerStyle={{ alignItems: "center" }}
-          buttonStyle={styles.logInBtn}
-          onPress={handleSignIn}
-        /> */}
         <Text style={{ fontSize: 16 }}>
           Don't have an account? You can
           <Text
             style={{ color: "#3498db", fontWeight: "bold" }}
             onPress={() => navigation.navigate("SignUp")}
-            // to={{ screen: "SignUp" }}
           >
             {" "}
             sign up{" "}
           </Text>
           here!
         </Text>
-        <View style={{ flexDirection: "row", marginVertical: 25 }}>
+        {/* <View style={{ flexDirection: "row", marginVertical: 25 }}>
           <View
             style={{
               backgroundColor: "lightgrey",
@@ -217,10 +154,25 @@ const LogInScreen = ({ navigation }) => {
               alignSelf: "center",
             }}
           />
-        </View>
-        <View>
-          <GoogleSignInBtn />
-        </View>
+        </View> */}
+        {/* <View>
+          <SocialIcon
+            type="google"
+            title="Sign In With Google"
+            fontStyle={{ fontSize: 20 }}
+            button={true}
+            // disabled={!request}
+            onPress={() => {
+              setGoogleModalVisible(true);
+            }}
+            // onPress={() => alert("signing in with google")}
+            style={{ width: 200, borderRadius: 10 }}
+          />
+        </View> */}
+        {/* <GoogleSignInBtn
+          googleModalVisible={googleModalVisible}
+          setGoogleModalVisible={setGoogleModalVisible}
+        /> */}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

@@ -13,6 +13,7 @@ import { useToast } from "react-native-toast-notifications";
 import { auth } from "../../firebaseConfig";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
+import { StatusBar } from "expo-status-bar";
 
 const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
   const [email, setEmail] = useState("");
@@ -98,6 +99,7 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
               <TextInput
                 value={email}
                 placeholder="Email..."
+                placeholderTextColor="#bbb"
                 onChangeText={(text) => setEmail(text)}
                 style={{
                   // backgroundColor: "orange",
@@ -124,6 +126,7 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
           </View>
         </View>
       </View>
+      <StatusBar style="light" />
     </Modal>
   );
 };

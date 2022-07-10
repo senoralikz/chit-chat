@@ -368,7 +368,14 @@ const ProfileScreen = ({ navigation }) => {
               value={email}
               placeholder={user.email}
               onChangeText={(text) => setEmail(text.toLowerCase())}
-              style={styles.credentialInput}
+              style={
+                user.providerData[0].providerId === "password"
+                  ? styles.credentialInput
+                  : [styles.credentialInput, { backgroundColor: "#ececec" }]
+              }
+              editable={
+                user.providerData[0].providerId === "password" ? true : false
+              }
             />
           </View>
           <View style={styles.credentialInputView}>
@@ -475,9 +482,11 @@ const styles = StyleSheet.create({
   },
   credentialPropertyText: {
     fontSize: 18,
+    alignSelf: "center",
   },
   credentialInput: {
     width: "60%",
+    height: 30,
     borderBottomColor: "#000",
     borderBottomWidth: 1,
     fontSize: 18,
