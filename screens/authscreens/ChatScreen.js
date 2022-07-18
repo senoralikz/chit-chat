@@ -48,6 +48,7 @@ import { useRoute } from "@react-navigation/native";
 import { Badge } from "react-native-elements";
 
 const ChatScreen = ({ route, navigation }) => {
+  const [chats, setChats] = useState([]);
   const [messages, setMessages] = useState(route.params.messages);
   const [textInput, setTextInput] = useState("");
   const [unreadMsgs, setUnreadMsgs] = useState([]);
@@ -62,6 +63,11 @@ const ChatScreen = ({ route, navigation }) => {
   const chatsRef = collection(db, "chats");
   const messagesRef = collection(chatsRef, route.params.groupId, "messages");
   const q = query(messagesRef, orderBy("createdAt"));
+  const qGroups = query(
+    groupsRef,
+    where("members", "array-contains", user.uid),
+    orderBy("lastMessage.createdAt", "desc")
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -93,7 +99,7 @@ const ChatScreen = ({ route, navigation }) => {
           <View style={{ flexDirection: "row" }}>
             <Ionicons name="chevron-back" size={32} color="#9b59b6" />
             <View style={{ justifyContent: "center" }}>
-              {totalUnreadMsgs !== 0 && (
+              {totalUnreadMsgs > 0 && (
                 <Badge
                   value={totalUnreadMsgs > 99 ? "99+" : totalUnreadMsgs}
                   textStyle={{ fontSize: 16 }}
@@ -114,6 +120,36 @@ const ChatScreen = ({ route, navigation }) => {
     });
   }, [navigation, totalUnreadMsgs]);
 
+  useEffect(
+    () =>
+      navigation.addListener("beforeRemove", async () => {
+        if (messages?.length > 0) {
+          // If we don't have unsaved changes, then we don't need to do anything
+          return;
+        }
+        await deleteDoc(doc(groupsRef, route.params.groupId));
+      }),
+    [navigation, messages]
+  );
+
+  useEffect(() => {
+    // let allChats = [];
+    const unsubChatDetails = onSnapshot(qGroups, (querySnapshot) => {
+      // querySnapshot.docs.forEach((doc) =>
+      //   allChats.push({ ...doc.data(), groupId: doc.id })
+      // );
+      setChats(
+        querySnapshot.docs.map((doc) => {
+          return { ...doc.data(), groupId: doc.id };
+        })
+      );
+      // console.log("checking latest chat:", allChats[0]);
+      // setChats(allChats[0]);
+    });
+
+    return unsubChatDetails;
+  }, []);
+
   useEffect(() => {
     // console.log("checking groupId from chat screen", route.params.groupId);
 
@@ -130,6 +166,48 @@ const ChatScreen = ({ route, navigation }) => {
 
     return unsubMessages;
   }, []);
+
+  // useEffect(() => {
+  //   if (chats.length > 0) {
+  //     if (
+  //       chats[0].groupId !== route.params.groupId &&
+  //       chats[0].lastMessage?.sentBy !== user.uid
+  //     ) {
+  //       toast.show(chats[0].lastMessage?.message, {
+  //         type: "newMessage",
+  //         message: chats[0].lastMessage?.message,
+  //         displayName: chats[0].lastMessage?.senderDisplayName,
+  //         photoURL: chats[0].lastMessage?.senderPhotoURL,
+  //         createdAt: new Date(
+  //           chats[0].lastMessage?.createdAt * 1000
+  //         ).toLocaleTimeString("en-US", {
+  //           hour: "numeric",
+  //           minute: "numeric",
+  //           hour12: true,
+  //         }),
+  //         placement: "top",
+  //         duration: 5000,
+  //       });
+  //     }
+  //   }
+  // }, [chats]);
+
+  // useEffect(() => {
+  //   if (currentRoute.name !== "ChatScreen") {
+  //     if (chats.length > 0 && chats[0].groupId !== route.params.groupId) {
+  //       if (chats[0].lastMessage && chats[0].lastMessage?.sentBy !== user.uid) {
+  //         toast.show(chats[0].lastMessage?.message, {
+  //           type: "newMessage",
+  //           message: chats[0].lastMessage?.message,
+  //           displayName: chats[0].lastMessage?.senderDisplayName,
+  //           photoURL: chats[0].lastMessage?.senderPhotoURL,
+  //           placement: "top",
+  //           duration: 5000,
+  //         });
+  //       }
+  //     }
+  //   }
+  // }, [chats]);
 
   useEffect(() => {
     if (messages?.length > 0) {
@@ -152,47 +230,6 @@ const ChatScreen = ({ route, navigation }) => {
   useEffect(() => {
     readMsgs();
   }, [unreadMsgs]);
-
-  // useEffect(() => {
-  //   const messagesRef = collection(db, "groups");
-  //   const q = query(messagesRef, where("members", "array-contains", user.uid));
-
-  //   const unsubNewMsgs = onSnapshot(q, (querySnapshot) => {
-  //     querySnapshot.docs.forEach((doc) => {
-  //       console.log("the group info:", doc.data());
-  //       if (currentRoute.name === "ChatScreen") {
-  //         if (doc.data().groupId !== route.params.groupId) {
-  //           if (
-  //             doc.data().lastMessage &&
-  //             doc.data().lastMessage?.sentBy !== user.uid
-  //           ) {
-  //             toast.show(doc.data().lastMessage?.message, {
-  //               type: "newMessage",
-  //               message: doc.data().lastMessage?.message,
-  //               displayName: doc.data().lastMessage?.senderDisplayName,
-  //               photoURL: doc.data().lastMessage?.senderPhotoURL,
-  //               placement: "top",
-  //               duration: 5000,
-  //             });
-  //           }
-  //         }
-  //       }
-  //     });
-  //   });
-  //   return unsubNewMsgs;
-  // }, []);
-
-  useEffect(
-    () =>
-      navigation.addListener("beforeRemove", async () => {
-        if (messages?.length > 0) {
-          // If we don't have unsaved changes, then we don't need to do anything
-          return;
-        }
-        await deleteDoc(doc(groupsRef, route.params.groupId));
-      }),
-    [navigation, messages]
-  );
 
   const onPressFunction = () => {
     scrollViewRef.current.scrollToEnd({ animating: true });
@@ -304,8 +341,8 @@ const ChatScreen = ({ route, navigation }) => {
           )}
         </ScrollView>
         {/* <Button
-          title="read msgs"
-          onPress={() => console.log(route.params.unreadMsgs)}
+          title="latest chat"
+          onPress={() => console.log("latest chat:", chats[0])}
         /> */}
         <View style={styles.footer}>
           <TextInput

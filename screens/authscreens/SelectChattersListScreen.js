@@ -32,7 +32,7 @@ const SelectChattersListScreen = ({
   navigation: { goBack },
 }) => {
   const [search, setSearch] = useState("");
-  const [friends, setFriends] = useState();
+  const [friends, setFriends] = useState("");
   const [filteredFriends, setFilteredFriends] = useState();
   const [chatWith, setChatWith] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -93,26 +93,30 @@ const SelectChattersListScreen = ({
   }, [navigation, chatterIds]);
 
   useEffect(() => {
-    const extractFriendId = route.params.userFriendIds.map((friendId) => {
-      return friendId.userId;
-    });
-
-    const q = query(
-      collection(db, "users"),
-      where("userId", "in", extractFriendId),
-      orderBy("displayName")
-    );
-    const unsubFriendInfo = onSnapshot(q, (querySnapshot) => {
-      let gettingFriends = [];
-      querySnapshot.forEach((doc) => {
-        gettingFriends.push({ ...doc.data(), chattingWith: false });
+    if (route.params.userFriendIds.length > 0) {
+      const extractFriendId = route.params.userFriendIds.map((friendId) => {
+        return friendId.userId;
       });
-      // console.log("listening to these friends:", gettingFriends);
-      setFriends(gettingFriends);
-    });
 
-    return unsubFriendInfo;
-  }, []);
+      const q = query(
+        collection(db, "users"),
+        where("userId", "in", extractFriendId),
+        orderBy("displayName")
+      );
+      const unsubFriendInfo = onSnapshot(q, (querySnapshot) => {
+        let gettingFriends = [];
+        querySnapshot.forEach((doc) => {
+          gettingFriends.push({ ...doc.data(), chattingWith: false });
+        });
+        // console.log("listening to these friends:", gettingFriends);
+        setFriends(gettingFriends);
+      });
+
+      return unsubFriendInfo;
+    } else {
+      setFriends("");
+    }
+  }, [route.params.userFriendIds]);
 
   useEffect(() => {
     setFilteredFriends(friends);

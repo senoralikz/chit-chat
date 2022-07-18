@@ -44,7 +44,6 @@ const ChatsListScreen = ({ navigation }) => {
     groupsRef,
     where("members", "array-contains", user.uid),
     orderBy("lastMessage.createdAt", "desc")
-    // orderBy("lastModified", "desc")
   );
 
   useLayoutEffect(() => {
@@ -73,7 +72,6 @@ const ChatsListScreen = ({ navigation }) => {
               userFriendIds: userFriendIds,
             })
           }
-          // onPress={() => setModalVisible(true)}
           style={{ paddingRight: 10 }}
         >
           <Ionicons name="create-outline" size={28} color="#9b59b6" />
@@ -95,7 +93,6 @@ const ChatsListScreen = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    // let totalMsgs = 0;
     let totalMsgs = [];
     chats.forEach(async (chat) => {
       const messagesRef = collection(db, "chats", chat.groupId, "messages");
@@ -110,13 +107,11 @@ const ChatsListScreen = ({ navigation }) => {
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
-        // totalMsgs++;
         totalMsgs.push(doc.data());
       });
 
       setTotalUnreadMsgs(totalMsgs.length);
     });
-    // setTotalUnreadMsgs(totalMsgs);
   }, [chats]);
 
   useEffect(() => {
@@ -130,48 +125,27 @@ const ChatsListScreen = ({ navigation }) => {
     return unsubFriendIds;
   }, []);
 
-  useEffect(() => {
-    if (currentRoute.name !== "ChatScreen") {
-      if (chats.length > 0 && chats[0].lastMessage?.sentBy !== user.uid) {
-        toast.show(chats[0].lastMessage?.message, {
-          type: "newMessage",
-          message: chats[0].lastMessage?.message,
-          displayName: chats[0].lastMessage?.senderDisplayName,
-          photoURL: chats[0].lastMessage?.senderPhotoURL,
-          createdAt: new Date(
-            chats[0].lastMessage?.createdAt * 1000
-          ).toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "numeric",
-            hour12: true,
-          }),
-          placement: "top",
-          duration: 5000,
-        });
-      }
-    }
-  }, [chats]);
-
   // useEffect(() => {
-  //   fetchFriendsInfo();
-  // }, [userFriendIds]);
-
-  // const fetchFriendsInfo = () => {
-  //   try {
-  //     let friendsInfo = [];
-  //     userFriendIds.forEach(async (friendId) => {
-  //       const friendRef = doc(db, "users", friendId.userId);
-  //       const docSnap = await getDoc(friendRef);
-  //       friendsInfo.push({ ...docSnap.data(), chattingWith: false });
-  //     });
-  //     friendsInfo.sort((a, b) => a.displayName.localeCompare(b.displayName));
-  //     setFriends(friendsInfo);
-  //   } catch (error) {
-  //     toast.show(error.message, {
-  //       type: "danger",
-  //     });
+  //   if (currentRoute.name !== "ChatScreen") {
+  //     if (chats.length > 0 && chats[0].lastMessage?.sentBy !== user.uid) {
+  //       toast.show(chats[0].lastMessage?.message, {
+  //         type: "newMessage",
+  //         message: chats[0].lastMessage?.message,
+  //         displayName: chats[0].lastMessage?.senderDisplayName,
+  //         photoURL: chats[0].lastMessage?.senderPhotoURL,
+  //         createdAt: new Date(
+  //           chats[0].lastMessage?.createdAt * 1000
+  //         ).toLocaleTimeString("en-US", {
+  //           hour: "numeric",
+  //           minute: "numeric",
+  //           hour12: true,
+  //         }),
+  //         placement: "top",
+  //         duration: 5000,
+  //       });
+  //     }
   //   }
-  // };
+  // }, [chats]);
 
   return (
     <View style={styles.container}>
@@ -188,7 +162,12 @@ const ChatsListScreen = ({ navigation }) => {
         )}
         data={chats}
         renderItem={({ item }) => (
-          <ChatListItem chat={item} navigation={navigation} />
+          <ChatListItem
+            chat={item}
+            chats={chats}
+            setChats={setChats}
+            navigation={navigation}
+          />
         )}
         keyExtractor={(item) => item.groupId}
         ListEmptyComponent={() => (

@@ -40,8 +40,7 @@ const AuthTabs = () => {
           tabBarBadge: totalUnreadMsgs,
           tabBarBadgeStyle: {
             backgroundColor: "#9b59b6",
-            display: totalUnreadMsgs === 0 ? "none" : "flex",
-            // display: totalUnreadMsgs > 0 ? "flex" : "none",
+            display: totalUnreadMsgs < 1 ? "none" : "flex",
             // paddingVertical: 2,
             // marginVertical: 2,
             justifyContent: "center",

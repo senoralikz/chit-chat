@@ -1,12 +1,11 @@
-import { View, Text, Platform } from "react-native";
+import { View, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import UnauthStack from "./routes/unauthRoutes/UnauthStack";
-import AuthTabs from "./routes/authRoutes/AuthTabs";
 import { UnreadMsgContext } from "./context/UnreadMsgContext";
 import ChatsStack from "./routes/authRoutes/ChatsStack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -14,68 +13,10 @@ import { Avatar } from "react-native-elements";
 import { ToastProvider } from "react-native-toast-notifications";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { MenuProvider } from "react-native-popup-menu";
-import * as Device from "expo-device";
-import * as Notifications from "expo-notifications";
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
 
 export default function App() {
   const [user, setUser] = useState("");
   const [totalUnreadMsgs, setTotalUnreadMsgs] = useState(0);
-  const [expoPushToken, setExpoPushToken] = useState("");
-  const [notification, setNotification] = useState(false);
-
-  const notificationListener = useRef();
-  const responseListener = useRef();
-
-  // useEffect(() => {
-  //   registerForPushNotificationsAsync();
-  // }, []);
-
-  const registerForPushNotificationsAsync = async () => {
-    try {
-      if (Device.isDevice) {
-        const { status: existingStatus } =
-          await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== "granted") {
-          const { status } = await Notifications.requestPermissionsAsync();
-          finalStatus = status;
-        }
-        if (finalStatus !== "granted") {
-          alert("Failed to get push token for push notification!");
-          return;
-        }
-        const token = (await Notifications.getExpoPushTokenAsync()).data;
-        console.log(token);
-        setExpoPushToken(token);
-      } else {
-        alert("Must use physical device for Push Notifications");
-      }
-
-      if (Platform.OS === "android") {
-        Notifications.setNotificationChannelAsync("default", {
-          name: "default",
-          importance: Notifications.AndroidImportance.MAX,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: "#FF231F7C",
-        });
-      }
-    } catch (error) {
-      alert(error.message);
-      console.error(
-        error.code,
-        "-- error getting push token --",
-        error.message
-      );
-    }
-  };
 
   const renderType = {
     newMessage: (toast) => (
@@ -136,31 +77,6 @@ export default function App() {
       </View>
     ),
   };
-
-  // useEffect(() => {
-  //   registerForPushNotificationsAsync().then((token) =>
-  //     setExpoPushToken(token)
-  //   );
-
-  //   // This listener is fired whenever a notification is received while the app is foregrounded
-  //   notificationListener.current =
-  //     Notifications.addNotificationReceivedListener((notification) => {
-  //       setNotification(notification);
-  //     });
-
-  //   // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
-  //   responseListener.current =
-  //     Notifications.addNotificationResponseReceivedListener((response) => {
-  //       console.log(response);
-  //     });
-
-  //   return () => {
-  //     Notifications.removeNotificationSubscription(
-  //       notificationListener.current
-  //     );
-  //     Notifications.removeNotificationSubscription(responseListener.current);
-  //   };
-  // }, []);
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (user) => {

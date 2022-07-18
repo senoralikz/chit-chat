@@ -14,14 +14,20 @@ import {
   arrayRemove,
   getDoc,
 } from "firebase/firestore";
-import { Avatar, ListItem, Icon, Badge } from "react-native-elements";
-import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
+import { Avatar, ListItem, Badge } from "react-native-elements";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { UnreadMsgContext } from "../context/UnreadMsgContext";
 import { useToast } from "react-native-toast-notifications";
 import { useRoute } from "@react-navigation/native";
 
-const ChatListItem = ({ chat, navigation, setModalVisible }) => {
+const ChatListItem = ({
+  chat,
+  chats,
+  setChats,
+  navigation,
+  setModalVisible,
+}) => {
   const [messages, setMessages] = useState([]);
   const [unreadMsgs, setUnreadMsgs] = useState([]);
   const [memberNames, setMemberNames] = useState([]);
@@ -92,64 +98,6 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
     }
   }, [messages]);
 
-  // useEffect(() => {
-  //   const chatsRef = collection(db, "chats");
-  //   const messagesRef = collection(chatsRef, chat.groupId, "messages");
-
-  //   const q = query(
-  //     messagesRef,
-  //     where("readBy", "array-contains", { readMsg: false, userId: user.uid })
-  //   );
-  //   // console.log("checking groupId from chat screen", route.params.groupId);
-  //   const unsubUnreadMsgs = onSnapshot(q, (snapshot) => {
-  //     setUnreadMsgs(
-  //       snapshot.docs.map((doc) => {
-  //         return {
-  //           ...doc.data(),
-  //           messageId: doc.id,
-  //         };
-  //       })
-  //     );
-  //   });
-
-  //   return unsubUnreadMsgs;
-  // }, []);
-
-  // useEffect(() => {
-  //   getIncomingMessageInfo();
-  // }, [messages]);
-
-  const getIncomingMessageInfo = async () => {
-    try {
-      if (currentRoute.name !== "ChatScreen") {
-        if (messages.length > 0 && messages[0]?.senderUserId !== user.uid) {
-          const userRef = doc(db, "users", messages[0]?.senderUserId);
-          const docSnap = await getDoc(userRef);
-
-          const msgSenderInfo = docSnap.data();
-          // if (docSnap.exists()) {
-          //   console.log("Document data:", docSnap.data());
-          // } else {
-          //   // doc.data() will be undefined in this case
-          //   console.log("No such document!");
-          // }
-          toast.show(messages[0].message, {
-            type: "newMessage",
-            message: messages[0].message,
-            displayName: msgSenderInfo.displayName,
-            photoURL: msgSenderInfo.photoURL,
-            placement: "top",
-            duration: 5000,
-          });
-        }
-      }
-    } catch (error) {
-      toast.show(error.message, {
-        type: "danger",
-      });
-    }
-  };
-
   const deleteMessagesColl = async () => {
     try {
       const messagesRef = collection(chatRef, "messages");
@@ -163,7 +111,7 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
         await deleteDoc(docRef);
       });
     } catch (error) {
-      Alert.alert(error.code, error.message, { text: "Ok" });
+      toast.show(error.message, { type: "danger" });
       console.error(error.code, "-- error deleting chat --", error.message);
     }
   };
@@ -173,7 +121,7 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
       deleteMessagesColl();
       await deleteDoc(groupRef);
     } catch (error) {
-      Alert.alert(error.code, error.message, { text: "Ok" });
+      toast.show(error.message, { type: "danger" });
       console.error(error.code, "-- error deleting chat --", error.message);
     }
   };
@@ -195,6 +143,7 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
         friendUserId: membersInfo[0]?.userId,
         friendDisplayName: membersInfo[0]?.displayName,
         friendPhotoURL: membersInfo[0]?.photoURL,
+        chats: chats,
       });
     } else {
       navigation.navigate("GroupChatScreen", {
@@ -206,7 +155,7 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
         unreadMsgs: unreadMsgs,
         friendDisplayName: memberNames,
         membersInfo: membersInfo,
-        chatInfo: chat,
+        chats: chats,
       });
     }
   };
@@ -230,132 +179,100 @@ const ChatListItem = ({ chat, navigation, setModalVisible }) => {
   };
 
   return (
-    <Swipeable renderRightActions={rightSwipeActions}>
-      <ListItem onPress={goToChatScreen}>
-        {membersInfo.length === 1 ? (
-          <Avatar
-            size="medium"
-            source={{ uri: membersInfo[0]?.photoURL }}
-            rounded
-          />
-        ) : !chat.groupPhotoUrl ? (
-          <View
+    // <Swipeable renderRightActions={rightSwipeActions}>
+    <ListItem onPress={goToChatScreen}>
+      {membersInfo.length === 1 ? (
+        <Avatar
+          size="medium"
+          source={{ uri: membersInfo[0]?.photoURL }}
+          rounded
+        />
+      ) : !chat.groupPhotoUrl ? (
+        <View
+          style={{
+            backgroundColor: "#bdc3c7",
+            height: 50,
+            width: 50,
+            borderRadius: 25,
+            alignSelf: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
             style={{
-              backgroundColor: "#bdc3c7",
-              height: 50,
-              width: 50,
-              borderRadius: 25,
-              alignSelf: "center",
-              justifyContent: "center",
+              color: "#fff",
+              textAlign: "center",
+              fontSize: 42,
+              // paddingVertical: 3,
             }}
           >
-            <Text
-              style={{
-                color: "#fff",
-                textAlign: "center",
-                fontSize: 42,
-                // paddingVertical: 3,
-              }}
-            >
-              {membersInfo.length}
-            </Text>
-          </View>
-        ) : (
-          <Avatar size="medium" source={{ uri: chat.groupPhotoUrl }} rounded />
-        )}
-        {/* {membersInfo.length === 1 && (
-          <Avatar
-            size="medium"
-            source={{ uri: membersInfo[0]?.photoURL }}
-            rounded
-          />
-        )}
-        {membersInfo.length > 1 && chat.groupPhotoURL ? (
-          <Avatar size="medium" source={{ uri: chat.groupPhotoURL }} rounded />
-        ) : (
-          <View
-            style={{
-              backgroundColor: "#bdc3c7",
-              height: 50,
-              width: 50,
-              borderRadius: 25,
-              alignSelf: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                textAlign: "center",
-                fontSize: 42,
-                // paddingVertical: 3,
-              }}
-            >
-              {membersInfo.length}
-            </Text>
-          </View>
-        )} */}
-        <View style={{ position: "absolute", top: 13, left: 52 }}>
-          {unreadMsgs > 0 && (
-            <Badge
-              value={unreadMsgs > 99 ? "99+" : unreadMsgs}
-              textStyle={{ fontSize: 14 }}
-              badgeStyle={{
-                // width: 23,
-                height: 23,
-                minWidth: 23,
-                maxWidth: 35,
-                // maxWidth: 35,
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 15,
-                borderColor: "#fff",
-                borderWidth: 2,
-                backgroundColor: "#9b59b6",
-                // position: "absolute",
-                // top: 0,
-                // left: 52,
-              }}
-            />
-          )}
+            {membersInfo.length}
+          </Text>
         </View>
-        <ListItem.Content>
-          <View
-            style={{
-              width: "100%",
-              flexDirection: "row",
-              justifyContent: "space-between",
+      ) : (
+        <Avatar size="medium" source={{ uri: chat.groupPhotoUrl }} rounded />
+      )}
+      <View style={{ position: "absolute", top: 13, left: 52 }}>
+        {unreadMsgs > 0 && (
+          <Badge
+            value={unreadMsgs > 99 ? "99+" : unreadMsgs}
+            textStyle={{ fontSize: 14 }}
+            badgeStyle={{
+              // width: 23,
+              height: 23,
+              minWidth: 23,
+              maxWidth: 35,
+              // maxWidth: 35,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 15,
+              borderColor: "#fff",
+              borderWidth: 2,
+              backgroundColor: "#9b59b6",
+              // position: "absolute",
+              // top: 0,
+              // left: 52,
             }}
+          />
+        )}
+      </View>
+      <ListItem.Content>
+        <View
+          style={{
+            width: "100%",
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <ListItem.Title
+            style={{ fontWeight: "bold", width: "70%" }}
+            numberOfLines={1}
+            ellipsizeMode="tail"
           >
-            <ListItem.Title
-              style={{ fontWeight: "bold", width: "70%" }}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {chat.groupName ? chat.groupName : memberNames.join(", ")}
-            </ListItem.Title>
-            <ListItem.Title right={true} style={{ fontSize: 14 }}>
-              {new Date(chat.lastMessage?.createdAt * 1000).toLocaleTimeString(
-                "en-US",
-                {
-                  hour: "numeric",
-                  minute: "numeric",
-                  hour12: true,
-                }
-              )}
-            </ListItem.Title>
-            {/* <Button
+            {chat.groupName ? chat.groupName : memberNames.join(", ")}
+          </ListItem.Title>
+          <ListItem.Title right={true} style={{ fontSize: 14 }}>
+            {new Date(chat.lastMessage?.createdAt * 1000).toLocaleTimeString(
+              "en-US",
+              {
+                hour: "numeric",
+                minute: "numeric",
+                hour12: true,
+              }
+            )}
+          </ListItem.Title>
+          {/* <Button
               title="check chat id"
               onPress={() => console.log("chat id is:", chat.groupId)}
             /> */}
-          </View>
-          <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
-            {chat.lastMessage?.message}
-          </ListItem.Subtitle>
-        </ListItem.Content>
-        <ListItem.Chevron />
-      </ListItem>
-    </Swipeable>
+        </View>
+        <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
+          {chat.lastMessage?.message}
+        </ListItem.Subtitle>
+      </ListItem.Content>
+      <ListItem.Chevron />
+    </ListItem>
+    // </Swipeable>
   );
 };
 
