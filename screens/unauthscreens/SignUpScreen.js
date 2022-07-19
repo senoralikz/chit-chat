@@ -28,7 +28,7 @@ import {
   FontAwesome,
   Feather,
 } from "@expo/vector-icons";
-import { Avatar } from "react-native-elements";
+import { Avatar, Button } from "react-native-elements";
 import { useToast } from "react-native-toast-notifications";
 import {
   Menu,
@@ -44,6 +44,8 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
   const [displayName, setDisplayName] = useState("");
   const [displayNameAvailable, setDisplayNameAvailable] = useState(true);
   const [pickedPhoto, setPickedPhoto] = useState("");
+  const [signingUpSpinner, setSigningUpSpinner] = useState(false);
+  const [signUpDisabled, setSignUpDisabled] = useState(false);
 
   const toast = useToast();
 
@@ -173,10 +175,18 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
 
   const handleSignUp = async () => {
     if (!email || !password || !displayName) {
-      toast.show("Please enter an email, password, and display name", {
+      toast.show("Please enter email, password, and display name", {
         type: "warning",
+        placement: "top",
+      });
+    } else if (password !== confirmPassword) {
+      toast.show("Passwords do not match", {
+        type: "warning",
+        placement: "top",
       });
     } else {
+      setSigningUpSpinner(true);
+      setSignUpDisabled(true);
       await createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           // Signed in
@@ -210,6 +220,8 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
           });
         })
         .catch((error) => {
+          setSigningUpSpinner(true);
+          setSignUpDisabled(true);
           console.error(
             error.code,
             "--- trouble creating user ---",
@@ -327,7 +339,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               placeholder="Email"
               value={email}
               onChangeText={(text) => setEmail(text)}
-              style={{ width: "100%" }}
+              style={{ width: "100%", fontSize: 18 }}
             />
           </View>
           <View style={styles.credentialInput}>
@@ -341,7 +353,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               placeholder="Display Name"
               value={displayName}
               onChangeText={(text) => setDisplayName(text)}
-              style={{ width: "100%" }}
+              style={{ width: "100%", fontSize: 18 }}
             />
           </View>
           {!displayNameAvailable && (
@@ -360,7 +372,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               placeholder="Password"
               value={password}
               onChangeText={(text) => setPassword(text)}
-              style={{ width: "100%" }}
+              style={{ width: "100%", fontSize: 18 }}
               secureTextEntry
             />
           </View>
@@ -384,7 +396,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               placeholder="Confirm Password"
               value={confirmPassword}
               onChangeText={(text) => setConfirmPassword(text)}
-              style={{ width: "100%" }}
+              style={{ width: "100%", fontSize: 18 }}
               editable={true}
               secureTextEntry
             />
@@ -394,7 +406,7 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
               Passwords do not match
             </Text>
           )}
-          <View style={{ alignItems: "center" }}>
+          {/* <View style={{ alignItems: "center" }}>
             <Pressable
               onPress={handleSignUp}
               style={
@@ -412,7 +424,18 @@ const SignUpScreen = ({ navigation: { goBack } }) => {
                 Sign Up
               </Text>
             </Pressable>
-          </View>
+          </View> */}
+          <Button
+            title="Sign Up"
+            titleStyle={{ fontSize: 24 }}
+            onPress={handleSignUp}
+            buttonStyle={{ backgroundColor: "#9b59b6" }}
+            containerStyle={{ width: 200, marginVertical: 20 }}
+            loading={signingUpSpinner}
+            disabled={signUpDisabled}
+            disabledStyle={{ backgroundColor: "#b2bec3" }}
+            raised={true}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

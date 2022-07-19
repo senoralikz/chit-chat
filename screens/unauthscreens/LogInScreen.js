@@ -14,7 +14,7 @@ import { auth } from "../../firebaseConfig";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import GoogleSignInBtn from "../../components/GoogleSignInBtn";
 import { useToast } from "react-native-toast-notifications";
-import { SocialIcon } from "react-native-elements";
+import { Button, SocialIcon } from "react-native-elements";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const LogInScreen = ({ navigation }) => {
@@ -22,6 +22,8 @@ const LogInScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [googleModalVisible, setGoogleModalVisible] = useState(false);
+  const [loggingInSpinner, setLoggingInSpinner] = useState(false);
+  const [logInDisabled, setLogInDisabled] = useState(false);
 
   const toast = useToast();
 
@@ -32,13 +34,18 @@ const LogInScreen = ({ navigation }) => {
         placement: "top",
       });
     } else {
+      setLoggingInSpinner(true);
+      setLogInDisabled(true);
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
+          // setLoggingInSpinner(false);
           // ...
         })
         .catch((error) => {
+          setLoggingInSpinner(false);
+          setLogInDisabled(false);
           const errorCode = error.code;
           const errorMessage = error.message;
           console.error(errorCode, "-- error signing in --", errorMessage);
@@ -81,7 +88,7 @@ const LogInScreen = ({ navigation }) => {
             placeholder="Email"
             value={email}
             onChangeText={(text) => setEmail(text)}
-            style={{ width: "100%" }}
+            style={{ width: "100%", fontSize: 18 }}
           />
         </View>
         <View style={styles.credentialInput}>
@@ -95,7 +102,7 @@ const LogInScreen = ({ navigation }) => {
             placeholder="Password"
             value={password}
             onChangeText={(text) => setPassword(text)}
-            style={{ width: "100%" }}
+            style={{ width: "100%", fontSize: 18 }}
             secureTextEntry
           />
         </View>
@@ -117,14 +124,25 @@ const LogInScreen = ({ navigation }) => {
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
         />
-        <View>
+        {/* <View>
           <Pressable onPress={handleSignIn} style={styles.logInBtn}>
             <MaterialCommunityIcons name="login" size={24} color="#fff" />
             <Text style={{ margin: 10, fontSize: 24, color: "#fff" }}>
               Log In
             </Text>
           </Pressable>
-        </View>
+        </View> */}
+        <Button
+          title="Log In"
+          titleStyle={{ fontSize: 24 }}
+          onPress={handleSignIn}
+          buttonStyle={{ backgroundColor: "#22a6b3" }}
+          containerStyle={{ width: 200, marginVertical: 20 }}
+          loading={loggingInSpinner}
+          disabled={logInDisabled}
+          disabledStyle={{ backgroundColor: "#b2bec3" }}
+          raised={true}
+        />
         <Text style={{ fontSize: 16 }}>
           Don't have an account? You can
           <Text

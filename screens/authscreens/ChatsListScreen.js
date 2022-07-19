@@ -23,7 +23,6 @@ import {
 import ChatListItem from "../../components/ChatListItem";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { Avatar } from "react-native-elements";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { UnreadMsgContext } from "../../context/UnreadMsgContext";
 import { useRoute } from "@react-navigation/native";
 import { useToast } from "react-native-toast-notifications";

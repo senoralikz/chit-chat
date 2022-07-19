@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import { auth, db } from "../firebaseConfig";
 import { Avatar } from "react-native-elements";
 import { getDoc, doc } from "firebase/firestore";
+import { useRoute } from "@react-navigation/native";
 
 const Message = ({ message, index, messages }) => {
   const [senderInfo, setSenderInfo] = useState("");
 
   const user = auth.currentUser;
+  const currentRoute = useRoute();
 
   useEffect(() => {
     fetchSenderInfo();
@@ -101,26 +103,30 @@ const Message = ({ message, index, messages }) => {
           </View>
         ) : (
           <View style={{ flexDirection: "row" }}>
-            <View
-              style={{
-                justifyContent: "flex-end",
-                marginRight: 3,
-              }}
-            >
-              <Avatar
-                size="small"
-                rounded
-                source={{ uri: senderInfo.photoURL }}
-              />
-            </View>
-            <View style={{ flexDirection: "column" }}>
-              <Text
-                style={{ paddingLeft: 10, color: "#95a5a6" }}
-                numberOfLines={1}
-                ellipsizeMode="tail"
+            {currentRoute.name === "GroupChatScreen" && (
+              <View
+                style={{
+                  justifyContent: "flex-end",
+                  marginRight: 3,
+                }}
               >
-                {senderInfo.displayName}
-              </Text>
+                <Avatar
+                  size="small"
+                  rounded
+                  source={{ uri: senderInfo.photoURL }}
+                />
+              </View>
+            )}
+            <View style={{ flexDirection: "column" }}>
+              {currentRoute.name === "GroupChatScreen" && (
+                <Text
+                  style={{ paddingLeft: 10, color: "#95a5a6" }}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {senderInfo.displayName}
+                </Text>
+              )}
               <View style={styles.messagesReceived}>
                 <Text style={{ fontSize: 16 }}>{message.message}</Text>
                 <Text style={{ fontSize: 12, paddingTop: 5 }}>
