@@ -110,6 +110,7 @@ const ChatListItem = ({
         const docRef = doc(chatRef, "messages", result.messageId);
         await deleteDoc(docRef);
       });
+      setTotalUnreadMsgs((prevState) => prevState - unreadMsgs);
     } catch (error) {
       toast.show(error.message, { type: "danger" });
       console.error(error.code, "-- error deleting chat --", error.message);
@@ -179,100 +180,100 @@ const ChatListItem = ({
   };
 
   return (
-    // <Swipeable renderRightActions={rightSwipeActions}>
-    <ListItem onPress={goToChatScreen}>
-      {membersInfo.length === 1 ? (
-        <Avatar
-          size="medium"
-          source={{ uri: membersInfo[0]?.photoURL }}
-          rounded
-        />
-      ) : !chat.groupPhotoUrl ? (
-        <View
-          style={{
-            backgroundColor: "#bdc3c7",
-            height: 50,
-            width: 50,
-            borderRadius: 25,
-            alignSelf: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text
-            style={{
-              color: "#fff",
-              textAlign: "center",
-              fontSize: 42,
-              // paddingVertical: 3,
-            }}
-          >
-            {membersInfo.length}
-          </Text>
-        </View>
-      ) : (
-        <Avatar size="medium" source={{ uri: chat.groupPhotoUrl }} rounded />
-      )}
-      <View style={{ position: "absolute", top: 13, left: 52 }}>
-        {unreadMsgs > 0 && (
-          <Badge
-            value={unreadMsgs > 99 ? "99+" : unreadMsgs}
-            textStyle={{ fontSize: 14 }}
-            badgeStyle={{
-              // width: 23,
-              height: 23,
-              minWidth: 23,
-              maxWidth: 35,
-              // maxWidth: 35,
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 15,
-              borderColor: "#fff",
-              borderWidth: 2,
-              backgroundColor: "#9b59b6",
-              // position: "absolute",
-              // top: 0,
-              // left: 52,
-            }}
+    <Swipeable renderRightActions={rightSwipeActions}>
+      <ListItem onPress={goToChatScreen}>
+        {membersInfo.length === 1 ? (
+          <Avatar
+            size="medium"
+            source={{ uri: membersInfo[0]?.photoURL }}
+            rounded
           />
-        )}
-      </View>
-      <ListItem.Content>
-        <View
-          style={{
-            width: "100%",
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
-          <ListItem.Title
-            style={{ fontWeight: "bold", width: "70%" }}
-            numberOfLines={1}
-            ellipsizeMode="tail"
+        ) : !chat.groupPhotoUrl ? (
+          <View
+            style={{
+              backgroundColor: "#bdc3c7",
+              height: 50,
+              width: 50,
+              borderRadius: 25,
+              alignSelf: "center",
+              justifyContent: "center",
+            }}
           >
-            {chat.groupName ? chat.groupName : memberNames.join(", ")}
-          </ListItem.Title>
-          <ListItem.Title right={true} style={{ fontSize: 14 }}>
-            {new Date(chat.lastMessage?.createdAt * 1000).toLocaleTimeString(
-              "en-US",
-              {
-                hour: "numeric",
-                minute: "numeric",
-                hour12: true,
-              }
-            )}
-          </ListItem.Title>
-          {/* <Button
+            <Text
+              style={{
+                color: "#fff",
+                textAlign: "center",
+                fontSize: 42,
+                // paddingVertical: 3,
+              }}
+            >
+              {membersInfo.length}
+            </Text>
+          </View>
+        ) : (
+          <Avatar size="medium" source={{ uri: chat.groupPhotoUrl }} rounded />
+        )}
+        <View style={{ position: "absolute", top: 13, left: 52 }}>
+          {unreadMsgs > 0 && (
+            <Badge
+              value={unreadMsgs > 99 ? "99+" : unreadMsgs}
+              textStyle={{ fontSize: 14 }}
+              badgeStyle={{
+                // width: 23,
+                height: 23,
+                minWidth: 23,
+                maxWidth: 35,
+                // maxWidth: 35,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 15,
+                borderColor: "#fff",
+                borderWidth: 2,
+                backgroundColor: "#9b59b6",
+                // position: "absolute",
+                // top: 0,
+                // left: 52,
+              }}
+            />
+          )}
+        </View>
+        <ListItem.Content>
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <ListItem.Title
+              style={{ fontWeight: "bold", width: "70%" }}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {chat.groupName ? chat.groupName : memberNames.join(", ")}
+            </ListItem.Title>
+            <ListItem.Title right={true} style={{ fontSize: 14 }}>
+              {new Date(chat.lastMessage?.createdAt * 1000).toLocaleTimeString(
+                "en-US",
+                {
+                  hour: "numeric",
+                  minute: "numeric",
+                  hour12: true,
+                }
+              )}
+            </ListItem.Title>
+            {/* <Button
               title="check chat id"
               onPress={() => console.log("chat id is:", chat.groupId)}
             /> */}
-        </View>
-        <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
-          {chat.lastMessage?.message}
-        </ListItem.Subtitle>
-      </ListItem.Content>
-      <ListItem.Chevron />
-    </ListItem>
-    // </Swipeable>
+          </View>
+          <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
+            {chat.lastMessage?.message}
+          </ListItem.Subtitle>
+        </ListItem.Content>
+        <ListItem.Chevron />
+      </ListItem>
+    </Swipeable>
   );
 };
 
