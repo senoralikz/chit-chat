@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { Button } from "react-native-elements";
 import { useToast } from "react-native-toast-notifications";
 import { auth } from "../../firebaseConfig";
 import { sendPasswordResetEmail } from "firebase/auth";
@@ -17,30 +18,46 @@ import { StatusBar } from "expo-status-bar";
 
 const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
   const [email, setEmail] = useState("");
+  const [resetPasswordSpinner, setResetPasswordSpinner] = useState(false);
+  const [resetPasswordDisabled, setResetPasswordDisabled] = useState(false);
 
   const toast = useToast();
 
   const handleResetPassword = () => {
-    sendPasswordResetEmail(auth, email)
-      .then(() => {
-        setModalVisible(false);
-        setEmail("");
-        toast.show("Sent Password Reset Email", {
-          type: "success",
-          placement: "top",
-        });
-      })
-      .catch((error) => {
-        toast.show("Error sending password reset email", {
-          type: "danger",
-          placement: "top",
-        });
-        console.error(
-          error.code,
-          "-- error sending password reset email --",
-          error.message
-        );
+    if (!email) {
+      toast.show("Please enter your email", {
+        type: "danger",
+        placement: "top",
       });
+    } else {
+      setResetPasswordSpinner(true);
+      setResetPasswordDisabled(true);
+
+      sendPasswordResetEmail(auth, email)
+        .then(() => {
+          setResetPasswordSpinner(false);
+          setResetPasswordDisabled(false);
+          setModalVisible(false);
+          setEmail("");
+          toast.show("Sent Password Reset Email", {
+            type: "success",
+            placement: "top",
+          });
+        })
+        .catch((error) => {
+          setResetPasswordSpinner(false);
+          setResetPasswordDisabled(false);
+          toast.show(error.message, {
+            type: "danger",
+            placement: "top",
+          });
+          console.error(
+            error.code,
+            "-- error sending password reset email --",
+            error.message
+          );
+        });
+    }
   };
 
   return (
@@ -50,10 +67,16 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
       visible={modalVisible}
       onRequestClose={() => {
         setModalVisible(false);
+        setEmail("");
       }}
     >
       <View style={{ flexDirection: "row" }}>
-        <Pressable onPress={() => setModalVisible(false)}>
+        <Pressable
+          onPress={() => {
+            setModalVisible(false);
+            setEmail("");
+          }}
+        >
           <View style={{ justifyContent: "center" }}>
             <Ionicons name="chevron-back" size={32} color="#22a6b3" />
           </View>
@@ -110,7 +133,7 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
                 }}
               />
               <View style={{ alignItems: "center" }}>
-                <Pressable
+                {/* <Pressable
                   onPress={handleResetPassword}
                   style={
                     email ? styles.passwordResetBtn : styles.disabledPWResetBtn
@@ -120,7 +143,18 @@ const ForgotPasswordModal = ({ modalVisible, setModalVisible }) => {
                   <Text style={{ margin: 10, fontSize: 24, color: "#fff" }}>
                     Reset Password
                   </Text>
-                </Pressable>
+                </Pressable> */}
+                <Button
+                  title="Reset Password"
+                  titleStyle={{ fontSize: 24 }}
+                  onPress={handleResetPassword}
+                  buttonStyle={{ backgroundColor: "#22a6b3" }}
+                  containerStyle={{ width: 200, marginVertical: 20 }}
+                  loading={resetPasswordSpinner}
+                  disabled={resetPasswordDisabled}
+                  disabledStyle={{ backgroundColor: "#b2bec3" }}
+                  raised={true}
+                />
               </View>
             </KeyboardAvoidingView>
           </View>

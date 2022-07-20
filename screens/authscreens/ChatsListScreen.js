@@ -26,8 +26,9 @@ import { Avatar } from "react-native-elements";
 import { UnreadMsgContext } from "../../context/UnreadMsgContext";
 import { useRoute } from "@react-navigation/native";
 import { useToast } from "react-native-toast-notifications";
+// import { newMessageAlert } from "../../helperFunctions/newMessageAlert";
 
-const ChatsListScreen = ({ navigation }) => {
+const ChatsListScreen = ({ navigation, route }) => {
   const [chats, setChats] = useState([]);
   const [userFriendIds, setUserFriendIds] = useState([]);
   const [friends, setFriends] = useState("");
@@ -123,6 +124,10 @@ const ChatsListScreen = ({ navigation }) => {
     });
     return unsubFriendIds;
   }, []);
+
+  // useEffect(() => {
+  //   newMessageAlert(chats, user, route.params?.groupId, currentRoute, toast);
+  // }, [chats]);
 
   // useEffect(() => {
   //   if (currentRoute.name !== "ChatScreen") {

@@ -17,9 +17,8 @@ import {
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
-import { signOut, updateEmail, updateProfile } from "firebase/auth";
+import { signOut, updateProfile } from "firebase/auth";
 import { auth, db, storage } from "../../firebaseConfig";
 import { Avatar, Button } from "react-native-elements";
 import { Ionicons, Entypo, FontAwesome, Feather } from "@expo/vector-icons";
@@ -49,8 +48,11 @@ const ProfileScreen = ({ navigation }) => {
   const [displayNameAvailable, setDisplayNameAvailable] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [savingChangesSpinner, setSavingChangesSpinner] = useState(false);
+  const [savingChangesDisabled, setSavingChangesDisabled] = useState(false);
+  const [canEditEmail, setCanEditEmail] = useState(false);
+  const [canEditDisplayName, setCanEditDisplayName] = useState(false);
   const [hasPermission, setHasPermission] = useState(null);
-  const [type, setType] = useState(CameraType.back);
 
   const usersRef = collection(db, "users");
   const qEmail = query(usersRef, where("email", "==", email));
@@ -196,6 +198,9 @@ const ProfileScreen = ({ navigation }) => {
 
   const handleUpdateProfilePic = async () => {
     try {
+      setSavingChangesSpinner(true);
+      setSavingChangesDisabled(true);
+
       const fileName = pickedPhoto.replace(/^.*[\\\/]/, "");
       const imageRef = ref(storage, `users/${user.uid}/images/${fileName}`);
 
@@ -215,6 +220,8 @@ const ProfileScreen = ({ navigation }) => {
               });
             })
             .then(() => {
+              setSavingChangesSpinner(false);
+              setSavingChangesDisabled(false);
               setPickedPhoto("");
               toast.show("Successfully updated profile picture", {
                 type: "success",
@@ -224,6 +231,8 @@ const ProfileScreen = ({ navigation }) => {
         });
       });
     } catch (error) {
+      setSavingChangesSpinner(false);
+      setSavingChangesDisabled(false);
       console.error(
         error.code,
         "--- error updating profile picture ---",
@@ -236,34 +245,42 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   const handleUpdateDisplayName = async () => {
-    await updateProfile(user, {
-      displayName: displayName,
-    })
-      .then(async () => {
-        const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, {
-          displayName: displayName,
-        });
+    try {
+      setSavingChangesSpinner(true);
+      setSavingChangesDisabled(true);
+
+      await updateProfile(user, {
+        displayName: displayName,
       })
-      .then(() => {
-        toast.show("Successfully updated display name", {
-          type: "success",
+        .then(async () => {
+          const userRef = doc(db, "users", user.uid);
+          await updateDoc(userRef, {
+            displayName: displayName,
+          });
+        })
+        .then(() => {
+          setSavingChangesSpinner(false);
+          setSavingChangesDisabled(false);
+          toast.show("Successfully updated display name", {
+            type: "success",
+          });
+          // console.log("Display Name was updated succesfully");
         });
-        // console.log("Display Name was updated succesfully");
-      })
-      .catch((error) => {
-        toast.show("Error updating display name", {
-          type: "danger",
-        });
-        console.error(
-          error.code,
-          "-- error updating display name --",
-          error.message
-        );
+    } catch (error) {
+      setSavingChangesSpinner(false);
+      setSavingChangesDisabled(false);
+      toast.show("Error updating display name", {
+        type: "danger",
       });
+      console.error(
+        error.code,
+        "-- error updating display name --",
+        error.message
+      );
+    }
   };
 
-  const handleUpdateProfile = async () => {
+  const handleUpdateProfile = () => {
     try {
       if (!email || !displayName) {
         toast.show("Please enter email and display name", {
@@ -276,6 +293,10 @@ const ProfileScreen = ({ navigation }) => {
       ) {
         toast.show("No changes to be saved", {
           type: "warning",
+        });
+      } else if (!displayNameAvailable) {
+        toast.show("Display Name is not available", {
+          type: "danger",
         });
       } else {
         if (email !== user.email) {
@@ -361,31 +382,79 @@ const ProfileScreen = ({ navigation }) => {
             </>
           )}
         </View>
-        <View style={{ marginVertical: 20 }}>
+        <View
+          style={{
+            marginVertical: 20,
+            // alignItems: "center",
+            // backgroundColor: "green",
+            // justifyContent: "space-between",
+          }}
+        >
           <View style={styles.credentialInputView}>
-            <Text style={styles.credentialPropertyText}>Email: </Text>
-            <TextInput
-              value={email}
-              placeholder={user.email}
-              onChangeText={(text) => setEmail(text.toLowerCase())}
-              style={
-                user.providerData[0].providerId === "password"
-                  ? styles.credentialInput
-                  : [styles.credentialInput, { backgroundColor: "#ececec" }]
-              }
-              editable={
-                user.providerData[0].providerId === "password" ? true : false
-              }
-            />
+            <Text style={styles.credentialPropertyText}>Email:</Text>
+            <View
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                justifyContent: "flex-end",
+                // backgroundColor: "blue",
+                // width: 400,
+              }}
+            >
+              <TextInput
+                value={email}
+                placeholder={user.email}
+                onChangeText={(text) => setEmail(text.toLowerCase())}
+                style={
+                  canEditEmail
+                    ? styles.credentialInput
+                    : [styles.credentialInput, { backgroundColor: "#ececec" }]
+                }
+                editable={canEditEmail}
+              />
+              {/* <View style={{ marginLeft: 30 }}> */}
+              {user.providerData[0].providerId === "password" ? (
+                <Pressable
+                  onPress={() => setCanEditEmail(!canEditEmail)}
+                  style={{ alignSelf: "center", paddingLeft: 10 }}
+                >
+                  <Feather name="edit-2" size={20} color="black" />
+                </Pressable>
+              ) : (
+                <View style={{ marginLeft: 30 }} />
+              )}
+              {/* </View> */}
+            </View>
           </View>
           <View style={styles.credentialInputView}>
-            <Text style={styles.credentialPropertyText}>Display Name: </Text>
-            <TextInput
-              value={displayName}
-              placeholder={user.displayName}
-              onChangeText={(text) => setDisplayName(text)}
-              style={styles.credentialInput}
-            />
+            <Text style={styles.credentialPropertyText}>Display Name:</Text>
+            <View
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                justifyContent: "flex-end",
+                // backgroundColor: "blue",
+                // width: 400,
+              }}
+            >
+              <TextInput
+                value={displayName}
+                placeholder={user.displayName}
+                onChangeText={(text) => setDisplayName(text)}
+                style={
+                  canEditDisplayName
+                    ? styles.credentialInput
+                    : [styles.credentialInput, { backgroundColor: "#ececec" }]
+                }
+                editable={canEditDisplayName}
+              />
+              <Pressable
+                onPress={() => setCanEditDisplayName(!canEditDisplayName)}
+                style={{ alignSelf: "center", paddingLeft: 10 }}
+              >
+                <Feather name="edit-2" size={20} color="black" />
+              </Pressable>
+            </View>
           </View>
           {!displayNameAvailable && (
             <View style={{ paddingRight: 10 }}>
@@ -433,7 +502,7 @@ const ProfileScreen = ({ navigation }) => {
         )}
       </View>
       <View style={{ alignItems: "center" }}>
-        <Pressable
+        {/* <Pressable
           onPress={handleUpdateProfile}
           style={
             !displayNameAvailable ? styles.disabledUpdateBtn : styles.updateBtn
@@ -443,7 +512,18 @@ const ProfileScreen = ({ navigation }) => {
           <Text style={{ margin: 10, fontSize: 24, color: "#34495e" }}>
             Save Changes
           </Text>
-        </Pressable>
+        </Pressable> */}
+        <Button
+          title="Save Changes"
+          titleStyle={{ fontSize: 24 }}
+          onPress={handleUpdateProfile}
+          buttonStyle={{ backgroundColor: "#22a6b3" }}
+          containerStyle={{ width: 200, marginVertical: 20 }}
+          loading={savingChangesSpinner}
+          disabled={savingChangesDisabled}
+          disabledStyle={{ backgroundColor: "#b2bec3" }}
+          raised={true}
+        />
         <UpdateEmailModal
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
@@ -464,6 +544,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 10,
   },
+  settingsBodyView: {
+    // backgroundColor: "red",
+    // width: "100%",
+    // justifyContent: "space-around",
+  },
   removeAddPhotoBtn: {
     position: "absolute",
     bottom: 5,
@@ -475,7 +560,9 @@ const styles = StyleSheet.create({
     // backgroundColor: "red",
   },
   credentialInputView: {
+    // backgroundColor: "blue",
     flexDirection: "row",
+    // alignSelf: "center",
     justifyContent: "space-between",
     marginVertical: 10,
     // paddingHorizontal: 10,
@@ -485,11 +572,13 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   credentialInput: {
-    width: "60%",
+    // backgroundColor: "red",
+    width: 200,
     height: 30,
     borderBottomColor: "#000",
     borderBottomWidth: 1,
     fontSize: 18,
+    padding: 5,
   },
   updateBtn: {
     backgroundColor: "#fff",

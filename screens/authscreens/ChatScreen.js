@@ -46,6 +46,7 @@ import { Avatar, Button } from "react-native-elements";
 import { useToast } from "react-native-toast-notifications";
 import { useRoute } from "@react-navigation/native";
 import { Badge } from "react-native-elements";
+// import { newMessageAlert } from "../../helperFunctions/newMessageAlert";
 
 const ChatScreen = ({ route, navigation }) => {
   const [chats, setChats] = useState([]);
@@ -166,6 +167,10 @@ const ChatScreen = ({ route, navigation }) => {
 
     return unsubMessages;
   }, []);
+
+  // useEffect(() => {
+  //   newMessageAlert(chats, user, route.params?.groupId, currentRoute, toast);
+  // }, [chats]);
 
   // useEffect(() => {
   //   if (chats.length > 0) {

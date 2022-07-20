@@ -6,6 +6,7 @@ import {
   Pressable,
   Modal,
 } from "react-native";
+import { Button } from "react-native-elements";
 import { useState } from "react";
 import { auth } from "../../firebaseConfig";
 import {
@@ -23,13 +24,15 @@ const ChangePasswordModal = ({
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [updatePasswordSpinner, setUpdatePasswordSpinner] = useState(false);
+  const [updatePasswordDisabled, setUpdatePasswordDisabled] = useState(false);
 
   const user = auth.currentUser;
   const toast = useToast();
 
   const handleChangePassword = () => {
     if (!currentPassword || !newPassword || !confirmNewPassword) {
-      toast.show("Please enter required information", {
+      toast.show("Please enter all required information", {
         type: "danger",
       });
     } else {
@@ -41,18 +44,25 @@ const ChangePasswordModal = ({
       reauthenticateWithCredential(user, credential)
         .then(() => {
           if (newPassword === confirmNewPassword) {
+            setUpdatePasswordSpinner(true);
+            setUpdatePasswordDisabled(true);
+
             updatePassword(user, newPassword)
               .then(() => {
                 toast.show("Successfully updated password", {
                   type: "success",
                 });
+                setUpdatePasswordSpinner(false);
+                setUpdatePasswordDisabled(false);
                 setPasswordModalVisible(false);
                 setCurrentPassword("");
                 setNewPassword("");
                 setConfirmNewPassword("");
               })
               .catch((error) => {
-                toast.show("Error updating password", {
+                setUpdatePasswordSpinner(false);
+                setUpdatePasswordDisabled(false);
+                toast.show(error.message, {
                   type: "danger",
                 });
                 console.error(
@@ -68,7 +78,7 @@ const ChangePasswordModal = ({
           }
         })
         .catch((error) => {
-          toast.show("Current password entered is incorrect", {
+          toast.show(error.message, {
             type: "danger",
           });
           console.error(
@@ -87,10 +97,20 @@ const ChangePasswordModal = ({
       visible={passwordModalVisible}
       onRequestClose={() => {
         setPasswordModalVisible(false);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmNewPassword("");
       }}
     >
       <View style={{ flexDirection: "row" }}>
-        <Pressable onPress={() => setPasswordModalVisible(false)}>
+        <Pressable
+          onPress={() => {
+            setPasswordModalVisible(false);
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmNewPassword("");
+          }}
+        >
           <View style={{ justifyContent: "center" }}>
             <Ionicons name="chevron-back" size={32} color="#22a6b3" />
           </View>
@@ -123,6 +143,7 @@ const ChangePasswordModal = ({
               width: "50%",
               height: 30,
               fontSize: 20,
+              padding: 5,
             }}
             secureTextEntry
           />
@@ -148,6 +169,7 @@ const ChangePasswordModal = ({
               width: "50%",
               height: 30,
               fontSize: 20,
+              padding: 5,
             }}
             secureTextEntry
           />
@@ -173,13 +195,14 @@ const ChangePasswordModal = ({
               width: "50%",
               height: 30,
               fontSize: 20,
+              padding: 5,
             }}
             secureTextEntry
           />
         </View>
 
         <View style={{ alignItems: "center" }}>
-          <Pressable
+          {/* <Pressable
             onPress={handleChangePassword}
             style={
               newPassword === confirmNewPassword && currentPassword
@@ -195,7 +218,18 @@ const ChangePasswordModal = ({
             <Text style={{ margin: 10, fontSize: 24, color: "#fff" }}>
               Change Password
             </Text>
-          </Pressable>
+          </Pressable> */}
+          <Button
+            title="Change Password"
+            titleStyle={{ fontSize: 24 }}
+            onPress={handleChangePassword}
+            buttonStyle={{ backgroundColor: "#22a6b3" }}
+            containerStyle={{ width: 200, marginVertical: 20 }}
+            loading={updatePasswordSpinner}
+            disabled={updatePasswordDisabled}
+            disabledStyle={{ backgroundColor: "#b2bec3" }}
+            raised={true}
+          />
         </View>
       </View>
     </Modal>

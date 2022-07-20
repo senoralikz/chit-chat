@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { Button } from "react-native-elements";
 import { useToast } from "react-native-toast-notifications";
 import { db } from "../../firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,34 +23,47 @@ import { updateDoc, doc } from "firebase/firestore";
 
 const UpdateEmailModal = ({ modalVisible, setModalVisible, email, user }) => {
   const [password, setPassword] = useState("");
+  const [passwordConfirmedSpinner, setPasswordConfirmedSpinner] =
+    useState(false);
+  const [passwordConfirmedDisabled, setPasswordConfirmedDisabled] =
+    useState(false);
 
   const toast = useToast();
 
   const handleUpdateEmail = async () => {
-    const credential = EmailAuthProvider.credential(user.email, password);
-    await reauthenticateWithCredential(user, credential)
-      .then(async () => {
-        await updateEmail(user, email);
-      })
-      .then(async () => {
-        const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, {
-          email: email,
+    try {
+      setPasswordConfirmedSpinner(true);
+      setPasswordConfirmedDisabled(true);
+      const credential = EmailAuthProvider.credential(user.email, password);
+      await reauthenticateWithCredential(user, credential)
+        .then(async () => {
+          await updateEmail(user, email);
+        })
+        .then(async () => {
+          const userRef = doc(db, "users", user.uid);
+          await updateDoc(userRef, {
+            email: email,
+          });
+        })
+        .then(() => {
+          setPasswordConfirmedSpinner(false);
+          setPasswordConfirmedDisabled(false);
+          setModalVisible(false);
+          setPassword("");
+          toast.show("Successfully updated email", {
+            type: "success",
+          });
         });
-      })
-      .then(() => {
-        setModalVisible(false);
-        setPassword("");
-        toast.show("Successfully updated email", {
-          type: "success",
-        });
-      })
-      .catch((error) => {
-        toast.show("Error updating email", {
-          type: "danger",
-        });
-        console.error(error.code, "-- error updating email --", error.message);
+    } catch (error) {
+      setPasswordConfirmedSpinner(false);
+      setPasswordConfirmedDisabled(false);
+      setPassword("");
+      setModalVisible(false);
+      toast.show(error.message, {
+        type: "danger",
       });
+      console.error(error.code, "-- error updating email --", error.message);
+    }
   };
 
   return (
@@ -58,11 +72,17 @@ const UpdateEmailModal = ({ modalVisible, setModalVisible, email, user }) => {
       presentationStyle="formSheet"
       visible={modalVisible}
       onRequestClose={() => {
+        setPassword("");
         setModalVisible(false);
       }}
     >
       <View style={{ flexDirection: "row" }}>
-        <Pressable onPress={() => setModalVisible(false)}>
+        <Pressable
+          onPress={() => {
+            setPassword("");
+            setModalVisible(false);
+          }}
+        >
           <View style={{ justifyContent: "center" }}>
             <Ionicons name="chevron-back" size={32} color="#22a6b3" />
           </View>
@@ -114,11 +134,12 @@ const UpdateEmailModal = ({ modalVisible, setModalVisible, email, user }) => {
                   height: 30,
                   textAlignVertical: "bottom",
                   fontSize: 20,
+                  padding: 5,
                 }}
                 secureTextEntry
               />
               <View style={{ alignItems: "center" }}>
-                <Pressable
+                {/* <Pressable
                   onPress={handleUpdateEmail}
                   style={
                     password ? styles.confirmBtn : styles.disabledConfirmBtn
@@ -128,7 +149,18 @@ const UpdateEmailModal = ({ modalVisible, setModalVisible, email, user }) => {
                   <Text style={{ margin: 10, fontSize: 24, color: "#fff" }}>
                     Confirm
                   </Text>
-                </Pressable>
+                </Pressable> */}
+                <Button
+                  title="Confirm"
+                  titleStyle={{ fontSize: 24 }}
+                  onPress={handleUpdateEmail}
+                  buttonStyle={{ backgroundColor: "#22a6b3" }}
+                  containerStyle={{ width: 200, marginVertical: 20 }}
+                  loading={passwordConfirmedSpinner}
+                  disabled={passwordConfirmedDisabled}
+                  disabledStyle={{ backgroundColor: "#b2bec3" }}
+                  raised={true}
+                />
               </View>
             </KeyboardAvoidingView>
           </View>

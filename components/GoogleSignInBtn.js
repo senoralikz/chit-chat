@@ -182,8 +182,8 @@ const GoogleSignInBtn = ({ googleModalVisible, setGoogleModalVisible }) => {
       title="Sign In With Google"
       fontStyle={{ fontSize: 20 }}
       button={true}
-      disabled={!displayName || !displayNameAvailable ? true : !request}
-      // disabled={!request}
+      // disabled={!displayName || !displayNameAvailable ? true : !request}
+      disabled={!request}
       onPress={() => {
         promptAsync();
       }}

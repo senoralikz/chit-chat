@@ -28,6 +28,8 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
   const [groupChatName, setGroupChatName] = useState("");
   const [currentChatName, setCurrentChatName] = useState("");
   const [pickedPhoto, setPickedPhoto] = useState("");
+  const [updateChatSpinner, setUpdateChatSpinner] = useState(false);
+  const [updateChatDisabled, setUpdateChatDisabled] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
 
   const user = auth.currentUser;
@@ -48,17 +50,20 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
           title="Save Changes"
           onPress={handleUpdateGroupChatInfo}
           type="clear"
-          disabled={
-            (!pickedPhoto && !groupChatName) ||
-            groupChatName === currentChatName
-              ? true
-              : false
-          }
-          titleStyle={{ fontSize: 20 }}
+          loading={updateChatSpinner}
+          disabled={updateChatDisabled}
+          titleStyle={{ fontSize: 20, color: "#9b59b6" }}
         />
       ),
     });
-  }, [navigation, route, pickedPhoto, groupChatName]);
+  }, [
+    navigation,
+    route,
+    groupChatName,
+    groupChatPhoto,
+    updateChatSpinner,
+    updateChatDisabled,
+  ]);
 
   useEffect(() => {
     const groupRef = doc(db, "groups", route.params.groupId);
@@ -136,6 +141,9 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
 
   const handleUpdateGroupPhoto = async () => {
     try {
+      setUpdateChatSpinner(true);
+      setUpdateChatDisabled(true);
+
       const fileName = pickedPhoto.replace(/^.*[\\\/]/, "");
       const imageRef = ref(storage, `users/${user.uid}/images/${fileName}`);
 
@@ -150,6 +158,8 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
           await updateDoc(groupRef, {
             groupPhotoUrl: url,
           }).then(() => {
+            setUpdateChatSpinner(false);
+            setUpdateChatDisabled(false);
             setPickedPhoto("");
             toast.show("Successfully updated group chat picture", {
               type: "success",
@@ -159,6 +169,8 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
         });
       });
     } catch (error) {
+      setUpdateChatSpinner(false);
+      setUpdateChatDisabled(false);
       console.error(
         error.code,
         "--- error updating group chat picture ---",
@@ -172,11 +184,16 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
 
   const handleUpdateGroupChatName = async () => {
     try {
+      setUpdateChatSpinner(true);
+      setUpdateChatDisabled(true);
+
       const groupRef = doc(db, "groups", route.params.groupId);
       // const groupRef = doc(db, "groups", route.params.chatInfo.groupId);
       await updateDoc(groupRef, {
         groupName: groupChatName,
       }).then(() => {
+        setUpdateChatSpinner(false);
+        setUpdateChatDisabled(false);
         setCanEdit(false);
         setGroupChatName("");
         toast.show("Successfully updated group chat name", {
@@ -185,6 +202,8 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
         // console.log("Display Name was updated succesfully");
       });
     } catch (error) {
+      setUpdateChatSpinner(false);
+      setUpdateChatDisabled(false);
       toast.show(error.message, {
         type: "danger",
       });
@@ -197,13 +216,19 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
   };
 
   const handleUpdateGroupChatInfo = () => {
-    if (pickedPhoto) {
-      handleUpdateGroupPhoto();
-      // console.log("now updating group chat pic");
-    }
-    if (groupChatName) {
-      handleUpdateGroupChatName();
-      // console.log("now updating group chat name");
+    if ((!pickedPhoto && !groupChatName) || groupChatName === currentChatName) {
+      toast.show("No changes to be saved", {
+        type: "warning",
+      });
+    } else {
+      if (pickedPhoto) {
+        handleUpdateGroupPhoto();
+        // console.log("now updating group chat pic");
+      }
+      if (groupChatName) {
+        handleUpdateGroupChatName();
+        // console.log("now updating group chat name");
+      }
     }
     // console.log("done updating group chat info");
   };
@@ -344,12 +369,11 @@ const GroupChatInfoScreen = ({ route, navigation, navigation: { goBack } }) => {
               ? currentChatName
               : route.params.friendDisplayName.join(", ")
           }
-          style={{
-            width: "65%",
-            borderBottomWidth: 1,
-            marginVertical: 20,
-            fontSize: 20,
-          }}
+          style={
+            canEdit
+              ? styles.chatNameInput
+              : [styles.chatNameInput, { backgroundColor: "#ececec" }]
+          }
           onChangeText={(text) => setGroupChatName(text)}
           editable={canEdit}
         />
@@ -426,5 +450,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "#fff",
     // backgroundColor: "red",
+  },
+  chatNameInput: {
+    width: "65%",
+    borderBottomWidth: 1,
+    marginVertical: 20,
+    fontSize: 18,
+    height: 30,
+    padding: 5,
   },
 });
