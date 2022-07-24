@@ -46,13 +46,15 @@ import { Avatar, Button } from "react-native-elements";
 import { useToast } from "react-native-toast-notifications";
 import { useRoute } from "@react-navigation/native";
 import { Badge } from "react-native-elements";
+import { TypingAnimation } from "react-native-typing-animation";
+import FadeInOut from "react-native-fade-in-out";
 // import { newMessageAlert } from "../../helperFunctions/newMessageAlert";
 
 const ChatScreen = ({ route, navigation }) => {
-  const [chats, setChats] = useState([]);
   const [messages, setMessages] = useState(route.params.messages);
   const [textInput, setTextInput] = useState("");
   const [unreadMsgs, setUnreadMsgs] = useState([]);
+  const [memberIsTyping, setMemberIsTyping] = useState(false);
   const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
   const scrollViewRef = useRef();
 
@@ -60,15 +62,11 @@ const ChatScreen = ({ route, navigation }) => {
 
   const currentRoute = useRoute();
   const user = auth.currentUser;
+  const groupRef = doc(db, "groups", route.params.groupId);
   const groupsRef = collection(db, "groups");
   const chatsRef = collection(db, "chats");
   const messagesRef = collection(chatsRef, route.params.groupId, "messages");
   const q = query(messagesRef, orderBy("createdAt"));
-  const qGroups = query(
-    groupsRef,
-    where("members", "array-contains", user.uid),
-    orderBy("lastMessage.createdAt", "desc")
-  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -134,21 +132,18 @@ const ChatScreen = ({ route, navigation }) => {
   );
 
   useEffect(() => {
-    // let allChats = [];
-    const unsubChatDetails = onSnapshot(qGroups, (querySnapshot) => {
-      // querySnapshot.docs.forEach((doc) =>
-      //   allChats.push({ ...doc.data(), groupId: doc.id })
-      // );
-      setChats(
-        querySnapshot.docs.map((doc) => {
-          return { ...doc.data(), groupId: doc.id };
-        })
-      );
-      // console.log("checking latest chat:", allChats[0]);
-      // setChats(allChats[0]);
+    checkIfTyping();
+  }, [textInput]);
+
+  useEffect(() => {
+    const unsubMemberIsTyping = onSnapshot(groupRef, (doc) => {
+      // console.log(doc.data().memberIsTyping.isTyping);
+      if (doc.data().memberIsTyping.memberId !== user.uid) {
+        setMemberIsTyping(doc.data().memberIsTyping.isTyping);
+      }
     });
 
-    return unsubChatDetails;
+    return unsubMemberIsTyping;
   }, []);
 
   useEffect(() => {
@@ -240,6 +235,29 @@ const ChatScreen = ({ route, navigation }) => {
     scrollViewRef.current.scrollToEnd({ animating: true });
   };
 
+  const checkIfTyping = async () => {
+    try {
+      if (textInput) {
+        await updateDoc(groupRef, {
+          memberIsTyping: { memberId: user.uid, isTyping: true },
+        });
+      } else {
+        await updateDoc(groupRef, {
+          memberIsTyping: { memberId: user.uid, isTyping: false },
+        });
+      }
+    } catch (error) {
+      toast.show(error.message, {
+        type: "danger",
+      });
+      console.error(
+        error.code,
+        "-- error checking if member is typing --",
+        error.message
+      );
+    }
+  };
+
   const readMsgs = () => {
     try {
       unreadMsgs.forEach((unreadMsg) => {
@@ -325,6 +343,10 @@ const ChatScreen = ({ route, navigation }) => {
           onContentSizeChange={() =>
             scrollViewRef.current.scrollToEnd({ animated: true })
           }
+          // contentContainerStyle={{
+          //   backgroundColor: "blue",
+          //   justifyContent: "space-between",
+          // }}
         >
           {messages?.length > 0 ? (
             messages?.map((message, index) => (
@@ -344,11 +366,77 @@ const ChatScreen = ({ route, navigation }) => {
               </Text>
             </View>
           )}
+          <FadeInOut visible={memberIsTyping}>
+            {memberIsTyping && (
+              <View
+                style={{
+                  width: 60,
+                  height: 40,
+                  borderRadius: 20,
+                  borderBottomLeftRadius: 5,
+                  marginHorizontal: 8,
+                  marginTop: 5,
+                  justifyContent: "center",
+                  backgroundColor: "#ecf0f1",
+                }}
+              >
+                <TypingAnimation
+                  dotColor="#9b59b6"
+                  dotMargin={10}
+                  dotAmplitude={3}
+                  dotSpeed={0.15}
+                  dotRadius={5}
+                  dotX={25}
+                  dotY={-5}
+                  // style={{ alignSelf: "flex-start" }}
+                />
+              </View>
+            )}
+          </FadeInOut>
         </ScrollView>
         {/* <Button
-          title="latest chat"
-          onPress={() => console.log("latest chat:", chats[0])}
+          title="check typing"
+          onPress={() => console.log("someone is typing:", memberIsTyping)}
+        />
+        <Button
+          title="check group id"
+          onPress={() => console.log("group id:", route.params.groupId)}
         /> */}
+        {/* {userIsTyping && (
+          <>
+            <View style={{ height: 10 }} />
+            <View style={{ flexDirection: "row" }}>
+              <Avatar
+                source={{ uri: user.photoURL }}
+                size={30}
+                rounded
+                containerStyle={{ marginHorizontal: 8, alignSelf: "flex-end" }}
+              />
+              <View
+                style={{
+                  width: 65,
+                  height: 40,
+                  borderRadius: 20,
+                  borderBottomLeftRadius: 5,
+                  // padding: 10,
+                  justifyContent: "center",
+                  backgroundColor: "#ecf0f1",
+                }}
+              >
+                <TypingAnimation
+                  dotColor="#9b59b6"
+                  dotMargin={10}
+                  dotAmplitude={3}
+                  dotSpeed={0.15}
+                  dotRadius={6}
+                  dotX={25}
+                  dotY={-5}
+                  // style={{ alignSelf: "flex-start" }}
+                />
+              </View>
+            </View>
+          </>
+        )} */}
         <View style={styles.footer}>
           <TextInput
             placeholder="ChitChat"

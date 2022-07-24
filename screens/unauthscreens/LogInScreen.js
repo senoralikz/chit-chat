@@ -16,6 +16,7 @@ import GoogleSignInBtn from "../../components/GoogleSignInBtn";
 import { useToast } from "react-native-toast-notifications";
 import { Button, SocialIcon } from "react-native-elements";
 import ForgotPasswordModal from "./ForgotPasswordModal";
+import { Ionicons } from "@expo/vector-icons";
 
 const LogInScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -72,6 +73,16 @@ const LogInScreen = ({ navigation }) => {
         >
           Log In
         </Text>
+      </View>
+      <View
+        style={{
+          // backgroundColor: "red",
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Ionicons name="ios-chatbubbles" size={200} color="#9b59b6" />
       </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -216,7 +227,7 @@ const styles = StyleSheet.create({
   },
   userInfoInputView: {
     flex: 1,
-    justifyContent: "center",
+    // justifyContent: "center",
     alignItems: "center",
   },
   credentialInput: {

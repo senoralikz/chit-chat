@@ -158,6 +158,7 @@ const ContactListItem = ({ friend, navigation }) => {
           groupPhotoUrl: "",
           groupName: "",
           members: [user.uid, friend.userId],
+          memberIsTyping: false,
         })
           .then(async (groupDoc) => {
             // console.log("new group id:", groupDoc.id);

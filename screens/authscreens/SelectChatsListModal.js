@@ -45,6 +45,7 @@ const SelectChatsListModal = ({
         groupPhotoUrl: "",
         groupName: "",
         members: gettingAllChatterIds,
+        memberIsTyping: false,
       })
         .then(async (groupDoc) => {
           // console.log("new group id:", groupDoc.id);

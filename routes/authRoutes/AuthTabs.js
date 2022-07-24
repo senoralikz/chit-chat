@@ -1,10 +1,7 @@
 import { useEffect, useState, useContext } from "react";
-import { Pressable } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import ChatsStack from "./ChatsStack";
 import ContactsStack from "./ContactsStack";
 import ProfileStack from "./ProfileStack";
-import ProfileScreen from "../../screens/authScreens/ProfileScreen";
 import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import ChatsListScreen from "../../screens/authScreens/ChatsListScreen";
 import { UnreadMsgContext } from "../../context/UnreadMsgContext";

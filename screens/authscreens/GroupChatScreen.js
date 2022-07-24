@@ -48,6 +48,8 @@ import { Avatar, Button } from "react-native-elements";
 import { useToast } from "react-native-toast-notifications";
 import { useRoute } from "@react-navigation/native";
 import { Badge } from "react-native-elements";
+import { TypingAnimation } from "react-native-typing-animation";
+import FadeInOut from "react-native-fade-in-out";
 
 const GroupChatScreen = ({ route, navigation }) => {
   const [groupChatName, setGroupChatName] = useState(route.params.groupName);
@@ -57,6 +59,8 @@ const GroupChatScreen = ({ route, navigation }) => {
   const [messages, setMessages] = useState([]);
   const [textInput, setTextInput] = useState("");
   const [unreadMsgs, setUnreadMsgs] = useState([]);
+  const [memberIsTyping, setMemberIsTyping] = useState(false);
+  const [userTypingInfo, setUserTypingInfo] = useState("");
   const { totalUnreadMsgs, setTotalUnreadMsgs } = useContext(UnreadMsgContext);
   const scrollViewRef = useRef();
 
@@ -64,6 +68,7 @@ const GroupChatScreen = ({ route, navigation }) => {
 
   const currentRoute = useRoute();
   const user = auth.currentUser;
+  const groupRef = doc(db, "groups", route.params.groupId);
   const groupsRef = collection(db, "groups");
   const chatsRef = collection(db, "chats");
   const messagesRef = collection(chatsRef, route.params.groupId, "messages");
@@ -152,7 +157,7 @@ const GroupChatScreen = ({ route, navigation }) => {
                 // backgroundColor: "blue"
               }}
             >
-              {totalUnreadMsgs !== 0 && (
+              {totalUnreadMsgs > 0 && (
                 <Badge
                   value={totalUnreadMsgs > 99 ? "99+" : totalUnreadMsgs}
                   textStyle={{ fontSize: 16 }}
@@ -245,6 +250,59 @@ const GroupChatScreen = ({ route, navigation }) => {
       }),
     [navigation, messages]
   );
+
+  useEffect(() => {
+    checkIfTyping();
+  }, [textInput]);
+
+  useEffect(() => {
+    const unsubMemberIsTyping = onSnapshot(groupRef, (doc) => {
+      console.log(doc.data().memberIsTyping.isTyping);
+      if (doc.data().memberIsTyping.memberId !== user.uid) {
+        setMemberIsTyping(doc.data().memberIsTyping.isTyping);
+        // setMemberIsTyping(doc.data());
+      }
+    });
+
+    return unsubMemberIsTyping;
+  }, []);
+
+  // useEffect(() => {
+  //   if (memberIsTyping) {
+  //     const userRef = doc(db, "users", memberIsTyping?.memberId);
+
+  //     const unsubMemberTypingInfo = onSnapshot(userRef, (doc) => {
+  //       setUserTypingInfo(doc.data());
+  //     });
+
+  //     return unsubMemberTypingInfo;
+  //   } else {
+  //     setUserTypingInfo("");
+  //   }
+  // }, [memberIsTyping]);
+
+  const checkIfTyping = async () => {
+    try {
+      if (textInput) {
+        await updateDoc(groupRef, {
+          memberIsTyping: { memberId: user.uid, isTyping: true },
+        });
+      } else {
+        await updateDoc(groupRef, {
+          memberIsTyping: { memberId: user.uid, isTyping: false },
+        });
+      }
+    } catch (error) {
+      toast.show(error.message, {
+        type: "danger",
+      });
+      console.error(
+        error.code,
+        "-- error checking if member is typing --",
+        error.message
+      );
+    }
+  };
 
   const onPressFunction = () => {
     scrollViewRef.current.scrollToEnd({ animating: true });
@@ -354,6 +412,33 @@ const GroupChatScreen = ({ route, navigation }) => {
               </Text>
             </View>
           )}
+          <FadeInOut visible={memberIsTyping}>
+            {memberIsTyping && (
+              <View
+                style={{
+                  width: 60,
+                  height: 40,
+                  borderRadius: 20,
+                  borderBottomLeftRadius: 5,
+                  marginHorizontal: 8,
+                  marginTop: 5,
+                  justifyContent: "center",
+                  backgroundColor: "#ecf0f1",
+                }}
+              >
+                <TypingAnimation
+                  dotColor="#9b59b6"
+                  dotMargin={10}
+                  dotAmplitude={3}
+                  dotSpeed={0.15}
+                  dotRadius={5}
+                  dotX={25}
+                  dotY={-5}
+                  // style={{ alignSelf: "flex-start" }}
+                />
+              </View>
+            )}
+          </FadeInOut>
         </ScrollView>
         {/* <Button
           title="read chat info"
