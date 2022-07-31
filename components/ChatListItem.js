@@ -20,6 +20,7 @@ import Swipeable from "react-native-gesture-handler/Swipeable";
 import { UnreadMsgContext } from "../context/UnreadMsgContext";
 import { useToast } from "react-native-toast-notifications";
 import { useRoute } from "@react-navigation/native";
+import { TypingAnimation } from "react-native-typing-animation";
 
 const ChatListItem = ({
   chat,
@@ -181,7 +182,7 @@ const ChatListItem = ({
 
   return (
     // <Swipeable renderRightActions={rightSwipeActions}>
-    <ListItem onPress={goToChatScreen}>
+    <ListItem onPress={goToChatScreen} style={{ height: 70 }}>
       {membersInfo.length === 1 ? (
         <Avatar
           size="medium"
@@ -267,8 +268,40 @@ const ChatListItem = ({
               onPress={() => console.log("chat id is:", chat.groupId)}
             /> */}
         </View>
-        <ListItem.Subtitle numberOfLines={2} ellipsizeMode="tail">
-          {chat.lastMessage?.message}
+        <ListItem.Subtitle
+          numberOfLines={2}
+          ellipsizeMode="tail"
+          style={{ height: 30, marginTop: 5, fontSize: 16 }}
+        >
+          {chat.memberIsTyping.isTyping &&
+          chat.memberIsTyping.memberId !== user.uid ? (
+            <View
+              style={{
+                width: 60,
+                height: 30,
+                borderRadius: 20,
+                borderBottomLeftRadius: 5,
+                // marginHorizontal: 8,
+                // marginTop: 5,
+                justifyContent: "center",
+                backgroundColor: "#ecf0f1",
+              }}
+            >
+              <TypingAnimation
+                dotColor="#9b59b6"
+                dotMargin={8}
+                dotAmplitude={3}
+                dotSpeed={0.15}
+                dotRadius={5}
+                dotX={25}
+                dotY={-5}
+                // style={{ alignSelf: "flex-start" }}
+              />
+            </View>
+          ) : (
+            chat.lastMessage?.message
+          )}
+          {/* {chat.lastMessage?.message} */}
         </ListItem.Subtitle>
       </ListItem.Content>
       <ListItem.Chevron />

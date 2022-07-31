@@ -237,10 +237,19 @@ const ChatScreen = ({ route, navigation }) => {
 
   const checkIfTyping = async () => {
     try {
+      // let timer;
       if (textInput) {
+        // clearTimeout(timer);
         await updateDoc(groupRef, {
           memberIsTyping: { memberId: user.uid, isTyping: true },
         });
+        // .then(() => {
+        //   timer = setTimeout(async () => {
+        //     await updateDoc(groupRef, {
+        //       memberIsTyping: { memberId: user.uid, isTyping: false },
+        //     });
+        //   }, 5000);
+        // });
       } else {
         await updateDoc(groupRef, {
           memberIsTyping: { memberId: user.uid, isTyping: false },

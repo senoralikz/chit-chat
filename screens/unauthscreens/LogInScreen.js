@@ -8,15 +8,15 @@ import {
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebaseConfig";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import GoogleSignInBtn from "../../components/GoogleSignInBtn";
 import { useToast } from "react-native-toast-notifications";
 import { Button, SocialIcon } from "react-native-elements";
 import ForgotPasswordModal from "./ForgotPasswordModal";
-import { Ionicons } from "@expo/vector-icons";
+import * as LocalAuthentication from "expo-local-authentication";
 
 const LogInScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -25,8 +25,28 @@ const LogInScreen = ({ navigation }) => {
   const [googleModalVisible, setGoogleModalVisible] = useState(false);
   const [loggingInSpinner, setLoggingInSpinner] = useState(false);
   const [logInDisabled, setLogInDisabled] = useState(false);
+  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
 
   const toast = useToast();
+
+  // Check if hardware supports biometrics
+  // useEffect(() => {
+  //   (async () => {
+  //     const compatible = await LocalAuthentication.hasHardwareAsync();
+  //     setIsBiometricSupported(compatible);
+  //   })();
+  // }, []);
+
+  const handleBiometricAuth = async () => {
+    const savedBiometrics = await LocalAuthentication.isEnrolledAsync();
+    if (!savedBiometrics)
+      return Alert.alert(
+        "Biometric record not found",
+        "Please verify your identity with your password",
+        "OK",
+        () => fallBackToDefaultAuth()
+      );
+  };
 
   const handleSignIn = () => {
     if (!email || !password) {
@@ -99,7 +119,7 @@ const LogInScreen = ({ navigation }) => {
             placeholder="Email"
             value={email}
             onChangeText={(text) => setEmail(text)}
-            style={{ width: "100%", fontSize: 18 }}
+            style={{ flex: 1, fontSize: 18 }}
           />
         </View>
         <View style={styles.credentialInput}>
@@ -113,9 +133,27 @@ const LogInScreen = ({ navigation }) => {
             placeholder="Password"
             value={password}
             onChangeText={(text) => setPassword(text)}
-            style={{ width: "100%", fontSize: 18 }}
+            style={{ flex: 1, fontSize: 18 }}
             secureTextEntry
           />
+          {/* <Pressable
+            onPress={() =>
+              toast.show(
+                isBiometricSupported
+                  ? "Your device is compatible with Biometrics"
+                  : "Face or Fingerprint scanner is available on this device",
+                {
+                  type: "success",
+                }
+              )
+            }
+          >
+            <MaterialCommunityIcons
+              name="face-recognition"
+              size={24}
+              color="#22a6b3"
+            />
+          </Pressable> */}
         </View>
         <View
           style={{
@@ -131,6 +169,11 @@ const LogInScreen = ({ navigation }) => {
             Forgot Password?
           </Text>
         </View>
+        {/* <Text>
+          {isBiometricSupported
+            ? "Your device is compatible with Biometrics"
+            : "Face or Fingerprint scanner is available on this device"}
+        </Text> */}
         <ForgotPasswordModal
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
@@ -237,19 +280,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     marginVertical: 10,
     padding: 3,
-  },
-  logInBtn: {
-    flexDirection: "row",
-    backgroundColor: "#34495e",
-    borderRadius: 10,
-    width: 200,
-    marginVertical: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 3,
-    shadowOffset: { width: 2, height: 2 },
-    shadowColor: "#333",
-    shadowOpacity: 0.4,
-    shadowRadius: 2,
   },
 });
